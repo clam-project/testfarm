@@ -1,5 +1,5 @@
 import unittest
-from testfarm import *
+from testfarmclient import *
 from listeners import *
 import os, os.path
 

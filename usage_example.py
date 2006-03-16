@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from testfarm import Repository, TestsFarmClient
+from testfarmclient import Repository, TestFarmClient
 
 clam = Repository("CLAM")
 clam.add_deployment_task( [
@@ -18,6 +18,6 @@ clam.add_task("another", [
 #[total num cycles] 233
 
 
-TestsFarmClient( [
+TestFarmClient( [
 	clam
 ] )

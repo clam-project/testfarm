@@ -1,25 +1,27 @@
 #! /usr/bin/python
 
-from testfarm import Repository, TestsFarmClient
+from testfarmclient import Repository, TestFarmClient
 
 clam = Repository("CLAM")
 clam.add_deployment_task( [
+	"cd /home/parumi/clam-sandboxes",
 	"cvs co -d testing-clam CLAM",
-	"cd testing-clam/scons/libs",
+	"cd /home/parumi/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure prefix=/tmp",
 	"scons install",
 
+	"cd /home/parumi/clam-sandboxes",
 	"cvs co -d testing-smstools CLAM_SMSTools",
 	"cd testing-smstools/scons/QtSMSTools",
 	"scons clam_prefix=/tmp"
 ] )
 clam.add_task("execute QTSMStools", [
-	"cd testing-smstools/scons/QtSMSTools",
+	"cd /home/parumi/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"./QtSMSTools"
 ] )
 
 
 
-TestsFarmClient( [
+TestFarmClient( [
 	clam
 ] )

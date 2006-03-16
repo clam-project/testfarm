@@ -2,7 +2,7 @@ import commands
 import os
 from listeners import NullResultListener, ConsoleResultListener
 
-class TestsFarmClient :
+class TestFarmClient :
 	# Attributes : repositories[]
 	
 	def __init__(self, repositories=[], listeners=[ ConsoleResultListener() ]) :

@@ -70,14 +70,14 @@ class ConsoleResultListener :
 			status_color = self.colors['RED']
 		normal = self.colors['NORMAL']
 		output_color = normal
+		yellow = self.colors['YELLOW']
 		if output :
-			yellow = self.colors['YELLOW']
 			ending = '%s---------------------------------------------\n' % yellow
 			ending += 'Output of failing command:%s\n\n%s\n' % (normal, output)
 			ending += '%s\n---------------------------------------------%s\n' % (yellow, normal)
 		else:
 			ending = ''
-		sys.stdout.write( " | %s%40s\t\t%s%s\n%s\n%s\n%s%s%s" % (cmd_color, cmd, status_color, status_text, info, stats ,output_color, ending, normal) )
+		sys.stdout.write( " | %scmd:%s%60s\t\t%s%s%s\n | %sinfo:%s %s\n | %sstats:%s %s\n%s%s%s |\n" % (yellow, cmd_color, cmd, status_color, status_text, normal, yellow, info, normal, yellow, normal, stats, output_color, ending, normal) )
 
 
 	def listen_result(self, command, ok, output, info, stats):

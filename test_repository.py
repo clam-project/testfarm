@@ -1,5 +1,5 @@
 import unittest
-from testfarm import *
+from testfarmclient import *
 from listeners import DummyResultListener
 
 class Tests_Repository(unittest.TestCase):

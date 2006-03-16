@@ -1,7 +1,7 @@
 #! /usr/bin/python
 
-from testfarm import Repository, TestsFarmClient
-from test_testsfarmserver import TestsFarmServer
+from testfarmclient import Repository, TestFarmClient
+from test_testsfarmserver import TestFarmServer
 
 for_loop = Repository("FOR LOOP")
 
@@ -13,6 +13,6 @@ for_loop.add_task("compile and execute for loop", [
 
 
 
-TestsFarmClient( [
+TestFarmClient( [
 	for_loop
-], [TestsFarmServer()] )
+], [TestFarmServer()] )
