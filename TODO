@@ -1,0 +1,11 @@
+
+Done - summary text format based on: key, [ok|no] so that the server can easily parse it
+- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
+- config and command line options: verbose, disable project, local file, server url
+Done - efficiency, etc. statistics. based on TAG, number also in the summary? statistics section
+- xml/easier text format YAML
+Done - client writes colorized output in console and sends step-by-step progress to server
+- communication via http post
+- send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
+
+
