@@ -8,7 +8,7 @@ clam.add_deployment_task( [
 	"ls" 
 ] )
 clam.add_task("teeesting", [
-	"./lalala fafaf",
+	#"./lalala fafaf",
 	"echo Should not write this!"
 ] )
 clam.add_task("another", [
@@ -20,4 +20,4 @@ clam.add_task("another", [
 
 TestFarmClient( [
 	clam
-] )
+], use_pushing_server=True )

@@ -26,38 +26,80 @@ footer = """
 class ServerListener:
 	def __init__(self):
 		self.logfile = "/tmp/tasks.log"
+
+	def clean_log_files(self):
+		open(self.logfile, "w")
+
 	def time(self):
 		return "15-03-2006 19:32:00"
 
 	def listen_result(self, command, ok, output, info, stats):
-		if ok :
-			status_text = "ok"
-		else :
-			status_text = "failure"
-		open(self.logfile, "a+").write("%s\n" % str( (command, status_text, output, info, stats) ) )
+		entry = str( ('CMD', command, ok, output, info, stats) ) + ',\n'
+		open(self.logfile, "a+").write(entry)
 
 	def listen_begin_task(self, taskname):
-		open(self.logfile, "a+").write("BEGIN_TASK %s\n" % taskname )
+		entry = "('BEGIN_TASK', '%s'),\n" % taskname 
+		open(self.logfile, "a+").write(entry)
 
 	def listen_end_task(self, taskname):
-		open(self.logfile, "a+").write("END_TASK %s\n" % taskname )
+		entry = "('END_TASK', '%s'),\n" % taskname
+		open(self.logfile, "a+").write(entry)
 	
 	def listen_begin_repository(self, repositoryname):
-		open(self.logfile, "a+").write("BEGIN_REPOSITORY %s\n%s\n" % (repositoryname, self.time()) )
+		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.time()) 
+		open(self.logfile, "a+").write(entry)
 
 	def listen_end_repository(self, repositoryname, status):
-		open(self.logfile, "a+").write("END_REPOSITORY %s\n%s\n\n" % (repositoryname, self.time()) )
+		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repositoryname, self.time(), status)
+		open(self.logfile, "a+").write(entry)
 	
 
 class TestFarmServer:
+	def __init__(self, serverlistener):
+		self.serverlistener = serverlistener
+
+	def iterations(self):
+		log = eval("[ %s ]" % open(self.serverlistener.logfile).read() )
+		result = []
+		iteration_opened = False
+		for entry in  log :
+			tag = entry[0]
+			if tag == 'BEGIN_REPOSITORY' :
+				begin_time = entry[2]
+				iteration_opened = True
+			if tag == 'END_REPOSITORY' :
+				end_time = entry[2]
+				status_ok = entry[3]
+				if status_ok :
+					status = 'stable'
+				else :
+					status = 'broken'
+				result.append( (begin_time, end_time, status) )
+				iteration_opened = False
+		if iteration_opened :
+			result.append( (begin_time, '', 'inprogress') )
+				
+		return result
+	def html_iterations(self):
+		content = ''
+		for begin_time, end_time, status in self.iterations():
+			begin_time_html = "<p>%s</p>" % begin_time
+			if end_time :
+				end_time_html = "<p>%s</p>" % end_time
+			else:
+				end_time_html = "<p>in progres...</p>"
+			details_html = '<p><a href="something=%s">details</a></p>' % begin_time
+			content += '<div class="%s">\n%s\n%s\n%s\n</div>' % (status, begin_time_html, end_time_html, details_html)
+		return header + content + footer
+		
+	'''
 	def __init__(self):
 		self.repository_state = None
 		self.repository_html_log = ''
 		self.details_log = "" 
 		
 	def repository_status_html(self, name=None):
-		return """%(HEADER)s
-%(FOOTER)s"""
+		return "%(HEADER)s\n%(FOOTER)s"
 
 	def repository_status_html2(self, name=None):
 		status_html = "%(HEADER)s"
@@ -91,9 +133,7 @@ class TestFarmServer:
 		<p id="repository"> BEGIN_REPOSITORY %s </p>""" % repositoryname
 		self.repository_state = 'progress'
 		self.repository_html_log = "<h1>%s repository status</h1>\n" % repositoryname
-		self.repository_html_log += """\t<div class="progress">
-		<p><b>Begin:</b> %(BEGIN_DATETIME)s</p>
-	</div>""" 
+		self.repository_html_log += "\t<div class="progress">\n<p><b>Begin:</b> %(BEGIN_DATETIME)s</p>\n</div>" 
 
 		html_log = self.repository_status_html2() % {'HEADER' : header, 'FOOTER' : footer, 'BEGIN_DATETIME' : self.begin_datetime}
 		
@@ -124,5 +164,6 @@ class TestFarmServer:
 		html_log = self.repository_status_html2() % {'HEADER' : header, 'FOOTER' : footer, 'BEGIN_DATETIME' : self.begin_datetime, 'END_DATETIME': self.end_datetime}
 		open("foo2.html", "w").write( html_log )
 		self.write_details_html_log()
+	'''
 
 

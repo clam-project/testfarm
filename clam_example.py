@@ -22,6 +22,5 @@ clam.add_task("execute QTSMStools", [
 
 
 
-TestFarmClient( [
-	clam
-] )
+TestFarmClient( [clam ], use_pushing_server=True )
+

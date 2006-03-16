@@ -96,6 +96,7 @@ ol li ol li
 	margin: 1em 0em;
 	color: maroon;
 }
+
 .progress
 {
 	color: green;
@@ -198,39 +199,42 @@ ol li ol li
 
 /*--------------------------TESTSFARM--------------------------*/
 
-.progress
+.inprogress
 {
+	margin: 12px;
 	text-align: center;
 	position : relative;
 	left: 40%;
 	padding: 10px;
 	width: 20%;
-	height: 150px;
+	height: 80px;
 	font-size: 11px;
 	color: black;
 	background-color: yellow;
 }
 
-.ok
+.stable
 {
+	margin: 12px;
 	text-align: center;
 	position : relative;
 	left: 40%;
 	padding: 10px;
 	width: 20%;
-	height: 150px;
+	height: 80px;
 	font-size: 11px;
 	color: black;
 	background-color: green;
 }
-.failure
+.broken
 {
+	margin: 12px;
 	text-align: center;
 	position : relative;
 	left: 40%;
 	padding: 10px;
 	width: 20%;
-	height: 150px;
+	height: 80px;
 	font-size: 11px;
 	color: black;
 	background-color: red;

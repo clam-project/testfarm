@@ -1,15 +1,21 @@
 import commands
 import os
 from listeners import NullResultListener, ConsoleResultListener
+from testfarmserver import * #TODO provisional
 
 class TestFarmClient :
 	# Attributes : repositories[]
 	
-	def __init__(self, repositories=[], listeners=[ ConsoleResultListener() ]) :
+	def __init__(self, repositories=[], listeners=[ ConsoleResultListener() ], use_pushing_server=False) :
 		self.repositories = repositories
 		self.listeners = listeners
+		if use_pushing_server :
+			serverlistener = ServerListener()
+			server = TestFarmServer(serverlistener)
+			self.listeners.append( serverlistener )
 		for repo in self.repositories :
 			repo.do_tasks( self.listeners )
+			open("iterations.html", "w").write( server.html_iterations() )
 		
 	def num_repositories(self) :
 		return len( self.repositories )
