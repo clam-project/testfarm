@@ -27,17 +27,47 @@ class ColoredTestCase(unittest.TestCase):
 		assert False, "different strings"
 
 class Tests_TestFarmServer(ColoredTestCase):
-	def test_repository__one_green_iteration(self):
+	def test_iterations__one_green_iteration(self):
 		listener = ServerListener()
 		listener.clean_log_files()
+		listener.current_time = lambda : "2006-03-17-13-26-20"
 		server = TestFarmServer(listener)
 		repo = Repository('repo')	
 		repo.add_task('task1', [])	
 		TestFarmClient([repo],[listener])
 		result = server.iterations()
-		print server.html_iterations()
-		self.assertEquals([('15-03-2006 19:32:00', '15-03-2006 19:32:00', 'stable')], result)
-	
+		self.assertEquals([('2006-03-17-13-26-20', '2006-03-17-13-26-20', 'repo', 'stable')], result)
+
+	def test_details(self):
+		listener = ServerListener()
+		server = TestFarmServer(listener)
+		listener.clean_log_files()
+
+		listener.current_time = lambda : "2004-03-17-13-26-20"
+		listener.listen_begin_repository("not wanted")
+		listener.listen_begin_task("task")
+		listener.listen_end_task("task")
+		listener.listen_end_repository("name", False)
+		listener.current_time = lambda : "1999-99-99-99-99-99"
+		listener.listen_begin_repository("we want this one")
+		listener.listen_begin_task("task")
+		listener.listen_result("a command", False, "", "some info", {'a':1})
+		listener.listen_end_task("task")
+		listener.current_time = lambda : "2000-00-00-00-00-00"
+		listener.listen_end_repository("we want this one", False)
+		listener.current_time = lambda : "2005-03-17-13-26-20"
+		listener.listen_begin_repository("not wanted either")
+		listener.listen_begin_task("task")
+		listener.listen_end_task("task")
+		listener.listen_end_repository("name", False)
+		expected = [
+('BEGIN_REPOSITORY', 'we want this one', '1999-99-99-99-99-99'),
+('BEGIN_TASK', 'task'),
+('CMD', 'a command', False, '', 'some info', {'a':1}),
+('END_TASK', 'task'),
+('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
+]
+		self.assertEquals(expected, server.details('1999-99-99-99-99-99') )
 
 class Tests_ServerListener(ColoredTestCase):
 
@@ -45,6 +75,7 @@ class Tests_ServerListener(ColoredTestCase):
 		id = lambda txt : txt
 		listener = ServerListener()
 		listener.clean_log_files()
+		listener.current_time = lambda : "2006-03-17-13-26-20"
 		repo1 = Repository('repo1')	
 		repo2 = Repository('repo2')	
 		repo1.add_task('task1', ["echo task1"])	
@@ -54,7 +85,7 @@ class Tests_ServerListener(ColoredTestCase):
 		TestFarmClient([repo1, repo2],[listener])
 		self.assertEquals("""\
 
-('BEGIN_REPOSITORY', 'repo1', '15-03-2006 19:32:00'),
+('BEGIN_REPOSITORY', 'repo1', '2006-03-17-13-26-20'),
 ('BEGIN_TASK', 'task1'),
 ('CMD', 'echo task1', True, '', '', {}),
 ('END_TASK', 'task1'),
@@ -62,14 +93,15 @@ class Tests_ServerListener(ColoredTestCase):
 ('CMD', 'echo something echoed', True, '', 'something echoed', {}),
 ('CMD', './lalala gh', False, 'sh: ./lalala: No such file or directory', '', {}),
 ('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo1', '15-03-2006 19:32:00', False),
+('END_REPOSITORY', 'repo1', '2006-03-17-13-26-20', False),
 
-('BEGIN_REPOSITORY', 'repo2', '15-03-2006 19:32:00'),
+('BEGIN_REPOSITORY', 'repo2', '2006-03-17-13-26-20'),
 ('BEGIN_TASK', 'task1'),
 ('END_TASK', 'task1'),
 ('BEGIN_TASK', 'task2'),
 ('CMD', 'ls', True, '', '', {}),
 ('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo2', '15-03-2006 19:32:00', True),
+('END_REPOSITORY', 'repo2', '2006-03-17-13-26-20', True),
 """, open( listener.logfile ).read() )
+	
 

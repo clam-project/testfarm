@@ -1,4 +1,4 @@
-
+import datetime
 header = """
 <html>
 <head>
@@ -7,6 +7,8 @@ header = """
 <title>Tests Farm</title>
 </head>
 <body>
+<h1>testfarm monitor</h1>
+<p>this file is the default html log for all testfarm tasks (from any repository) </p>
 """
 
 header_details = """
@@ -23,6 +25,7 @@ footer = """
 </html>
 """
 
+
 class ServerListener:
 	def __init__(self):
 		self.logfile = "/tmp/tasks.log"
@@ -30,8 +33,8 @@ class ServerListener:
 	def clean_log_files(self):
 		open(self.logfile, "w")
 
-	def time(self):
-		return "15-03-2006 19:32:00"
+	def current_time(self):
+		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 	def listen_result(self, command, ok, output, info, stats):
 		entry = str( ('CMD', command, ok, output, info, stats) ) + ',\n'
@@ -46,11 +49,11 @@ class ServerListener:
 		open(self.logfile, "a+").write(entry)
 	
 	def listen_begin_repository(self, repositoryname):
-		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.time()) 
+		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.current_time()) 
 		open(self.logfile, "a+").write(entry)
 
 	def listen_end_repository(self, repositoryname, status):
-		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repositoryname, self.time(), status)
+		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repositoryname, self.current_time(), status)
 		open(self.logfile, "a+").write(entry)
 	
 
@@ -58,13 +61,60 @@ class TestFarmServer:
 	def __init__(self, serverlistener):
 		self.serverlistener = serverlistener
 
-	def iterations(self):
-		log = eval("[ %s ]" % open(self.serverlistener.logfile).read() )
+	def load_log(self):
+		return eval("[ %s ]" % open(self.serverlistener.logfile).read() )
+
+	def last_date(self, log):
+		log.reverse()
+		for entry in log :
+			tag = entry[0]
+			if tag == 'BEGIN_REPOSITORY':
+				return entry[2]
+		assert "BEGIN_REPOSITORY not found"
+		
+	def single_iteration_details(self, wanted_date):
+		log = self.load_log()
 		result = []
+		in_wanted_iteration = False
+		for entry in log :
+			tag = entry[0]
+			if not in_wanted_iteration :
+				if tag == 'BEGIN_REPOSITORY' and entry[2] == wanted_date :
+					in_wanted_iteration = True
+			if in_wanted_iteration :
+				result.append(entry)
+				if tag == 'END_REPOSITORY' :
+					in_wanted_iteration = False
+					break
+		return result
+
+	def write_html_detail_file(self, wanted_date):
+		open("details-%s" % wanted_date, "w").write( self.html_single_iteration_details(wanted_date) )
+
+	def html_single_iteration_details(self, wanted_date):
+		content = ["<pre>"]
+		for entry in self.single_iteration_details( wanted_date ):
+			content.append( "\n".join( map(str, entry) ) )	
+		content.append("</pre>")
+		return header_details + "\n".join(content) + footer
+
+	def write_single_iteration_details_html_file(self, wanted_date):
+		details = self.html_single_iteration_details(wanted_date)
+		open("details-%s.html" % wanted_date, "w").write( details )
+	
+	def write_last_single_iteration_details_html_file(self): #TODO remove
+		log = self.load_log()
+		last_date = self.last_date(log)
+		self.write_single_iteration_details_html_file(last_date)
+
+	def iterations(self):
+		log = self.load_log()
+		iterations = []
 		iteration_opened = False
 		for entry in  log :
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY' :
+				repo_name = entry[1]
 				begin_time = entry[2]
 				iteration_opened = True
 			if tag == 'END_REPOSITORY' :
@@ -74,24 +124,35 @@ class TestFarmServer:
 					status = 'stable'
 				else :
 					status = 'broken'
-				result.append( (begin_time, end_time, status) )
+				iterations.append( (begin_time, end_time, repo_name, status) )
 				iteration_opened = False
 		if iteration_opened :
-			result.append( (begin_time, '', 'inprogress') )
+			iterations.append( (begin_time, '', repo_name, 'inprogress') )
 				
-		return result
+		iterations.reverse()
+		return iterations
+
 	def html_iterations(self):
 		content = ''
-		for begin_time, end_time, status in self.iterations():
-			begin_time_html = "<p>%s</p>" % begin_time
-			if end_time :
-				end_time_html = "<p>%s</p>" % end_time
+		for begintime_str, endtime_str, repo_name, status in self.iterations():
+			name_html = "<p>%s</p>" % repo_name
+			time_tags = ["Y", "M", "D", "hour", "min", "sec"]
+			begintime_dict = dict(zip( time_tags, begintime_str.split("-") ))
+			print begintime_dict
+			begintime_html = "<p>Begin time: %(hour)s:%(min)s:%(sec)s</p>" % begintime_dict
+			if endtime_str :
+				endtime_dict = dict(zip( time_tags, endtime_str.split("-") ))
+				print endtime_dict
+				endtime_html = "<p>End time: %(hour)s:%(min)s:%(sec)s</p>" % endtime_dict
 			else:
-				end_time_html = "<p>in progres...</p>"
-			details_html = '<p><a href="something=%s">details</a></p>' % begin_time
-			content += '<div class="%s">\n%s\n%s\n%s\n</div>' % (status, begin_time_html, end_time_html, details_html)
+				endtime_html = "<p>in progres...</p>"
+			details_html = '<p><a href="details-%s.html">details</a></p>' % begintime_str
+			content += '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (status, name_html, begintime_html, endtime_html, details_html)
 		return header + content + footer
 		
+	def write_iterations_html_file(self):
+		open("iterations.html", "w").write( self.html_iterations() )
+
 	'''
 	def __init__(self):
 		self.repository_state = None

@@ -13,10 +13,13 @@ class TestFarmClient :
 			serverlistener = ServerListener()
 			server = TestFarmServer(serverlistener)
 			self.listeners.append( serverlistener )
+		else :
+			server = None
 		for repo in self.repositories :
-			repo.do_tasks( self.listeners )
+			repo.do_tasks( self.listeners, pushing_server = server )
 			if use_pushing_server :
-				open("iterations.html", "w").write( server.html_iterations() )
+				server.write_iterations_html_file()
+				server.write_last_single_iteration_details_html_file()
 		
 	def num_repositories(self) :
 		return len( self.repositories )
@@ -114,13 +117,16 @@ class Repository :
 	def add_task(self, taskname, commands):
 		self.tasks.append(Task(taskname, commands)) 
 	
-	def do_tasks( self, listeners = [ NullResultListener() ] ):
+	def do_tasks( self, listeners = [ NullResultListener() ], pushing_server = None): #TODO remove pushing_server
 		all_ok = True
 		for listener in listeners:
 			listener.listen_begin_repository( self.name )
 		for task in self.tasks :
 			current_result = task.do_task(listeners)
 			all_ok = all_ok and current_result
+			if pushing_server : #TODO remove. this is just provisional
+				pushing_server.write_iterations_html_file()
+				pushing_server.write_last_single_iteration_details_html_file()
 		for listener in listeners:
 			listener.listen_end_repository( self.name, all_ok )
 		return all_ok
