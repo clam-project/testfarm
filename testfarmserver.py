@@ -2,7 +2,7 @@ import datetime
 header = """
 <html>
 <head>
-<meta http-equiv="refresh" content="5">
+<!-- <meta http-equiv="refresh" content="5"> -->
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm</title>
 </head>
@@ -29,6 +29,7 @@ footer = """
 class ServerListener:
 	def __init__(self):
 		self.logfile = "/tmp/tasks.log"
+		self.iterations_needs_update = True
 
 	def clean_log_files(self):
 		open(self.logfile, "w")
@@ -51,10 +52,14 @@ class ServerListener:
 	def listen_begin_repository(self, repositoryname):
 		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.current_time()) 
 		open(self.logfile, "a+").write(entry)
+		self.iterations_needs_update = True
 
 	def listen_end_repository(self, repositoryname, status):
 		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repositoryname, self.current_time(), status)
 		open(self.logfile, "a+").write(entry)
+		self.iterations_needs_update = True
+	def iterations_updated(self):
+		self.iterations_needs_update = False
 	
 
 class TestFarmServer:
@@ -122,6 +127,7 @@ class TestFarmServer:
 				status_ok = entry[3]
 				if status_ok :
 					status = 'stable'
+					pass
 				else :
 					status = 'broken'
 				iterations.append( (begin_time, end_time, repo_name, status) )
@@ -138,11 +144,9 @@ class TestFarmServer:
 			name_html = "<p>%s</p>" % repo_name
 			time_tags = ["Y", "M", "D", "hour", "min", "sec"]
 			begintime_dict = dict(zip( time_tags, begintime_str.split("-") ))
-			print begintime_dict
 			begintime_html = "<p>Begin time: %(hour)s:%(min)s:%(sec)s</p>" % begintime_dict
 			if endtime_str :
 				endtime_dict = dict(zip( time_tags, endtime_str.split("-") ))
-				print endtime_dict
 				endtime_html = "<p>End time: %(hour)s:%(min)s:%(sec)s</p>" % endtime_dict
 			else:
 				endtime_html = "<p>in progres...</p>"
@@ -153,78 +157,7 @@ class TestFarmServer:
 	def write_iterations_html_file(self):
 		open("iterations.html", "w").write( self.html_iterations() )
 
-	'''
-	def __init__(self):
-		self.repository_state = None
-		self.repository_html_log = ''
-		self.details_log = "" 
-		
-	def repository_status_html(self, name=None):
-		return "%(HEADER)s\n%(FOOTER)s"
-
-	def repository_status_html2(self, name=None):
-		status_html = "%(HEADER)s"
-		status_html += "\n\t%s" % self.repository_html_log
-		status_html += "\n%(FOOTER)s"
-		return status_html
-
-	def write_details_html_log(self) :
-		details_html_log = "%(HEADER)s\n" % {'HEADER' : header_details}
-		details_html_log += self.details_log
-		details_html_log += "\n%(FOOTER)s" % {'FOOTER' : footer}
-		open("foo2-details.html", "w").write( details_html_log )
-
-	def listen_result(self, command, ok, output, info, stats):
-		self.details_log += '\n\t\t<p id="command">%s' % command
-		if ok :
-			self.details_log += '\t<span id="command_ok">[OK]</span></p>'
-		else :
-			self.details_log += '\t<span id="command_failure">[FAILURE]</span>\t<span id="normal">%s</span></p>' % output
-		
-	def listen_begin_task(self, taskname):
-		self.details_log += '\n\t\t<p id="task">BEGIN_TASK %s</p>' % taskname
-
-	def listen_end_task(self, taskname):
-		self.details_log += '\n\t\t<p id="task">END_TASK %s</p>' % taskname
-	
-	def listen_begin_repository(self, repositoryname):
-		actual_datetime = datetime.datetime.now()
-		self.begin_datetime = actual_datetime.strftime("%d-%m-%Y %H:%M:%S")
-		self.details_log += """\t<div class="details">
-		<p id="repository"> BEGIN_REPOSITORY %s </p>""" % repositoryname
-		self.repository_state = 'progress'
-		self.repository_html_log = "<h1>%s repository status</h1>\n" % repositoryname
-		self.repository_html_log += "\t<div class="progress">\n<p><b>Begin:</b> %(BEGIN_DATETIME)s</p>\n</div>" 
-
-		html_log = self.repository_status_html2() % {'HEADER' : header, 'FOOTER' : footer, 'BEGIN_DATETIME' : self.begin_datetime}
-		
-		open("foo2.html", "w").write( html_log )
-
-	def listen_end_repository(self, repositoryname, status):
-		actual_datetime = datetime.datetime.now()
-		self.end_datetime = actual_datetime.strftime("%d-%m-%Y %H:%M:%S")
-		self.details_log += """\n\t\t<p id="repository"> END_REPOSITORY %s</td></p>
-	</div>""" % repositoryname
-		if (status==True):
-			self.repository_state = 'ok'
-			self.repository_html_log = "<h1>%s repository status</h1>\n" % repositoryname
-			self.repository_html_log += """\t<div class="ok">
-		<p><b>Begin:</b> %(BEGIN_DATETIME)s</p>
-		<p><b>End:</b> %(END_DATETIME)s</p>
-		<p><a href="foo2-details.html">Show Details</a></p>
-	</div>"""
-		else:
-			self.repository_state = 'failure'
-			self.repository_html_log = "<h1>%s repository status</h1>\n" % repositoryname
-			self.repository_html_log += """\t<div class="failure">
-		<p><b>Begin:</b> %(BEGIN_DATETIME)s</p>
-		<p><b>End:</b> %(END_DATETIME)s</p>
-		<p><a href="foo2-details.html">Show Details</a></p>
-	</div>"""
-	
-		html_log = self.repository_status_html2() % {'HEADER' : header, 'FOOTER' : footer, 'BEGIN_DATETIME' : self.begin_datetime, 'END_DATETIME': self.end_datetime}
-		open("foo2.html", "w").write( html_log )
-		self.write_details_html_log()
-	'''
-
-
+	def update_static_html_files(self):
+		self.write_last_single_iteration_details_html_file()
+		if self.iterations_html_needs_update:
+			self.write_iterations_html_file()

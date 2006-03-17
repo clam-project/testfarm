@@ -67,7 +67,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
 ]
-		self.assertEquals(expected, server.details('1999-99-99-99-99-99') )
+		self.assertEquals(expected, server.single_iteration_details('1999-99-99-99-99-99') )
 
 class Tests_ServerListener(ColoredTestCase):
 
