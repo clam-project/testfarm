@@ -15,7 +15,8 @@ class TestFarmClient :
 			self.listeners.append( serverlistener )
 		for repo in self.repositories :
 			repo.do_tasks( self.listeners )
-			open("iterations.html", "w").write( server.html_iterations() )
+			if use_pushing_server :
+				open("iterations.html", "w").write( server.html_iterations() )
 		
 	def num_repositories(self) :
 		return len( self.repositories )
