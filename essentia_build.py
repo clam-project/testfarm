@@ -5,19 +5,23 @@ from testfarmclient import *
 def pass_text(text) :
 	return text
 
-cd_essentia = "cd /home/parumi/essentia-sandboxes/clean-essentia/trunk"
+cd_essentia = "cd $HOME/essentia-sandboxes/clean-essentia/trunk"
+
+essentia_update = "SVN_SSH=\"ssh -i $HOME/.ssh/svn_id_dsa\" svn update svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/"
+
+essentia_checkout = "SVN_SSH=\"ssh -i $HOME/.ssh/svn_id_dsa\" svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/"
 
 essentia = Repository("essentia/trunk")
 
 essentia.add_deployment_task([
-	"cd /home/parumi/",
+	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
 	"cd essentia-sandboxes",
 	"rm -fr /tmp/essentia/",
 	"rm -fr clean-essentia/trunk/build",
 	"rm -fr clean-essentia/trunk/algorithms",
 	"rm -fr clean-essentia/trunk/test/build",
-	"SVN_SSH=\"ssh -i /home/parumi/.ssh/svn_id_dsa\" svn update svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/"
+	essentia_update,
 ] )
 
 essentia.add_task("build core libs", [
@@ -37,8 +41,8 @@ essentia.add_task("automatic tests", [
 	"cd test",
 	"scons",
 	"cd build/unittests/descriptortests/",
-	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : pass_text}
+	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : pass_text},
 ] )
 
 
-TestFarmClient( [essentia],  use_pushing_server=True )
+TestFarmClient( [essentia],  use_pushing_server=True, continuous=True )
