@@ -14,10 +14,8 @@ clam.add_task("teeesting", [
 clam.add_task("just a CD", [
 	{CD:"/tmp"}
 ] )
-#[tal] 244.3
-#[total num cycles] 233
 
 
-TestFarmClient( [
-	clam
-], use_pushing_server=True )
+TestFarmClient( "pau_linux_breezy", [clam], use_pushing_server=True)
+
+TestFarmClient( "another_computer", [clam], use_pushing_server=True)

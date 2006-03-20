@@ -7,11 +7,11 @@ class TestFarmClient :
 	# Attributes : repositories[]
 	
 	def __init__(self, 
+		name = '--unnamed_client--',
 		repositories=[], 
 		listeners=[ ConsoleResultListener() ],
 		continuous=False,
 		use_pushing_server=False,
-		name = '--unnamed_client--'
 	) :
 		self.repositories = repositories
 		self.listeners = listeners
@@ -19,7 +19,7 @@ class TestFarmClient :
 
 		if use_pushing_server :
 			serverlistener = ServerListener( client_name=self.name )
-			server_to_push = TestFarmServer(serverlistener)
+			server_to_push = TestFarmServer()
 			self.listeners.append( serverlistener )
 		else:
 			server_to_push = None
@@ -30,7 +30,6 @@ class TestFarmClient :
 				if use_pushing_server :
 					server_to_push.update_static_html_files()
 			if not continuous: break
-			time.sleep(60 * 15) #sleep 15 minutes TODO remove from here (PA)
 		
 	def num_repositories(self) :
 		return len( self.repositories )

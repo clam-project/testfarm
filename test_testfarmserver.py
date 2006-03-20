@@ -21,8 +21,8 @@ class ColoredTestCase(unittest.TestCase):
 			if expectedstr[i]!=resultstr[i]:
 				index_diff = i
 				break
-		print "(%s%s%s%s%s)" % (cyan, expectedstr[:index_diff], green, expectedstr[index_diff:], normal)
-		print "(%s%s%s%s%s)" % (cyan, resultstr[:index_diff], red, resultstr[index_diff:], normal)
+		print "\n<expected>%s%s%s%s%s</expected>" % (cyan, expectedstr[:index_diff], green, expectedstr[index_diff:], normal)
+		print "\n<but was>%s%s%s%s%s</but was>" % (cyan, resultstr[:index_diff], red, resultstr[index_diff:], normal)
 		
 		assert False, "different strings"
 
@@ -31,18 +31,18 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener = ServerListener()
 		listener.clean_log_files()
 		listener.current_time = lambda : "a date"
-		server = TestFarmServer(listener)
+		server = TestFarmServer()
 		repo = Repository('repo')	
 		repo.add_task('task1', [])	
-		TestFarmClient([repo],[listener])
-		result = server.iterations()
-		self.assertEquals({'unnamed client' : [('a date', 'a date', 'repo', 'stable')]}, result)
+		TestFarmClient('a client', [repo],[listener])
+		self.assertEquals(
+			{'testing_client' : [('a date', 'a date', 'repo', 'stable')]}, 
+			server.iterations() )
 
 	def test_details(self):
 		listener = ServerListener()
-		server = TestFarmServer(listener)
+		server = TestFarmServer()
 		listener.clean_log_files()
-
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_repository("not wanted")
 		listener.listen_begin_task("task")
@@ -67,17 +67,27 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
 ]
-		self.assertEquals(expected, server.single_iteration_details('1999-99-99-99-99-99') )
+		self.assertEquals( expected, server.single_iteration_details('1999-99-99-99-99-99') )
 
 	def test_two_clients(self):
-		listener = ServerListener(client_name='client 1')
-		listener.clean_log_files()
-		listener.current_time = lambda : "some date"
-		server = TestFarmServer(listener)
+		listener1 = ServerListener(client_name='client 1', logs_base_dir='/tmp/clients_testdir')
+		listener2 = ServerListener(client_name='client 2', logs_base_dir='/tmp/clients_testdir')
+		listener1.clean_log_files()
+		listener2.clean_log_files()
+		listener1.current_time = lambda : "some date"
+		listener2.current_time = lambda : "some other date"
+		server = TestFarmServer(logs_base_dir='/tmp/clients_testdir')
 		repo = Repository('repo')
 		repo.add_task('task1', [])
-		TestFarmClient([repo], [listener])
-		self.assertEquals( {'client 1':[('some date', 'some date', 'repo', 'stable')]}, server.iterations())
+		TestFarmClient('a client', [repo], [listener1])
+		TestFarmClient('another client', [repo], [listener2])
+		self.assertEquals( 
+			{'client 1':[('some date', 'some date', 'repo', 'stable')],
+			 'client 2':[('some other date', 'some other date', 'repo', 'stable')]}, 
+			server.iterations() )
+	def tearDown(self):
+		listener = ServerListener()
+		listener.clean_log_files()
 
 class Tests_ServerListener(ColoredTestCase):
 
@@ -92,7 +102,7 @@ class Tests_ServerListener(ColoredTestCase):
 		repo1.add_task('task2', [{CMD:"echo something echoed", INFO:id}, "./lalala gh"])
 		repo2.add_task('task1', [])
 		repo2.add_task('task2', ["ls"])	
-		TestFarmClient([repo1, repo2],[listener])
+		TestFarmClient('a client', [repo1, repo2],[listener])
 		self.assertEquals("""\
 
 ('BEGIN_REPOSITORY', 'repo1', '2006-03-17-13-26-20'),

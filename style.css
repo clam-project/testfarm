@@ -18,7 +18,10 @@
 	margin-bottom: 1em;
 	margin-left: 2em;
 	margin-right: 2em;
-	padding: 0.3em;
+	padding-top: 0.3em;
+	padding-bottom: 0.3em;
+	padding-right: 2em;
+	padding-left: 2em;
 	text-align: center;
 	font-size: 0.8em;
 	color: white;
@@ -36,6 +39,7 @@
 	color: white;
 	background-color: red;
 }
+td { border-style: solid; }
 
 .details
 {
