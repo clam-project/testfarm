@@ -6,7 +6,12 @@ from testfarmserver import * #TODO provisional
 class TestFarmClient :
 	# Attributes : repositories[]
 	
-	def __init__(self, repositories=[], listeners=[ ConsoleResultListener() ], use_pushing_server=False) :
+	def __init__(self, 
+		repositories=[], 
+		listeners=[ ConsoleResultListener() ],
+		continuous=False,
+		use_pushing_server=False
+	) :
 		self.repositories = repositories
 		self.listeners = listeners
 		if use_pushing_server :
@@ -15,11 +20,15 @@ class TestFarmClient :
 			self.listeners.append( serverlistener )
 		else :
 			server = None
-		for repo in self.repositories :
-			repo.do_tasks( self.listeners, pushing_server = server )
-			if use_pushing_server :
-				server.write_iterations_html_file()
-				server.write_last_single_iteration_details_html_file()
+
+		while True :
+			for repo in self.repositories :
+				repo.do_tasks( self.listeners, pushing_server = server )
+				if use_pushing_server :
+					server.write_iterations_html_file()
+					server.write_last_single_iteration_details_html_file()
+			if not continuous: break
+			time.sleep(60 * 15) #sleep 15 minutes
 		
 	def num_repositories(self) :
 		return len( self.repositories )

@@ -77,7 +77,7 @@ class ConsoleResultListener :
 			ending += '%s\n---------------------------------------------%s\n' % (yellow, normal)
 		else:
 			ending = ''
-		sys.stdout.write( " | %scmd:%s%60s\t\t%s%s%s\n | %sinfo:%s %s\n | %sstats:%s %s\n%s%s%s |\n" % (yellow, cmd_color, cmd, status_color, status_text, normal, yellow, info, normal, yellow, normal, stats, output_color, ending, normal) )
+		sys.stdout.write( " | %scmd:%s%60s\t\t%s%s%s\n | %sinfo:%s %s\n | %sstats:%s %s\n%s%s%s |\n" % (yellow, cmd_color, cmd, status_color, status_text, normal, yellow, normal, info, yellow, normal, stats, output_color, ending, normal) )
 
 
 	def listen_result(self, command, ok, output, info, stats):
