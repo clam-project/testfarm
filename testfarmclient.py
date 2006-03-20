@@ -10,25 +10,27 @@ class TestFarmClient :
 		repositories=[], 
 		listeners=[ ConsoleResultListener() ],
 		continuous=False,
-		use_pushing_server=False
+		use_pushing_server=False,
+		name = '--unnamed_client--'
 	) :
 		self.repositories = repositories
 		self.listeners = listeners
+		self.name = name
+
 		if use_pushing_server :
-			serverlistener = ServerListener()
-			server = TestFarmServer(serverlistener)
+			serverlistener = ServerListener( client_name=self.name )
+			server_to_push = TestFarmServer(serverlistener)
 			self.listeners.append( serverlistener )
-		else :
-			server = None
+		else:
+			server_to_push = None
 
 		while True :
 			for repo in self.repositories :
-				repo.do_tasks( self.listeners, pushing_server = server )
+				repo.do_tasks( self.listeners, server_to_push = server_to_push )
 				if use_pushing_server :
-					server.write_iterations_html_file()
-					server.write_last_single_iteration_details_html_file()
+					server_to_push.update_static_html_files()
 			if not continuous: break
-			time.sleep(60 * 15) #sleep 15 minutes
+			time.sleep(60 * 15) #sleep 15 minutes TODO remove from here (PA)
 		
 	def num_repositories(self) :
 		return len( self.repositories )
@@ -126,16 +128,15 @@ class Repository :
 	def add_task(self, taskname, commands):
 		self.tasks.append(Task(taskname, commands)) 
 	
-	def do_tasks( self, listeners = [ NullResultListener() ], pushing_server = None): #TODO remove pushing_server
+	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.
 		all_ok = True
 		for listener in listeners:
 			listener.listen_begin_repository( self.name )
 		for task in self.tasks :
 			current_result = task.do_task(listeners)
 			all_ok = all_ok and current_result
-			if pushing_server : #TODO remove. this is just provisional
-				pushing_server.write_iterations_html_file()
-				pushing_server.write_last_single_iteration_details_html_file()
+			if server_to_push : #TODO remove. this is just provisional. Is it?
+				server_to_push.update_static_html_files()
 		for listener in listeners:
 			listener.listen_end_repository( self.name, all_ok )
 		return all_ok

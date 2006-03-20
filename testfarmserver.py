@@ -26,10 +26,15 @@ footer = """
 """
 
 
+#
+#  LISTENER
+#
+
 class ServerListener:
-	def __init__(self):
-		self.logfile = "/tmp/tasks.log"
+	def __init__(self, client_name='unnamed client'):
 		self.iterations_needs_update = True
+		self.client_name = client_name
+		self.logfile = "/tmp/%s.testfarmlog" % client_name
 
 	def clean_log_files(self):
 		open(self.logfile, "w")
@@ -58,9 +63,14 @@ class ServerListener:
 		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repositoryname, self.current_time(), status)
 		open(self.logfile, "a+").write(entry)
 		self.iterations_needs_update = True
+
 	def iterations_updated(self):
 		self.iterations_needs_update = False
 	
+
+#
+#     SERVER
+#
 
 class TestFarmServer:
 	def __init__(self, serverlistener):
@@ -93,9 +103,6 @@ class TestFarmServer:
 					break
 		return result
 
-	def write_html_detail_file(self, wanted_date):
-		open("details-%s" % wanted_date, "w").write( self.html_single_iteration_details(wanted_date) )
-
 	def html_single_iteration_details(self, wanted_date):
 		content = ["<pre>"]
 		for entry in self.single_iteration_details( wanted_date ):
@@ -103,14 +110,14 @@ class TestFarmServer:
 		content.append("</pre>")
 		return header_details + "\n".join(content) + footer
 
-	def write_single_iteration_details_html_file(self, wanted_date):
+	def write_details_static_html_file(self, wanted_date):
 		details = self.html_single_iteration_details(wanted_date)
 		open("details-%s.html" % wanted_date, "w").write( details )
 	
-	def write_last_single_iteration_details_html_file(self): #TODO remove
+	def write_last_details_static_html_file(self): #TODO remove
 		log = self.load_log()
 		last_date = self.last_date(log)
-		self.write_single_iteration_details_html_file(last_date)
+		self.write_details_static_html_file(last_date)
 
 	def iterations(self):
 		log = self.load_log()
@@ -136,11 +143,14 @@ class TestFarmServer:
 			iterations.append( (begin_time, '', repo_name, 'inprogress') )
 				
 		iterations.reverse()
-		return iterations
+		return { self.serverlistener.client_name : iterations }
 
 	def html_iterations(self):
+		iterations_dict = self.iterations()
+		client_name = iterations_dict.keys()[0] #TODO provisonal
+		client_iterations = iterations_dict[client_name]
 		content = ''
-		for begintime_str, endtime_str, repo_name, status in self.iterations():
+		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
 			time_tags = ["Y", "M", "D", "hour", "min", "sec"]
 			begintime_dict = dict(zip( time_tags, begintime_str.split("-") ))
@@ -154,10 +164,10 @@ class TestFarmServer:
 			content += '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (status, name_html, begintime_html, endtime_html, details_html)
 		return header + content + footer
 		
-	def write_iterations_html_file(self):
+	def write_iterations_static_html_file(self):
 		open("iterations.html", "w").write( self.html_iterations() )
 
 	def update_static_html_files(self):
-		self.write_last_single_iteration_details_html_file()
-		if self.iterations_html_needs_update:
-			self.write_iterations_html_file()
+		self.write_last_details_static_html_file()
+		if self.serverlistener.iterations_needs_update:
+			self.write_iterations_static_html_file()

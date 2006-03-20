@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-from testfarmclient import Repository, TestFarmClient
+from testfarmclient import * 
 
 clam = Repository("CLAM")
 clam.add_deployment_task( [
@@ -11,8 +11,8 @@ clam.add_task("teeesting", [
 	#"./lalala fafaf",
 	"echo Should not write this!"
 ] )
-clam.add_task("another", [
-	"echo Do should write this!"
+clam.add_task("just a CD", [
+	{CD:"/tmp"}
 ] )
 #[tal] 244.3
 #[total num cycles] 233
