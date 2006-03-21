@@ -61,7 +61,7 @@ td
 .repository
 {
 	left: 5%;
-	color: #aaa;
+	color: #888;
 	padding: 2em; 
 	border: solid 1px #eee;
 }
@@ -71,7 +71,7 @@ td
 	left: 2%;
 	padding: 1em; 
 	margin: 1em;
-	border: solid 1px #bbb;
+	border: solid 1px #999;
 }
 
 .command
@@ -102,11 +102,18 @@ td
 .output
 {
 	white-space: pre;
+	padding: 2em; 
+	border: solid 1px #eee;
 }
 
 .info
 {
+	font-family: monospace;
 	white-space: pre;
+	color: blue;
+	font-size: 0.9em;
+	padding: 2em; 
+	border: solid 1px #eee;
 }
 
 .stats
