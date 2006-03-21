@@ -13,6 +13,13 @@ essentia_checkout = "SVN_SSH=\"ssh -i $HOME/.ssh/svn_id_dsa\" svn checkout svn+s
 
 essentia = Repository("essentia/trunk")
 
+
+essentia.add_task("TODO fix bug: update html at begin time ", [] )
+
+essentia.add_task("rest for 5 min", [
+	"sleep 300" # 900 == 60 sec * 5
+] )
+
 essentia.add_deployment_task([
 	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
@@ -45,4 +52,5 @@ essentia.add_task("automatic tests", [
 ] )
 
 
-TestFarmClient( [essentia],  use_pushing_server=True, continuous=True )
+
+TestFarmClient( 'testing-machine_linux_breezy', [essentia],  use_pushing_server=True, continuous=True )
