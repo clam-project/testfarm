@@ -82,6 +82,8 @@ td
 {
 	position: relative;
 	left: 2%;
+	font-family: monospace;
+	font-size: 1.2em;
 	color:maroon;
 }
 
@@ -89,6 +91,8 @@ td
 {
 	color: green;
 	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
 	padding-left: 3em;
 }
 
@@ -96,20 +100,27 @@ td
 {
 	color: red;
 	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
 	padding-left: 3em;
 }
 
 .output
 {
 	white-space: pre;
+	font-family: monospace;
+	color: black;
+	font-size: 0.9em;
+	padding: 2em; 
+	border: solid 1px #eee;
 	padding: 2em; 
 	border: solid 1px #eee;
 }
 
 .info
 {
-	font-family: monospace;
 	white-space: pre;
+	font-family: monospace;
 	color: blue;
 	font-size: 0.9em;
 	padding: 2em; 
