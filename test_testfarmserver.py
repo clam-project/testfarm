@@ -29,7 +29,6 @@ class ColoredTestCase(unittest.TestCase):
 class Tests_TestFarmServer(ColoredTestCase):
 	def test_iterations__one_green_iteration(self):
 		listener = ServerListener()
-		listener.clean_log_files()
 		listener.current_time = lambda : "a date"
 		server = TestFarmServer()
 		repo = Repository('repo')	
@@ -42,7 +41,6 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_details(self):
 		listener = ServerListener( client_name='a client')
 		server = TestFarmServer()
-		listener.clean_log_files()
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_repository("not wanted")
 		listener.listen_begin_task("task")
@@ -85,16 +83,30 @@ class Tests_TestFarmServer(ColoredTestCase):
 			{'client 1':[('some date', 'some date', 'repo', 'stable')],
 			 'client 2':[('some other date', 'some other date', 'repo', 'stable')]}, 
 			server.iterations() )
+		listener1.clean_log_files()
+		listener2.clean_log_files()
+
 	def tearDown(self):
+		listener = ServerListener()
+		listener.clean_log_files()
+
+	def setUp(self):
 		listener = ServerListener()
 		listener.clean_log_files()
 
 class Tests_ServerListener(ColoredTestCase):
 
+	def tearDown(self):
+		listener = ServerListener()
+		listener.clean_log_files()
+
+	def setUp(self):
+		listener = ServerListener()
+		listener.clean_log_files()
+
 	def test_multiple_repositories_multiple_tasks(self):
 		id = lambda txt : txt
 		listener = ServerListener()
-		listener.clean_log_files()
 		listener.current_time = lambda : "2006-03-17-13-26-20"
 		repo1 = Repository('repo1')	
 		repo2 = Repository('repo2')	
@@ -124,4 +136,9 @@ class Tests_ServerListener(ColoredTestCase):
 ('END_REPOSITORY', 'repo2', '2006-03-17-13-26-20', True),
 """, open( listener.logfile ).read() )
 	
+	def xtest_idle_state(self):
+		repo.check_for_new_commits( check_cmd="cvs -nq up -dP | grep ^[UP]", minutes_idle=5 )
+		listener = ServerListener()
+			
+		
 
