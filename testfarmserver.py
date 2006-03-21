@@ -32,6 +32,9 @@ def remove_path_and_extension( path ):
 def log_filename(logs_base_dir, client_name) :
 	return '%s/%s.testfarmlog' % (logs_base_dir, client_name)
 
+def idle_log_filename(logs_base_dir, client_name) :
+	return '%s/%s.idle' % (logs_base_dir, client_name)
+
 def create_dir_if_needed(dir):
 	if not os.path.isdir( dir ) :
 		sys.stderr.write("Warning: directory '%s' is not available. Creating it." % dir)
@@ -50,6 +53,7 @@ class ServerListener:
 		self.client_name = client_name
 		self.logs_base_dir = logs_base_dir
 		self.logfile = log_filename( logs_base_dir, client_name )
+		self.idle_logfile = idle_log_filename( logs_base_dir, client_name )
 		create_dir_if_needed( logs_base_dir )
 
 		
@@ -63,6 +67,7 @@ class ServerListener:
 		for filename in self.list_log_files():
 			os.remove(filename)
 		open( self.logfile, "w")
+		open( self.idle_logfile, "w")
 
 	def current_time(self):
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -91,6 +96,11 @@ class ServerListener:
 
 	def iterations_updated(self):
 		self.iterations_needs_update = False
+	
+	def listen_cms_is_idle(self, seconds_for_next_check):
+		entry = "{date:'%s', next_run_interval:%d}" % (self.current_time(), seconds_for_next_check)
+		open(self.idle_logfile, 'a+').write( entry )
+	
 	
 
 #
@@ -139,7 +149,7 @@ class TestFarmServer:
 					break
 		return result
 	
-	def moha_html_single_iteration_details(self, client_name, wanted_date):
+	def html_single_iteration_details(self, client_name, wanted_date):
 		content = []
 		for entry in self.single_iteration_details(client_name, wanted_date ):
 			tag = entry[0]
@@ -168,16 +178,17 @@ class TestFarmServer:
 
 		return header_details + '\n'.join(content) + footer	
 
+	'''#minimal version:
 	def html_single_iteration_details(self, client_name, wanted_date):
 		content = ["<pre>"]
 		for entry in self.single_iteration_details(client_name, wanted_date ):
 			content.append( "\n".join( map(str, entry) ) )	
 		content.append("</pre>")
 		return header_details + "\n".join(content) + footer
+	'''
 
 	def write_details_static_html_file(self, client_name, wanted_date):
-#		details = self.html_single_iteration_details(client_name, wanted_date)
-		details = self.moha_html_single_iteration_details(client_name, wanted_date)
+		details = self.html_single_iteration_details(client_name, wanted_date)
 		open("%s/details-%s-%s.html" % (self.html_dir, client_name, wanted_date), "w").write( details )
 	
 	def write_last_details_static_html_file(self): 
@@ -231,7 +242,8 @@ class TestFarmServer:
 			else:
 				endtime_html = "<p>in progres...</p>"
 			details_html = '<p><a href="details-%s-%s.html">details</a></p>' % (client_name, begintime_str)
-			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (status, name_html, begintime_html, endtime_html, details_html) )
+			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
+				status, name_html, begintime_html, endtime_html, details_html) )
 		return content
 
 	def html_iterations(self):

@@ -3,10 +3,14 @@
 from testfarmclient import * 
 
 clam = Repository("CLAM")
+
 clam.add_deployment_task( [
 	"echo lalala",
 	"ls" 
 ] )
+
+clam.check_for_new_commits( "cvs -nq up -dP | grep ^[UP]" )
+
 clam.add_task("teeesting", [
 	#"./lalala fafaf",
 	"echo Should not write this!"

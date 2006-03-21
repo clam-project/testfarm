@@ -136,9 +136,14 @@ class Tests_ServerListener(ColoredTestCase):
 ('END_REPOSITORY', 'repo2', '2006-03-17-13-26-20', True),
 """, open( listener.logfile ).read() )
 	
-	def xtest_idle_state(self):
-		repo.check_for_new_commits( check_cmd="cvs -nq up -dP | grep ^[UP]", minutes_idle=5 )
+	def test_idle_state(self):
+#		repo.check_for_new_commits( check_cmd="cvs -nq up -dP | grep ^[UP]", minutes_idle=5 )
 		listener = ServerListener()
+		listener.current_time = lambda : "1000-10-10-10-10-10"
+		listener.listen_cms_is_idle(seconds_for_next_check=60)
+		self.assertEquals("{date:'1000-10-10-10-10-10', next_run_interval:60}", 
+			open(listener.idle_logfile).read())
+
 			
 		
 
