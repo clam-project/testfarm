@@ -41,6 +41,70 @@
 }
 td { border-style: solid; }
 
+
+.repository
+{
+	left: 5%;
+	color: #aaa;
+	padding: 2em; 
+	border: solid 1px #eee;
+}
+
+.task
+{
+	left: 2%;
+	padding: 1em; 
+	margin: 1em;
+	border: solid 1px #bbb;
+}
+
+.command
+{
+}
+
+.command_string
+{
+	position: relative;
+	left: 2%;
+	color:maroon;
+}
+
+.command_ok
+{
+	color: green;
+	font-weight: bold;
+	padding-left: 3em;
+}
+
+.command_failure
+{
+	color: red;
+	font-weight: bold;
+	padding-left: 3em;
+}
+
+.output
+{
+	position: relative;
+	left: 4%;
+	color:#777A7F;
+}
+
+.info
+{
+	position: relative;
+	left: 4%;
+	color:#777A7F;
+}
+
+.stats
+{
+	position: relative;
+	left: 4%;
+	color:#777A7F;
+}
+
+
 .details
 {
 	position: relative;

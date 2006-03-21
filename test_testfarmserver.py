@@ -40,7 +40,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 			server.iterations() )
 
 	def test_details(self):
-		listener = ServerListener()
+		listener = ServerListener( client_name='a client')
 		server = TestFarmServer()
 		listener.clean_log_files()
 		listener.current_time = lambda : "2004-03-17-13-26-20"
@@ -67,7 +67,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
 ]
-		self.assertEquals( expected, server.single_iteration_details('1999-99-99-99-99-99') )
+		self.assertEquals( expected, server.single_iteration_details('a client', '1999-99-99-99-99-99') )
 
 	def test_two_clients(self):
 		listener1 = ServerListener(client_name='client 1', logs_base_dir='/tmp/clients_testdir')

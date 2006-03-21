@@ -1,4 +1,4 @@
-import datetime, os, glob
+import datetime, os, glob, sys
 
 header = """
 <html>
@@ -32,22 +32,26 @@ def remove_path_and_extension( path ):
 def log_filename(logs_base_dir, client_name) :
 	return '%s/%s.testfarmlog' % (logs_base_dir, client_name)
 
+def create_dir_if_needed(dir):
+	if not os.path.isdir( dir ) :
+		sys.stderr.write("Warning: directory '%s' is not available. Creating it." % dir)
+		os.makedirs(dir)
+
 #
 #  LISTENER
 #
 
 class ServerListener:
-	def __init__(self, client_name='testing_client', logs_base_dir = '/tmp/testfarm_logs'):
+	def __init__(self, 
+		client_name='testing_client', 
+		logs_base_dir = '/tmp/testfarm_logs',
+	) :
 		self.iterations_needs_update = True
 		self.client_name = client_name
 		self.logs_base_dir = logs_base_dir
 		self.logfile = log_filename( logs_base_dir, client_name )
-		self.__create_logs_base_dir_if_needed()
+		create_dir_if_needed( logs_base_dir )
 
-	def __create_logs_base_dir_if_needed(self):
-		if not os.path.isdir( self.logs_base_dir ) :
-			print "Warning: %s dir not available. Creating it"
-			os.makedirs(self.logs_base_dir)
 		
 	def __append_log_entry(self, entry) :
 		open(self.logfile, 'a+').write( entry )
@@ -76,7 +80,7 @@ class ServerListener:
 		self.__append_log_entry(entry)
 	
 	def listen_begin_repository(self, repositoryname):
-		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.current_time()) 
+		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.current_time())
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
 
@@ -94,17 +98,18 @@ class ServerListener:
 #
 
 class TestFarmServer:
-	def __init__(self, logs_base_dir = '/tmp/testfarm_logs'):
+	def __init__(self, 
+		logs_base_dir = '/tmp/testfarm_logs',
+		html_dir = './html'
+	) :
 		self.logs_base_dir = logs_base_dir 
+		self.html_dir = html_dir
+		create_dir_if_needed( html_dir )
 
 	def client_names(self):
 		logfiles = glob.glob('%s/*.testfarmlog' % self.logs_base_dir )
 		result = map( remove_path_and_extension, logfiles)
 		return result
-
-	def load_first_client_log(self): #TODO deprecate
-		client_name = self.client_names()[0]
-		return self.load_client_log( client_name )
 
 	def load_client_log(self, client_name):
 		filename = log_filename( self.logs_base_dir, client_name )
@@ -117,9 +122,9 @@ class TestFarmServer:
 			if tag == 'BEGIN_REPOSITORY':
 				return entry[2]
 		assert "BEGIN_REPOSITORY not found"
-		
-	def single_iteration_details(self, wanted_date):
-		log = self.load_first_client_log()
+
+	def single_iteration_details(self, client_name, wanted_date):
+		log = self.load_client_log(client_name)
 		result = []
 		in_wanted_iteration = False
 		for entry in log :
@@ -133,22 +138,53 @@ class TestFarmServer:
 					in_wanted_iteration = False
 					break
 		return result
+	
+	def moha_html_single_iteration_details(self, client_name, wanted_date):
+		content = []
+		for entry in self.single_iteration_details(client_name, wanted_date ):
+			tag = entry[0]
+			if tag == 'BEGIN_REPOSITORY':
+				content.append('<div class="repository"> BEGIN_REPOSITORY "%s" %s' % (entry[1], entry[2]) )
+			elif tag == 'BEGIN_TASK':
+				content.append('<div class="task"> BEGIN_TASK "%s"' % entry[1])
+			elif tag == 'END_TASK':
+				content.append('END_TASK "%s"</div>' % entry[1])
+			elif tag == 'END_REPOSITORY':
+				content.append( 'END_REPOSITORY "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
+			else:
+				assert tag == 'CMD', 'Log Parsing Error. Expected CMD, but was:' + entry
+				content.append( '<div class=command>' )
+				content.append( '<span class="command_string"> %s </span>' % entry[1] )
+				if entry[2]:
+					content.append( '<span class="command_ok">[OK]</span>' )
+				else:
+					content.append( '<span class="command_failure">[FAILURE]</span>' )
+					content.append( '<p class="output"> OUTPUT: %s </p>' % entry[3] )
+				if entry[4] :
+					content.append( '<p class="info"> INFO: %s </p>' % entry[4] )
+				if entry[5] :
+					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
+				content.append( '</div>' )
 
-	def html_single_iteration_details(self, wanted_date):
+		return header_details + '\n'.join(content) + footer	
+
+	def html_single_iteration_details(self, client_name, wanted_date):
 		content = ["<pre>"]
-		for entry in self.single_iteration_details( wanted_date ):
+		for entry in self.single_iteration_details(client_name, wanted_date ):
 			content.append( "\n".join( map(str, entry) ) )	
 		content.append("</pre>")
 		return header_details + "\n".join(content) + footer
 
-	def write_details_static_html_file(self, wanted_date):
-		details = self.html_single_iteration_details(wanted_date)
-		open("details-%s.html" % wanted_date, "w").write( details )
+	def write_details_static_html_file(self, client_name, wanted_date):
+#		details = self.html_single_iteration_details(client_name, wanted_date)
+		details = self.moha_html_single_iteration_details(client_name, wanted_date)
+		open("%s/details-%s-%s.html" % (self.html_dir, client_name, wanted_date), "w").write( details )
 	
 	def write_last_details_static_html_file(self): 
-		log = self.load_first_client_log()
-		last_date = self.last_date(log)
-		self.write_details_static_html_file(last_date)
+		for client in self.client_names():
+			client_log = self.load_client_log(client)
+			last_date = self.last_date(client_log)
+			self.write_details_static_html_file(client, last_date)
 
 	def __get_client_iterations(self, client_name):
 		log = self.load_client_log(client_name)
@@ -182,21 +218,19 @@ class TestFarmServer:
 			result[client_name] = self.__get_client_iterations(client_name)
 		return result
 
-	def __html_format_client_iterations(self, client_iterations):
+	def __html_format_client_iterations(self, client_name, client_iterations):
 		content = []
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
 			time_tags = ["Y", "M", "D", "hour", "min", "sec"]
 			begintime_dict = dict(zip( time_tags, begintime_str.split("-") ))
-			print 'begintime str', begintime_str
-			print 'begintime dict', begintime_dict
 			begintime_html = "<p>Begin time: %(hour)s:%(min)s:%(sec)s</p>" % begintime_dict
 			if endtime_str :
 				endtime_dict = dict(zip( time_tags, endtime_str.split("-") ))
 				endtime_html = "<p>End time: %(hour)s:%(min)s:%(sec)s</p>" % endtime_dict
 			else:
 				endtime_html = "<p>in progres...</p>"
-			details_html = '<p><a href="details-%s.html">details</a></p>' % begintime_str
+			details_html = '<p><a href="details-%s-%s.html">details</a></p>' % (client_name, begintime_str)
 			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (status, name_html, begintime_html, endtime_html, details_html) )
 		return content
 
@@ -210,13 +244,13 @@ class TestFarmServer:
 		for client in iterations_dict.keys():
 			content.append('<td>')
 			client_iterations = iterations_dict[client]
-			content += self.__html_format_client_iterations(client_iterations) 
+			content += self.__html_format_client_iterations(client, client_iterations) 
 			content.append('</td>')
 		content.append('</table>')
 		return header + '\n'.join(content) + footer
 		
 	def write_iterations_static_html_file(self):
-		open("iterations.html", "w").write( self.html_iterations() )
+		open("%s/iterations.html" % self.html_dir, "w").write( self.html_iterations() )
 
 	def update_static_html_files(self):
 		self.write_last_details_static_html_file()
