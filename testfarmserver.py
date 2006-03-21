@@ -257,7 +257,7 @@ class TestFarmServer:
 <div class="idle">
 <p>New Commits: %(new_commits_found)s</p>
 <p>Last check on : %(date)s </p>
-<p>Next run scheduled in %(next_run_in_seconds) seconds </p>
+<p>Next run scheduled in %(next_run_in_seconds)s seconds </p>
 </div>''' % client_idle)
 
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
