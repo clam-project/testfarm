@@ -8,4 +8,21 @@ Done - client writes colorized output in console and sends step-by-step progress
 - communication via http post
 - send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
 
+- Adapt to Windows and MacOS X
+- Idle State
+- Stop client "gently"
+  -> Propagate "user aborted" to HTML
+ 
+Done - Propagate "idle" checking to HTML (logs)
+- Remove "log" sufix in idle methods
+- Mandatory / Breaking tasks
+- Checking <-> Check
+- Idle with threading repositories
+- Resolve BUG : Fix idle messages in console
 
+Others :
+- Tasks in HTML with proportional size
+- Rotate logs
+- Mileston 2: remote server
+- Multiple repositories ( see Idle with Threading repositories)
+- Send begin command 
