@@ -1,5 +1,5 @@
-import commands
-import os
+import commands, os, time
+
 from listeners import NullResultListener, ConsoleResultListener
 from testfarmserver import * #TODO provisional
 
@@ -32,6 +32,8 @@ class TestFarmClient :
 					print "!!!!!!!!!!!!! in idle stat. skipping this repository"
 					if use_pushing_server: 
 						server_to_push.update_static_html_files()
+					print "sleeping %d seconds" % repo.seconds_idle
+					time.sleep( repo.seconds_idle )
 					continue
 				repo.do_tasks( self.listeners, server_to_push = server_to_push )
 				if use_pushing_server : 

@@ -252,10 +252,9 @@ class TestFarmServer:
 
 	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
 		content = []
-		if client_idle :
+		if client_idle and not client_idle['new_commits_found'] :
 			content.append('''\
 <div class="idle">
-<p>New Commits: %(new_commits_found)s</p>
 <p>Last check on : %(date)s </p>
 <p>Next run scheduled in %(next_run_in_seconds)s seconds </p>
 </div>''' % client_idle)

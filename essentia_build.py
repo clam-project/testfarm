@@ -18,8 +18,8 @@ essentia.add_task("TODO fix bug: update html at begin time ", [] )
 
 
 essentia.add_checking_for_new_commits( 
-	checking_cmd="cvs -nq up -dP | grep ^[UP]",  #subversion!!
-	minutes_idle=1
+	checking_cmd=essentia_update + " | grep ^[UP]",  #subversion!! TODO confirm this is just a guess
+	minutes_idle=0.2
 )
 
 essentia.add_deployment_task([
