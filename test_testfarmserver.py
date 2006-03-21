@@ -27,6 +27,15 @@ class ColoredTestCase(unittest.TestCase):
 		assert False, "different strings"
 
 class Tests_TestFarmServer(ColoredTestCase):
+
+	def tearDown(self):
+		listener = ServerListener()
+		listener.clean_log_files()
+
+	def setUp(self):
+		listener = ServerListener()
+		listener.clean_log_files()
+
 	def test_iterations__one_green_iteration(self):
 		listener = ServerListener()
 		listener.current_time = lambda : "a date"
@@ -86,13 +95,17 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener1.clean_log_files()
 		listener2.clean_log_files()
 
-	def tearDown(self):
+	def test_idles(self):
 		listener = ServerListener()
-		listener.clean_log_files()
+		listener.current_time = lambda : "a date"
+		server = TestFarmServer()
+		repo = Repository('repo')	
+		repo.check_for_new_commits( check_cmd="cvs -nq up -dP | grep ^[UP]", minutes_idle=1 )
+		TestFarmClient('a client', [repo],[listener])
+		self.assertEquals(
+			{'testing_client' : []}, 
+			server.idles() )
 
-	def setUp(self):
-		listener = ServerListener()
-		listener.clean_log_files()
 
 class Tests_ServerListener(ColoredTestCase):
 
@@ -137,7 +150,6 @@ class Tests_ServerListener(ColoredTestCase):
 """, open( listener.logfile ).read() )
 	
 	def test_idle_state(self):
-#		repo.check_for_new_commits( check_cmd="cvs -nq up -dP | grep ^[UP]", minutes_idle=5 )
 		listener = ServerListener()
 		listener.current_time = lambda : "1000-10-10-10-10-10"
 		listener.listen_cms_is_idle(seconds_for_next_check=60)
