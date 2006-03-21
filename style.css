@@ -114,7 +114,8 @@ td
 	padding: 2em; 
 	border: solid 1px #eee;
 	padding: 2em; 
-	border: solid 1px #eee;
+	border: solid 3px red;
+	background-color: yellow;
 }
 
 .info
