@@ -25,7 +25,7 @@
 	text-align: center;
 	font-size: 0.8em;
 	color: white;
-	background-color: green;
+	background-color: #00C200;
 }
 .broken
 {
@@ -39,7 +39,23 @@
 	color: white;
 	background-color: red;
 }
-td { border-style: solid; }
+table
+{
+	border-spacing: 10px;
+}
+
+th 
+{ 
+	border: solid 1px #ddd; 
+	background-color: #fff;
+	padding: 1em;
+}
+td 
+{ 
+	border: solid 1px #ddd; 
+	vertical-align: top;
+	background-color: #eee;
+}
 
 
 .repository
@@ -85,20 +101,17 @@ td { border-style: solid; }
 
 .output
 {
-	position: relative;
-	left: 4%;
-	color:#777A7F;
+	white-space: pre;
 }
 
 .info
 {
-	position: relative;
-	left: 4%;
-	color:#777A7F;
+	white-space: pre;
 }
 
 .stats
 {
+	white-space: pre;
 	position: relative;
 	left: 4%;
 	color:#777A7F;
@@ -107,10 +120,8 @@ td { border-style: solid; }
 
 .details
 {
-	position: relative;
-	left: 5%;
-	text-align: left;
-	font-size: 11px;
+	white-space: pre;
+	font-size: 0.8em;
 }
 
 #normal
