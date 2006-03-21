@@ -26,8 +26,15 @@ class TestFarmClient :
 
 		while True :
 			for repo in self.repositories :
+				print " $$$$$$$ about to do_checking_for... "
+				new_commits_found = repo.do_checking_for_new_commits( self.listeners )
+				if not new_commits_found:
+					print "!!!!!!!!!!!!! in idle stat. skipping this repository"
+					if use_pushing_server: 
+						server_to_push.update_static_html_files()
+					continue
 				repo.do_tasks( self.listeners, server_to_push = server_to_push )
-				if use_pushing_server :
+				if use_pushing_server : 
 					server_to_push.update_static_html_files()
 			if not continuous: break
 		
@@ -114,6 +121,8 @@ class Repository :
 		self.name = name;
 		self.tasks = []
 		self.deployment_task = None
+		self.not_idle_checking_cmd = ""
+		self.seconds_idle = 0
 		
 	def get_name(self):
 		return self.name;
@@ -121,12 +130,26 @@ class Repository :
 	def get_num_tasks(self): # Note : Deployment task is considered as a separated task
 		return len( self.tasks )
 	
-	def add_deployment_task(self, commands):
+	def add_checking_for_new_commits(self, checking_cmd, minutes_idle = 5 ):
+		self.not_idle_checking_cmd = checking_cmd
+		self.seconds_idle = minutes_idle * 60
+
+	def add_deployment_task(self, commands): #TODO abort if fails
 		self.add_task("Deployment Task", commands)
 
 	def add_task(self, taskname, commands):
 		self.tasks.append(Task(taskname, commands)) 
-	
+
+	def do_checking_for_new_commits(self, listeners):
+		if not self.not_idle_checking_cmd :
+			new_commits_found = True #default
+		else :
+			zero_if_new_commits_found, output = commands.getstatusoutput( self.not_idle_checking_cmd )
+			new_commits_found = not zero_if_new_commits_found
+		for listener in listeners :
+			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
+		return new_commits_found
+
 	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.
 		all_ok = True
 		for listener in listeners:

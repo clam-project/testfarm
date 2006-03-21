@@ -58,7 +58,9 @@ class ServerListener:
 
 		
 	def __append_log_entry(self, entry) :
-		open(self.logfile, 'a+').write( entry )
+		f = open(self.logfile, 'a+')
+		f.write( entry )
+		f.close()
 
 	def list_log_files(self):
 		return glob.glob('%s/*' % self.logs_base_dir)
@@ -97,9 +99,14 @@ class ServerListener:
 	def iterations_updated(self):
 		self.iterations_needs_update = False
 	
-	def listen_cms_is_idle(self, seconds_for_next_check):
-		entry = "{date:'%s', next_run_interval:%d}" % (self.current_time(), seconds_for_next_check)
-		open(self.idle_logfile, 'a+').write( entry )
+	def listen_found_new_commits(self, new_commits_found, next_run_in_seconds ):
+		idle_dict = {}
+		idle_dict['new_commits_found'] = new_commits_found
+		idle_dict['date'] = self.current_time()
+		idle_dict['next_run_in_seconds']=next_run_in_seconds	
+		f = open(self.idle_logfile, 'w')
+		f.write( str( idle_dict ) )
+		f.close()
 	
 	
 
@@ -124,6 +131,13 @@ class TestFarmServer:
 	def load_client_log(self, client_name):
 		filename = log_filename( self.logs_base_dir, client_name )
 		return eval("[ %s ]" % open( filename ).read() )
+
+	def load_client_idle(self, client_name):
+		filename = idle_log_filename( self.logs_base_dir, client_name )
+		content = open( filename ).read() 
+		if not content :
+			return {}
+		return eval( content )
 
 	def last_date(self, log):
 		log.reverse()
@@ -223,14 +237,29 @@ class TestFarmServer:
 		iterations.reverse()
 		return iterations
 
+	def idle(self):
+		result = {}
+		for client_name in self.client_names():
+			idle_entry = self.load_client_idle(client_name)
+			result[client_name] = idle_entry
+		return result
+
 	def iterations(self):
 		result = {}
 		for client_name in self.client_names():
 			result[client_name] = self.__get_client_iterations(client_name)
 		return result
 
-	def __html_format_client_iterations(self, client_name, client_iterations):
+	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
 		content = []
+		if client_idle :
+			content.append('''\
+<div class="idle">
+<p>New Commits: %(new_commits_found)s</p>
+<p>Last check on : %(date)s </p>
+<p>Next run scheduled in %(next_run_in_seconds) seconds </p>
+</div>''' % client_idle)
+
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
 			time_tags = ["Y", "M", "D", "hour", "min", "sec"]
@@ -247,16 +276,18 @@ class TestFarmServer:
 		return content
 
 	def html_iterations(self):
-		iterations_dict = self.iterations()
+		iterations_per_client = self.iterations()
+		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
-		for client in iterations_dict.keys():
+		for client in iterations_per_client.keys():
 			content.append('<th> Client: %s </th>' % client )
 		content.append('</tr>')
 		
-		for client in iterations_dict.keys():
+		for client in iterations_per_client.keys():
 			content.append('<td>')
-			client_iterations = iterations_dict[client]
-			content += self.__html_format_client_iterations(client, client_iterations) 
+			client_iterations = iterations_per_client[client]
+			client_idle = idle_per_client[client]
+			content += self.__html_format_client_iterations(client, client_idle, client_iterations) 
 			content.append('</td>')
 		content.append('</table>')
 		return header + '\n'.join(content) + footer

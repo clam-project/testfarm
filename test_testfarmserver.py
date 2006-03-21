@@ -100,11 +100,11 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener.current_time = lambda : "a date"
 		server = TestFarmServer()
 		repo = Repository('repo')	
-		repo.check_for_new_commits( check_cmd="cvs -nq up -dP | grep ^[UP]", minutes_idle=1 )
+		repo.add_checking_for_new_commits( checking_cmd="echo P patched file | grep ^[UP]", minutes_idle=1 )
 		TestFarmClient('a client', [repo],[listener])
 		self.assertEquals(
-			{'testing_client' : []}, 
-			server.idles() )
+			{'testing_client' : {'date':'a date', 'new_commits_found': True,'next_run_in_seconds':60}}, 
+			server.idle() )
 
 
 class Tests_ServerListener(ColoredTestCase):
@@ -152,8 +152,8 @@ class Tests_ServerListener(ColoredTestCase):
 	def test_idle_state(self):
 		listener = ServerListener()
 		listener.current_time = lambda : "1000-10-10-10-10-10"
-		listener.listen_cms_is_idle(seconds_for_next_check=60)
-		self.assertEquals("{date:'1000-10-10-10-10-10', next_run_interval:60}", 
+		listener.listen_found_new_commits(True, next_run_in_seconds=60)
+		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 
 			open(listener.idle_logfile).read())
 
 			

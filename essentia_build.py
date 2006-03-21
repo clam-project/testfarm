@@ -16,9 +16,11 @@ essentia = Repository("essentia/trunk")
 
 essentia.add_task("TODO fix bug: update html at begin time ", [] )
 
-essentia.add_task("rest for 5 min", [
-	"sleep 300" # 900 == 60 sec * 5
-] )
+
+essentia.add_checking_for_new_commits( 
+	checking_cmd="cvs -nq up -dP | grep ^[UP]",  #subversion!!
+	minutes_idle=1
+)
 
 essentia.add_deployment_task([
 	"cd $HOME/",
