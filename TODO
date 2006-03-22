@@ -1,28 +1,57 @@
 
-Done - summary text format based on: key, [ok|no] so that the server can easily parse it
-- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
-- config and command line options: verbose, disable project, local file, server url
-Done - efficiency, etc. statistics. based on TAG, number also in the summary? statistics section
-- xml/easier text format YAML
-Done - client writes colorized output in console and sends step-by-step progress to server
-- communication via http post
-- send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
+Done 	- summary text format based on: key, [ok|no] so that the server can easily parse it
+Done 	- efficiency, etc. statistics. based on TAG, number also in the summary? statistics section
+Done 	- client writes colorized output in console and sends step-by-step progress to server
+Done	- Idle State
+Done	- Propagate "idle" checking to HTML (logs)
+Done	- xml/easier text format YAML --> Plain Python Code!!
+Done	- essentia in linux
+Done	- Remove "log" sufix in idle methods
+Done	- Examples use appropiate logs dir
 
-- Adapt to Windows and MacOS X
-- Idle State
-- Stop client "gently"
-  -> Propagate "user aborted" to HTML
- 
-Done - Propagate "idle" checking to HTML (logs)
-- Remove "log" sufix in idle methods
-- Mandatory / Breaking tasks
-- Checking <-> Check
-- Idle with threading repositories
-- Resolve BUG : Fix idle messages in console
+Low Priority
+	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
+	- separate config script and command line tool with options: verbose, disable repository, server url
+	- send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
+	  -> alarms instead of stability levels
+	- Idle with threading repositories (very low priority)
 
-Others :
-- Tasks in HTML with proportional size
-- Rotate logs
-- Mileston 2: remote server
-- Multiple repositories ( see Idle with Threading repositories)
-- Send begin command 
+Medium Priority
+	- communication via http post
+	- Mileston 2: remote server
+	- set up a "universal" server for any project (be aware of security issues, spam...)
+	- Stop client "gently"
+	  -> Propagate "user aborted" to HTML
+	- Mandatory / Breaking tasks
+	- Tasks in HTML with proportional size
+	- Rotate logs
+	- Send begin command 
+	- CLAM in windows
+	- essentia in windows
+	- ardour2 in linux
+
+High Priority
+	- Adapt to Windows 
+	- Adapt to MacOS X
+	- Checking <-> Check. Ask Bram
+	- BUG : Fix idle messages in console - MS
+	- BUG TestFarmClient without name - MS
+	  -> assert that name is a string
+	- BUG after command completion should update html - MS
+	- Multiple repositories 
+	- Expandible info (and stats) with javascript - MS
+	- CLAM in linux - PA
+	- publish CLAM htmls, via script that makes scp each X minutes - PA
+	- CLAM in mac osx
+
+
+
+
+
+bram's idea:
+
+<a href="javascript: document.getElementById('id_15').style.display='block'; document.getElementById('id_15_short').style.display='none';">toggle information display</a>
+
+<p id="id_15_short" class="info-short">bleep</p>
+
+<p id="id_15" class="info" style:"display:none">bleep</p>

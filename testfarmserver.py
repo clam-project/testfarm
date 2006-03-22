@@ -32,7 +32,7 @@ def remove_path_and_extension( path ):
 def log_filename(logs_base_dir, client_name) :
 	return '%s/%s.testfarmlog' % (logs_base_dir, client_name)
 
-def idle_log_filename(logs_base_dir, client_name) :
+def idle_filename(logs_base_dir, client_name) :
 	return '%s/%s.idle' % (logs_base_dir, client_name)
 
 def create_dir_if_needed(dir):
@@ -47,13 +47,13 @@ def create_dir_if_needed(dir):
 class ServerListener:
 	def __init__(self, 
 		client_name='testing_client', 
-		logs_base_dir = '/tmp/testfarm_logs',
+		logs_base_dir = '/tmp/testfarm_tests',
 	) :
 		self.iterations_needs_update = True
 		self.client_name = client_name
 		self.logs_base_dir = logs_base_dir
 		self.logfile = log_filename( logs_base_dir, client_name )
-		self.idle_logfile = idle_log_filename( logs_base_dir, client_name )
+		self.idle_file = idle_filename( logs_base_dir, client_name )
 		create_dir_if_needed( logs_base_dir )
 
 		
@@ -69,7 +69,7 @@ class ServerListener:
 		for filename in self.list_log_files():
 			os.remove(filename)
 		open( self.logfile, "w")
-		open( self.idle_logfile, "w")
+		open( self.idle_file, "w")
 
 	def current_time(self):
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -104,7 +104,7 @@ class ServerListener:
 		idle_dict['new_commits_found'] = new_commits_found
 		idle_dict['date'] = self.current_time()
 		idle_dict['next_run_in_seconds']=next_run_in_seconds	
-		f = open(self.idle_logfile, 'w')
+		f = open(self.idle_file, 'w')
 		f.write( str( idle_dict ) )
 		f.close()
 	
@@ -116,7 +116,7 @@ class ServerListener:
 
 class TestFarmServer:
 	def __init__(self, 
-		logs_base_dir = '/tmp/testfarm_logs',
+		logs_base_dir = '/tmp/testfarm_tests',
 		html_dir = './html'
 	) :
 		self.logs_base_dir = logs_base_dir 
@@ -133,7 +133,7 @@ class TestFarmServer:
 		return eval("[ %s ]" % open( filename ).read() )
 
 	def load_client_idle(self, client_name):
-		filename = idle_log_filename( self.logs_base_dir, client_name )
+		filename = idle_filename( self.logs_base_dir, client_name )
 		content = open( filename ).read() 
 		if not content :
 			return {}
@@ -252,16 +252,19 @@ class TestFarmServer:
 
 	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
 		content = []
+		time_tags = ["Y", "M", "D", "hour", "min", "sec"]
 		if client_idle and not client_idle['new_commits_found'] :
+			idlechecktime_str = client_idle['date']
+			idlechecktime_dict = dict(zip( time_tags, idlechecktime_str.split("-") ))
+			client_idle['date'] = "<p>Last check done at : %(hour)s:%(min)s:%(sec)s</p>" % idlechecktime_dict
 			content.append('''\
 <div class="idle">
-<p>Last check on : %(date)s </p>
-<p>Next run scheduled in %(next_run_in_seconds)s seconds </p>
+%(date)s
+<p>Next run after %(next_run_in_seconds)s seconds </p>
 </div>''' % client_idle)
 
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
-			time_tags = ["Y", "M", "D", "hour", "min", "sec"]
 			begintime_dict = dict(zip( time_tags, begintime_str.split("-") ))
 			begintime_html = "<p>Begin time: %(hour)s:%(min)s:%(sec)s</p>" % begintime_dict
 			if endtime_str :

@@ -154,7 +154,7 @@ class Tests_ServerListener(ColoredTestCase):
 		listener.current_time = lambda : "1000-10-10-10-10-10"
 		listener.listen_found_new_commits(True, next_run_in_seconds=60)
 		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 
-			open(listener.idle_logfile).read())
+			open(listener.idle_file).read())
 
 			
 		
