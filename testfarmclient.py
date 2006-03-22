@@ -26,7 +26,6 @@ class TestFarmClient :
 
 		while True :
 			for repo in self.repositories :
-				print " $$$$$$$ about to do_checking_for... "
 				new_commits_found = repo.do_checking_for_new_commits( self.listeners )
 				if not new_commits_found:
 					print "!!!!!!!!!!!!! in idle stat. skipping this repository"

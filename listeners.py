@@ -12,7 +12,8 @@ class NullResultListener : #TODO base class
 		pass
 	def listen_end_repository(self, repositoryname, status):
 		pass
-
+	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
+		pass
 
 class DummyResultListener :
 	"helper ResultListener class "
@@ -40,6 +41,9 @@ class DummyResultListener :
 
 	def listen_end_repository(self, repositoryname, status):
 		self.results.append( "END_REPOSITORY %s" % repositoryname )
+	
+	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
+		pass
 
 
 class ConsoleResultListener :

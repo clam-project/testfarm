@@ -1,15 +1,18 @@
 #! /usr/bin/python
 
+from os import environ
+
 from testfarmclient import *
 
 def pass_text(text) :
 	return text
 
+environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 cd_essentia = "cd $HOME/essentia-sandboxes/clean-essentia/trunk"
 
-essentia_update = "SVN_SSH=\"ssh -i $HOME/.ssh/svn_id_dsa\" svn update svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/"
+essentia_update = 'svn update svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
-essentia_checkout = "SVN_SSH=\"ssh -i $HOME/.ssh/svn_id_dsa\" svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/"
+essentia_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
 essentia = Repository("essentia/trunk")
 
@@ -18,7 +21,7 @@ essentia.add_task("TODO fix bug: update html at begin time ", [] )
 
 
 essentia.add_checking_for_new_commits( 
-	checking_cmd=essentia_update + " | grep ^[UP]",  #subversion!! TODO confirm this is just a guess
+	checking_cmd='cd $HOME/essentia-sandboxes && svn status -u clean-essentia/trunk | grep \*', 
 	minutes_idle=0.2
 )
 
@@ -30,7 +33,8 @@ essentia.add_deployment_task([
 	"rm -fr clean-essentia/trunk/build",
 	"rm -fr clean-essentia/trunk/algorithms",
 	"rm -fr clean-essentia/trunk/test/build",
-	essentia_update,
+	{CMD : "svn diff --revision HEAD clean-essentia/trunk", INFO: pass_text},
+	{CMD : essentia_update, INFO : pass_text },
 ] )
 
 essentia.add_task("build core libs", [

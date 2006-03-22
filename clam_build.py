@@ -5,12 +5,10 @@ from testfarmclient import *
 clam = Repository("CLAM")
 clam.add_task("starting clam", ["echo foo"])
 
-'''
 clam.add_checking_for_new_commits( 
 	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
 	minutes_idle=0.2
 )
-'''
 
 clam.add_deployment_task( [
 	"cd $HOME/clam-sandboxes",
@@ -31,5 +29,5 @@ clam.add_task("execute QTSMStools", [
 ] )
 
 
-TestFarmClient( "clam", [clam ], use_pushing_server=True, continuous=False )
+TestFarmClient( "pau_linux_breezy", [clam ], use_pushing_server=True, continuous=False )
 

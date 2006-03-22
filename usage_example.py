@@ -9,7 +9,7 @@ clam.add_deployment_task( [
 	"ls" 
 ] )
 
-clam.add_check_for_new_commits( "cvs -nq up -dP | grep ^[UP]" )
+#clam.add_checking_for_new_commits( "cvs -nq up -dP | grep ^[UP]" )
 
 clam.add_task("teeesting", [
 	#"./lalala fafaf",
