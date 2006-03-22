@@ -4,7 +4,7 @@ header = """
 <html>
 <head>
 <meta http-equiv="refresh" content="60">
-<link href="../style.css" rel="stylesheet" type="text/css">
+<link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm</title>
 </head>
 <body>
@@ -16,7 +16,7 @@ header_details = """
 <html>
 <head>
 <meta http-equiv="refresh" content="5">
-<link href="../style.css" rel="stylesheet" type="text/css">
+<link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm Details</title>
 </head>
 <body>

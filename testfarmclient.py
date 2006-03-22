@@ -32,9 +32,6 @@ class TestFarmClient :
 			server_to_push = None
 
 		while True :
-#			print "CLIENT = ", self
-#			print "CLIENT_NAME = ", self.name
-#			print "CLIENT_LISTENERS = ", str(self.listeners)
 			for repo in self.repositories :
 				new_commits_found = repo.do_checking_for_new_commits( self.listeners )
 				if not new_commits_found:
@@ -92,7 +89,7 @@ class Task:
 
 	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None):
 		self.__begin_task(listeners)
-		if server_to_push:
+		if False and server_to_push: #TODO
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		for maybe_dict in self.commands :
@@ -115,7 +112,7 @@ class Task:
 			if status_ok :
 				output = ''
 			self.__send_result(listeners, cmd, status_ok, output, info, stats)
-			if server_to_push:
+			if False and server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			current_dir = open( temp_file ).read().strip()
 			os.chdir( current_dir )
