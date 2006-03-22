@@ -16,18 +16,19 @@ clam.add_checking_for_new_commits(
 '''
 clam.add_deployment_task( [
 	"cd $HOME/clam-sandboxes",
-	"cvs co -d testing-clam CLAM",
-	"cvs co -d testing-smstools CLAM_SMSTools",
+#	"cvs co -d testing-clam CLAM",
+	"cd testing-clam && cvs up -dP",
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
-#	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
-#	"scons install",
+	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
+	"scons install",
 ] )
 
 clam.add_task("SMSTools installation", [
 	"cd $HOME/clam-sandboxes",
-	"cvs co -d testing-smstools CLAM_SMSTools",
-	"cd testing-smstools/scons/QtSMSTools",
-#	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
+#	"cvs co -d testing-smstools CLAM_SMSTools",
+	"cd testing-smstools && cvs up -dP",
+	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
+	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
 
 clam.add_task("execute QTSMStools", [
@@ -39,7 +40,7 @@ clam.add_task("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes",
 	"cvs co -d testing-neteditor CLAM_NetworkEditor",
 	"cd testing-neteditor/scons",
-#	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
+	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
 
 clam.add_task("execute NetworkEditor", [
@@ -49,7 +50,7 @@ clam.add_task("execute NetworkEditor", [
 
 
 TestFarmClient( 
-	"pau_linux_breezy", 
+	"testing_machine_linux_breezy", 
 	[clam ], 
 	generated_html_path='./html-clam', 
 	logs_path='/home/testfarmclient/clam-sandboxes/testfarm_logs/',

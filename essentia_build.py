@@ -59,4 +59,10 @@ essentia.add_task("automatic tests", [
 
 
 
-TestFarmClient( 'testing-machine_linux_breezy', [essentia],  use_pushing_server=True, continuous=True )
+TestFarmClient( 
+	'testing-machine_linux_breezy', 
+	[essentia],  
+	generated_html_path='./html',
+	logs_path='/home/testfarmclient/essentia-sandboxes/testfarm_logs', #TODO can use $HOME ?
+	continuous=True 
+)

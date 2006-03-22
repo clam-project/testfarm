@@ -29,6 +29,7 @@ Medium Priority
 	- CLAM in windows
 	- essentia in windows
 	- ardour2 in linux
+	- first iteration new_commits should return always true 
 
 High Priority
 	- Adapt to Windows 
