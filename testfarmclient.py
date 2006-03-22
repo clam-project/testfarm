@@ -16,16 +16,25 @@ class TestFarmClient :
 	) :
 		self.repositories = repositories
 		self.listeners = listeners
-		self.name = name
-
+		
+		try: # TODO : find another clean way to tho this check 
+			name.isalpha()
+			self.name = name
+		except AttributeError:
+			assert False, '< %s > is not a valid client name (should be a string)' % str(name)
+		
 		if generated_html_path :	
 			serverlistener = ServerListener( client_name=self.name, logs_base_dir=logs_path )
 			server_to_push = TestFarmServer( logs_base_dir=logs_path, html_dir=generated_html_path )
+
 			self.listeners.append( serverlistener )
 		else:
 			server_to_push = None
 
 		while True :
+#			print "CLIENT = ", self
+#			print "CLIENT_NAME = ", self.name
+#			print "CLIENT_LISTENERS = ", str(self.listeners)
 			for repo in self.repositories :
 				new_commits_found = repo.do_checking_for_new_commits( self.listeners )
 				if not new_commits_found:
@@ -81,8 +90,10 @@ class Task:
 			listener.listen_result( cmd, status, output, info, stats )
 
 
-	def do_task(self, listeners = [ NullResultListener() ] ):
+	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None):
 		self.__begin_task(listeners)
+		if server_to_push:
+				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		for maybe_dict in self.commands :
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
@@ -104,6 +115,8 @@ class Task:
 			if status_ok :
 				output = ''
 			self.__send_result(listeners, cmd, status_ok, output, info, stats)
+			if server_to_push:
+				server_to_push.update_static_html_files()
 			current_dir = open( temp_file ).read().strip()
 			os.chdir( current_dir )
 			if not status_ok :
@@ -153,9 +166,10 @@ class Repository :
 	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.
 		all_ok = True
 		for listener in listeners:
+#			print "LISTENEr = ", listener
 			listener.listen_begin_repository( self.name )
 		for task in self.tasks :
-			current_result = task.do_task(listeners)
+			current_result = task.do_task(listeners, server_to_push)
 			all_ok = all_ok and current_result
 			if server_to_push : #TODO remove. this is just provisional. Is it?
 				server_to_push.update_static_html_files()

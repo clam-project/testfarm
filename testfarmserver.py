@@ -4,7 +4,7 @@ header = """
 <html>
 <head>
 <meta http-equiv="refresh" content="60">
-<link href="style.css" rel="stylesheet" type="text/css">
+<link href="../style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm</title>
 </head>
 <body>
@@ -15,7 +15,8 @@ header = """
 header_details = """
 <html>
 <head>
-<link href="style.css" rel="stylesheet" type="text/css">
+<meta http-equiv="refresh" content="5">
+<link href="../style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm Details</title>
 </head>
 <body>
@@ -59,6 +60,7 @@ class ServerListener:
 		
 	def __append_log_entry(self, entry) :
 		f = open(self.logfile, 'a+')
+#		print '###### WRITE ENTRY IN LOGFILE = "%s"######' % self.logfile
 		f.write( entry )
 		f.close()
 

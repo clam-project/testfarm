@@ -20,6 +20,6 @@ clam.add_task("just a CD", [
 ] )
 
 
-TestFarmClient( "pau_linux_breezy", [clam], use_pushing_server=True)
+t = TestFarmClient( "pau_linux_breezy", [clam], use_pushing_server=True)
 
-TestFarmClient( "another_computer", [clam], use_pushing_server=True)
+# tt = TestFarmClient( "another_computer", [clam], use_pushing_server=True)

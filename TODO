@@ -13,8 +13,9 @@ Low Priority
 	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
 	- separate config script and command line tool with options: verbose, disable repository, server url
 	- send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
-	  -> alarms instead of stability levels
+	  -> alarms instead of stability level
 	- Idle with threading repositories (very low priority)
+	- Multiple clients in a single script (usage_example.py)
 
 Medium Priority
 	- communication via http post
@@ -35,8 +36,8 @@ High Priority
 	- Adapt to Windows 
 	- Adapt to MacOS X
 	- Checking <-> Check. Ask Bram
-	- BUG : Fix idle messages in console - MS
-	- BUG TestFarmClient without name - MS
+Done	- BUG : Fix idle messages in console - MS
+Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
 	  -> assert that name is a string
 	- BUG after command completion should update html - MS
 	- Multiple repositories 

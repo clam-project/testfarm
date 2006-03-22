@@ -56,6 +56,7 @@ class ConsoleResultListener :
 			'YELLOW':"\x1b[33;01m", # unreadable on white backgrounds
 			#'YELLOW':"\033[1m", #"\033[93m" # unreadable on white backgrounds
 			'CYAN'  :"\x1b[36;01m",
+			'MAGENTA':"\x1b[35;01m", 
 			'NORMAL':"\x1b[0m",
 			}
 
@@ -100,6 +101,6 @@ class ConsoleResultListener :
 		self.pprint ('BOLD', "END_REPOSITORY %s --> %s" % (repositoryname, status) )
 
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
-		self.pprint('NORMAL', 'New commits found:', new_commits_found)
-		self.pprint('NORMAL', 'New check in %d seconds:' % seconds_idle)
+		self.pprint('MAGENTA', 'New commits found, or No checks specified :', new_commits_found)
+		self.pprint('MAGENTA', 'New check in %d seconds.' % seconds_idle)
 
