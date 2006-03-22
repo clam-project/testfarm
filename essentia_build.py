@@ -14,17 +14,17 @@ essentia_update = 'svn update svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trun
 
 essentia_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
-essentia = Repository("essentia/trunk")
 
+essentia = Repository("essentia/trunk")
 
 essentia.add_task("TODO fix bug: update html at begin time ", [] )
 
-
+'''
 essentia.add_checking_for_new_commits( 
 	checking_cmd='cd $HOME/essentia-sandboxes && svn status -u clean-essentia/trunk | grep \*', 
 	minutes_idle=5
 )
-
+'''
 essentia.add_deployment_task([
 	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
@@ -63,6 +63,6 @@ TestFarmClient(
 	'testing-machine_linux_breezy', 
 	[essentia],  
 	generated_html_path='./html',
-	logs_path='/home/testfarmclient/essentia-sandboxes/testfarm_logs', #TODO can use $HOME ?
+	logs_path='%s/essentia-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
 	continuous=True 
 )
