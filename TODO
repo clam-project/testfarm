@@ -39,7 +39,7 @@ High Priority
 Done	- BUG : Fix idle messages in console - MS
 Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
 	  -> assert that name is a string
-	- BUG after command completion should update html - MS
+Done	- BUG after command completion should update html - MS
 	- Multiple repositories 
 	- Expandible info (and stats) with javascript - MS
 	- CLAM in linux - PA
