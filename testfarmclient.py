@@ -11,15 +11,16 @@ class TestFarmClient :
 		repositories=[], 
 		listeners=[ ConsoleResultListener() ],
 		continuous=False,
-		use_pushing_server=False,
+		generated_html_path = None,
+		logs_path='/tmp/testfarm_logs',
 	) :
 		self.repositories = repositories
 		self.listeners = listeners
 		self.name = name
 
-		if use_pushing_server :
-			serverlistener = ServerListener( client_name=self.name )
-			server_to_push = TestFarmServer()
+		if generated_html_path :	
+			serverlistener = ServerListener( client_name=self.name, logs_base_dir=logs_path )
+			server_to_push = TestFarmServer( logs_base_dir=logs_path, html_dir=generated_html_path )
 			self.listeners.append( serverlistener )
 		else:
 			server_to_push = None
@@ -28,14 +29,12 @@ class TestFarmClient :
 			for repo in self.repositories :
 				new_commits_found = repo.do_checking_for_new_commits( self.listeners )
 				if not new_commits_found:
-					print "!!!!!!!!!!!!! in idle stat. skipping this repository"
-					if use_pushing_server: 
+					if server_to_push: 
 						server_to_push.update_static_html_files()
-					print "sleeping %d seconds" % repo.seconds_idle
 					time.sleep( repo.seconds_idle )
 					continue
 				repo.do_tasks( self.listeners, server_to_push = server_to_push )
-				if use_pushing_server : 
+				if server_to_push : 
 					server_to_push.update_static_html_files()
 			if not continuous: break
 		
