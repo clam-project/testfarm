@@ -11,30 +11,37 @@ Done	- Examples use appropiate logs dir
 
 Low Priority
 	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
+	- client info to the server. not only the name
 	- separate config script and command line tool with options: verbose, disable repository, server url
+	  ala scons and SConstruct.  testfarm --verbose --force
 	- send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
 	  -> alarms instead of stability level
 	- Idle with threading repositories (very low priority)
+	  -> or just now allow multiple repositories
 	- Multiple clients in a single script (usage_example.py)
+	- Now executing con AJAX
 
 Medium Priority
-	- communication via http post
-	- Mileston 2: remote server
 	- set up a "universal" server for any project (be aware of security issues, spam...)
 	- Stop client "gently"
 	  -> Propagate "user aborted" to HTML
 	- Mandatory / Breaking tasks
-	- Tasks in HTML with proportional size
+	- Think: Tasks in HTML with proportional size
 	- Rotate logs
 	- Send begin command 
 	- CLAM in windows
-	- essentia in windows
+Done	- essentia in windows
 	- ardour2 in linux
-	- first iteration new_commits should return always true 
+	- Think: first iteration new_commits should return always true 
+	- verbose client argument: adds info : pass_text to every command
 
 High Priority
-	- Adapt to Windows 
-	- Adapt to MacOS X
+
+	- communication via http post
+	- Mileston 2: remote server
+
+Done!!	- Adapt to Windows 
+Done	- Adapt to MacOS X
 	- Checking <-> Check. Ask Bram
 Done	- BUG : Fix idle messages in console - MS
 Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
@@ -43,7 +50,7 @@ Done	- BUG after command completion should update html - MS
 	- Multiple repositories 
 	- Expandible info (and stats) with javascript - MS
 	- CLAM in linux - PA
-	- publish CLAM htmls, via script that makes scp each X minutes - PA
+Done	- publish CLAM htmls, via script that makes scp each X minutes - PA
 	- CLAM in mac osx
 
 
