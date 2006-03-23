@@ -31,12 +31,10 @@ essentia = Repository("essentia/trunk")
 
 essentia.add_task("TODO fix bug: update html at begin time ", [] )
 
-'''
 essentia.add_checking_for_new_commits( 
 	checking_cmd='cd $HOME/essentia-sandboxes && svn status -u clean-essentia/trunk | grep \*', 
 	minutes_idle=5
 )
-'''
 essentia.add_deployment_task([
 	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
