@@ -49,7 +49,8 @@ class DummyResultListener :
 class ConsoleResultListener :
 	def __init__(self):
 		self.results = []
-		self.colors= {
+
+		self.colors = {
 			'BOLD'  :"\x1b[01m",
 			'RED'   :"\x1b[31;01m",
 			'GREEN' :"\x1b[32;01m",
@@ -59,23 +60,31 @@ class ConsoleResultListener :
 			'MAGENTA':"\x1b[35;01m", 
 			'NORMAL':"\x1b[0m",
 			}
+			
+	def color(self, name):
+		if sys.platform == 'win32':
+			return ""
+	
+		try:
+			return self.colors[name]
+		except:
+			return ""
 
 	def pprint(self, col, str, label=''):
-		try: mycol=self.colors[col]
-		except: mycol=''
-		print "%s%s%s %s" % (mycol, str, self.colors['NORMAL'], label)
+		mycol = self.color(col)
+		print "%s%s%s %s" % (mycol, str, self.color('NORMAL'), label)
 
 	def pprint_cmd_result(self, cmd, status_ok, output, info, stats):
-		cmd_color = self.colors['CYAN']
+		cmd_color = self.color('CYAN')
 		if status_ok:
 			status_text = '[ ok ]'
-			status_color = self.colors['GREEN']
+			status_color = self.color('GREEN')
 		else :
 			status_text = "[ failure ]"
-			status_color = self.colors['RED']
-		normal = self.colors['NORMAL']
+			status_color = self.color('RED')
+		normal = self.color('NORMAL')
 		output_color = normal
-		yellow = self.colors['YELLOW']
+		yellow = self.color('YELLOW')
 		if output :
 			ending = '%s---------------------------------------------\n' % yellow
 			ending += 'Output of failing command:%s\n\n%s\n' % (normal, output)

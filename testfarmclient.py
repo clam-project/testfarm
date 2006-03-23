@@ -1,4 +1,4 @@
-import commands, os, time
+import commands, os, time, sys, subprocess
 
 from listeners import NullResultListener, ConsoleResultListener
 from testfarmserver import * #TODO provisional
@@ -53,7 +53,7 @@ def get_command_and_parsers(maybe_dict):
 	stats_parser = None
 	status_ok_parser = None 
 	try:
-		cmd = 'echo no explicit command provided'
+		cmd = 'echo no command specified'
 		if maybe_dict.has_key(CMD) :
 			cmd = maybe_dict[CMD] 
 		if maybe_dict.has_key(INFO) :
@@ -68,6 +68,25 @@ def get_command_and_parsers(maybe_dict):
 	except AttributeError:
 		cmd = maybe_dict
 	return (cmd, info_parser, stats_parser, status_ok_parser)
+
+def run_command(command):
+	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+	status = pipe.wait()
+	output = pipe.communicate()[0]
+	return (output, status)
+
+
+def windows_status_ok(output):
+	bad_outputs = [
+		"The system cannot find the path specified.", # chdir to non-existant directory
+		#"A subdirectory or file html already exists." # trying to create an existing directory
+	]
+
+	for bad_output in bad_outputs:
+		if bad_output in output.strip():
+			return False
+	
+	return True
 
 class Task:
 	def __init__(self, name, commands):
@@ -86,7 +105,6 @@ class Task:
 		for listener in listeners :
 			listener.listen_result( cmd, status, output, info, stats )
 
-
 	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None):
 		self.__begin_task(listeners)
 		if False and server_to_push: #TODO
@@ -95,12 +113,15 @@ class Task:
 		for maybe_dict in self.commands :
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
 			temp_file = "%s/current_dir.temp" % initial_working_dir #TODO multiplatform
-			cmd_with_pwd = cmd + " && pwd > %s" % temp_file
-			exit_status, output = commands.getstatusoutput(cmd_with_pwd)
+			if sys.platform == 'win32':
+				cmd_with_pwd = cmd + " 2>&1 && cd > %s" % temp_file
+			else:
+				cmd_with_pwd = cmd + " 2>&1 && pwd > %s" % temp_file
+			output, exit_status = run_command(cmd_with_pwd)
 			if status_ok_parser :
 				status_ok = status_ok_parser( output ) #TODO assert that returns a boolean
 			else:
-				status_ok = (exit_status == 0)
+				status_ok = exit_status == 0
 			if info_parser :
 				info = info_parser(output)
 			else :
@@ -115,7 +136,8 @@ class Task:
 			if False and server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			current_dir = open( temp_file ).read().strip()
-			os.chdir( current_dir )
+			if current_dir:
+				os.chdir( current_dir )
 			if not status_ok :
 				self.__end_task(listeners)
 				os.chdir ( initial_working_dir )
