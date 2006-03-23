@@ -7,7 +7,19 @@ from testfarmclient import *
 def pass_text(text) :
 	return text
 
+def minicppunit_parser(text):
+	result = []
+	in_summary = False
+	for line in text.split('\n'):
+		if not in_summary and 'Summary:' in line:
+			in_summary = True
+			result.append( line )
+		if in_summary :
+			result.append( line )
+		return "\n".join(result)
+
 environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
+
 cd_essentia = "cd $HOME/essentia-sandboxes/clean-essentia/trunk"
 
 essentia_update = 'svn update svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
@@ -54,7 +66,7 @@ essentia.add_task("automatic tests", [
 	"cd test",
 	"scons",
 	"cd build/unittests/descriptortests/",
-	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : pass_text},
+	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : minicppunit_parser},
 ] )
 
 
