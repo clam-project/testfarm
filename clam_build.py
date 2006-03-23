@@ -10,10 +10,12 @@ def filter_cvs_update( text ):
 	return '\n'.join(result)
 clam = Repository("CLAM")
 clam.add_task("starting clam", ["echo foo"])
+'''
 clam.add_checking_for_new_commits( 
 	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
 	minutes_idle=5
 )
+'''
 clam.add_deployment_task( [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-clam CLAM",

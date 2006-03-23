@@ -75,19 +75,6 @@ def run_command(command):
 	output = pipe.communicate()[0]
 	return (output, status)
 
-
-def windows_status_ok(output):
-	bad_outputs = [
-		"The system cannot find the path specified.", # chdir to non-existant directory
-		#"A subdirectory or file html already exists." # trying to create an existing directory
-	]
-
-	for bad_output in bad_outputs:
-		if bad_output in output.strip():
-			return False
-	
-	return True
-
 class Task:
 	def __init__(self, name, commands):
 		self.name = name
