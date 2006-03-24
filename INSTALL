@@ -1,0 +1,24 @@
+
+How To Install a TestFarm Server ?
+
+- install libapache2-mod-python ( version >= 3.1 )
+
+- $ cd /etc/apache2/conf.d 
+
+- $ sudo ln -s /your/path/to/testfarm/mod_python_testfarm.conf
+
+- edit mod_python_testfarm.conf 
+  change the Alias /testfarm_server to point to  /your/path/to/testfarm/server_side.py
+  change DirectoryMatch to point to /you/path/to/testfarm
+
+- check that the testfarm/server_side.py file is accessible and executable by a different
+  user. Tip check this: 
+    $ su 
+    $ su nobody
+    $ ls -l /you/paht/co/testfarm/server_side.py
+
+- $ sudo /etc/init.d/apache2 restart
+
+- give permissions to the logs and html directory. TODO explain
+
+
