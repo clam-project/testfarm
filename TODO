@@ -19,6 +19,7 @@ Low Priority
 	- Idle with threading repositories (very low priority)
 	  -> or just now allow multiple repositories
 	- Multiple clients in a single script (usage_example.py)
+	- Maybe change Repository -> Build (like quickupdate, large checkout, subproject)
 	- Now executing con AJAX
 
 Medium Priority
@@ -46,21 +47,12 @@ Done	- Adapt to MacOS X
 Done	- BUG : Fix idle messages in console - MS
 Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
 	  -> assert that name is a string
-Done	- BUG after command completion should update html - MS
+Done??	- BUG after command completion should update html - MS
 	- Multiple repositories 
 	- Expandible info (and stats) with javascript - MS
+	- Integrate Bram's nice javascript
 	- CLAM in linux - PA
 Done	- publish CLAM htmls, via script that makes scp each X minutes - PA
 	- CLAM in mac osx
 
 
-
-
-
-bram's idea:
-
-<a href="javascript: document.getElementById('id_15').style.display='block'; document.getElementById('id_15_short').style.display='none';">toggle information display</a>
-
-<p id="id_15_short" class="info-short">bleep</p>
-
-<p id="id_15" class="info" style:"display:none">bleep</p>
