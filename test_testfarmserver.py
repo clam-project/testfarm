@@ -135,8 +135,8 @@ class Tests_ServerListener(ColoredTestCase):
 ('CMD', 'echo task1', True, '', '', {}),
 ('END_TASK', 'task1'),
 ('BEGIN_TASK', 'task2'),
-('CMD', 'echo something echoed', True, '', 'something echoed', {}),
-('CMD', './lalala gh', False, 'sh: ./lalala: No such file or directory', '', {}),
+('CMD', 'echo something echoed', True, '', 'something echoed\\n', {}),
+('CMD', './lalala gh', False, '/bin/sh: ./lalala: No such file or directory\\n', '', {}),
 ('END_TASK', 'task2'),
 ('END_REPOSITORY', 'repo1', '2006-03-17-13-26-20', False),
 

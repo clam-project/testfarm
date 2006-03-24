@@ -49,7 +49,7 @@ END_TASK task""", listener.log() )
 		self.assertEquals("""\
 BEGIN_TASK task
 ('echo hello', 'ok', '', '', {})
-('non-existing-command', 'failure', 'sh: non-existing-command: command not found', '', {})
+('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
 END_TASK task""", listener.log() )
 	
 	def test_results_log__command_fails_with_stderr_and_stdout(self):
@@ -58,7 +58,7 @@ END_TASK task""", listener.log() )
 		task.do_task( [listener] )
 		self.assertEquals("""\
 BEGIN_TASK task
-('./write_to_stderr_and_stdout.py', 'failure', 'ERR OUT', '', {})
+('./write_to_stderr_and_stdout.py', 'failure', 'ERR OUT\\n', '', {})
 END_TASK task""", listener.log() )
 		
 	def test_results_log__of_two_listeners(self):
@@ -94,7 +94,7 @@ END_TASK task""", listener2.log() )
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
-('echo hello', 'ok', '', 'hello', {})
+('echo hello', 'ok', '', 'hello\\n', {})
 END_TASK task""", listener.log())
 
 	def test_stats_parser(self):
@@ -104,7 +104,7 @@ END_TASK task""", listener.log())
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
-('echo hello', 'ok', '', '', {'len': 5})
+('echo hello', 'ok', '', '', {'len': 6})
 END_TASK task""", listener.log())
 
 	def test_cd(self):
@@ -115,7 +115,7 @@ END_TASK task""", listener.log())
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
-('pwd', 'ok', '', '/tmp', {})
+('pwd', 'ok', '', '/tmp\\n', {})
 END_TASK task""", listener.log() )
 
 	def test_status_ok(self):
@@ -126,7 +126,7 @@ END_TASK task""", listener.log() )
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
-('echo error', 'failure', 'error', '', {})
+('echo error', 'failure', 'error\\n', '', {})
 END_TASK task""", listener.log() )
 
 

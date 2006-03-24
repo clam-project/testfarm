@@ -62,7 +62,7 @@ END_REPOSITORY repo name""", listener.log() )
 		self.assertEquals(  """\
 BEGIN_REPOSITORY repo name
 BEGIN_TASK task1
-('non-existing-command', 'failure', 'sh: non-existing-command: command not found', '', {})
+('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
 END_TASK task1
 BEGIN_TASK task2
 ('echo foo', 'ok', '', '', {})
