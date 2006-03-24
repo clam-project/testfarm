@@ -35,6 +35,7 @@ essentia.add_checking_for_new_commits(
 	checking_cmd='cd $HOME/essentia-sandboxes && svn status -u clean-essentia/trunk | grep \*', 
 	minutes_idle=5
 )
+
 essentia.add_deployment_task([
 	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
@@ -49,24 +50,23 @@ essentia.add_deployment_task([
 
 essentia.add_task("build core libs", [
 	cd_essentia,
-	"scons base",
+	"scons base prefix=/tmp/essentia/",
 	"scons install base",
 ] )
 
 essentia.add_task("build plugin libs", [
 	cd_essentia,
-	"scons",
+	"scons prefix=/tmp/essentia",
 	"scons install",
 ] )
 
 essentia.add_task("automatic tests", [
 	cd_essentia,
 	"cd test",
-	"scons",
+	"scons prefix=/tmp/essentia",
 	"cd build/unittests/descriptortests/",
 	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : minicppunit_parser},
 ] )
-
 
 
 TestFarmClient( 
