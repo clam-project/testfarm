@@ -35,8 +35,8 @@ essentia.add_deployment_task([
 	{CMD : "rmdir /S /Q clean-essentia/trunk/build", STATUS_OK : force_ok},
 	{CMD : "rmdir /S /Q clean-essentia/trunk/algorithms", STATUS_OK : force_ok},
 	{CMD : "rmdir /S /Q clean-essentia/trunk/test/build", STATUS_OK : force_ok},
-	{CMD : '"c:/program files/svn/svn" diff --revision HEAD clean-essentia/trunk', INFO: pass_text},
-	{CMD : essentia_update, INFO : pass_text },
+	#{CMD : '"c:/program files/svn/svn" diff --revision HEAD clean-essentia/trunk', INFO: pass_text},
+	{CMD : essentia_checkout, INFO : pass_text },
 ] )
 
 essentia.add_task("build core libs", [

@@ -69,11 +69,73 @@ def get_command_and_parsers(maybe_dict):
 		cmd = maybe_dict
 	return (cmd, info_parser, stats_parser, status_ok_parser)
 
-def run_command(command):
-	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+
+def run_command_with_log(command, tmp_filename = None, output_to_stdout = True, logfile_filename = None, write_as_html = False):
+
+	tmpFile = open(tmp_filename, "w")
+	monitor = open(tmp_filename, "r")
+	
+	if logfile_filename:
+		logFile = open(logfile_filename, "a")
+		if write_as_html:
+			logFile.write("<hr/>")
+			logFile.write("<p><span style=\"color:red\">command</span>: %s</p>" % command)
+			logFile.write("<p><span style=\"color:red\">output</span>:</p><pre>\n")
+		else:
+			logFile.write("-" * 60 + "\n")
+			logFile.write("command: %s\n" % command)
+			logFile.write("output:\n")
+		logFile.flush()
+	else:
+		logFile = None
+	
+	output = ""
+	 
+	pipe = subprocess.Popen(command, stdout=tmpFile, stderr=tmpFile, shell=True)
+	  
+	while True:
+		tmp = monitor.read()
+		
+		if tmp:
+			if output_to_stdout:
+				print tmp.strip()
+						
+			if logFile:
+				logFile.write(tmp)
+				logFile.flush()
+							
+			output = output + tmp
+			
+		if pipe.poll() is not None:
+			break
+		
+		time.sleep(0.200) # sleep 200 ms
+
 	status = pipe.wait()
-	output = pipe.communicate()[0]
+	
+	monitor.close()
+	tmpFile.close()
+	
+	if logFile:
+		if write_as_html:
+			logFile.write("</pre><p><span style=\"color:red\">status</span>: %d</p>" % status)
+		else:
+			logFile.write("status: %d\n" % status)
+		logFile.flush()
+		logFile.close()
+	
+	os.remove(tmp_filename)
+	
 	return (output, status)
+	
+	
+def run_command(command, initial_working_dir):
+	logfile = initial_working_dir + "/command_log.html"
+	tmp_filename = initial_working_dir + "/tmp.txt"
+	write_as_html = True
+	output_to_stdout = False
+	return run_command_with_log(command, tmp_filename, output_to_stdout, logfile, write_as_html)
+
 
 class Task:
 	def __init__(self, name, commands):
@@ -101,10 +163,10 @@ class Task:
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
 			temp_file = "%s/current_dir.temp" % initial_working_dir #TODO multiplatform
 			if sys.platform == 'win32':
-				cmd_with_pwd = cmd + " 2>&1 && cd > %s" % temp_file
+				cmd_with_pwd = cmd + " && cd > %s" % temp_file
 			else:
-				cmd_with_pwd = cmd + " 2>&1 && pwd > %s" % temp_file
-			output, exit_status = run_command(cmd_with_pwd)
+				cmd_with_pwd = cmd + " && pwd > %s" % temp_file
+			output, exit_status = run_command(cmd_with_pwd, initial_working_dir)
 			if status_ok_parser :
 				status_ok = status_ok_parser( output ) #TODO assert that returns a boolean
 			else:
