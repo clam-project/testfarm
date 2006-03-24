@@ -2,27 +2,36 @@ import commands, os, time, sys, subprocess
 
 from listeners import NullResultListener, ConsoleResultListener
 from testfarmserver import * #TODO provisional
+from serverlistenerproxy import ServerListenerProxy
 
+def is_string( data ):
+	try: # TODO : find another clean way to tho this check 
+		data.isalpha()
+		return True
+	except AttributeError:
+		return False
+	
 class TestFarmClient :
 	# Attributes : repositories[]
 	
 	def __init__(self, 
 		name = '--unnamed_client--',
 		repositories=[], 
-		listeners=[ ConsoleResultListener() ],
+		listeners= [],
 		continuous=False,
 		generated_html_path = None,
 		logs_path='/tmp/testfarm_logs',
+		remote_server_url = None
 	) :
+		assert is_string(name), '< %s > is not a valid client name (should be a string)' % str(name)
+		self.name = name
+
 		self.repositories = repositories
-		self.listeners = listeners
-		
-		try: # TODO : find another clean way to tho this check 
-			name.isalpha()
-			self.name = name
-		except AttributeError:
-			assert False, '< %s > is not a valid client name (should be a string)' % str(name)
-		
+		self.listeners = [ ConsoleResultListener() ]
+		if remote_server_url:
+			listenerproxy = ServerListenerProxy(name, remote_server_url)		
+			listeners.append( listenerproxy )
+		self.listeners += listeners
 		if generated_html_path :	
 			serverlistener = ServerListener( client_name=self.name, logs_base_dir=logs_path )
 			server_to_push = TestFarmServer( logs_base_dir=logs_path, html_dir=generated_html_path )
@@ -156,7 +165,7 @@ class Task:
 
 	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None):
 		self.__begin_task(listeners)
-		if False and server_to_push: #TODO
+		if server_to_push:
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		for maybe_dict in self.commands :

@@ -21,10 +21,23 @@ example.add_task("just a CD", [
 ] )
 
 
+'''
 TestFarmClient( 
 	"an_example_client", 
 	[example ], 
 	generated_html_path='./html-example', 
 	logs_path='/tmp/testfarm_example_logs',
-	continuous=False 
+	continuous=false 
 )
+'''
+	
+from serverlistenerproxy import ServerListenerProxy
+
+TestFarmClient( 
+	"davids_computer", 
+	[example ], 
+	listeners = [ServerListenerProxy()],
+	remote_server_url="http://10.55.0.66/testfarm_server",
+	continuous=False
+)
+

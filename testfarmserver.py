@@ -61,7 +61,6 @@ class ServerListener:
 		
 	def __append_log_entry(self, entry) :
 		f = open(self.logfile, 'a+')
-#		print '###### WRITE ENTRY IN LOGFILE = "%s"######' % self.logfile
 		f.write( entry )
 		f.close()
 
