@@ -26,6 +26,11 @@ essentia_checkout = '"c:\\program files\\svn\\svn" checkout svn+ssh://svn@mtgdb.
 
 essentia = Repository("essentia/trunk")
 
+'''essentia.add_checking_for_new_commits( 
+	checking_cmd='cd g:\\sandbox\\essentia-sandbox\\ && "c:\\program files\\svn\\svn" status -u clean-essentia/trunk | grep \*', 
+	minutes_idle=5
+)'''
+
 essentia.add_deployment_task([
 	"cd g:\\sandbox\\",
 	{CMD : "mkdir essentia-sandbox", STATUS_OK : force_ok},
@@ -62,7 +67,8 @@ essentia.add_task("automatic tests", [
 TestFarmClient( 
 	'testing-machine_windows', 
 	[essentia],  
-	generated_html_path='./html',
-	logs_path='g:\\sandbox\\essentia-sandbox\\testfarm_logs',
+	#generated_html_path='./html',
+	#logs_path='g:\\sandbox\\essentia-sandbox\\testfarm_logs',
+	remote_server_url="http://10.55.0.66/testfarm_server",
 	continuous=False 
 )

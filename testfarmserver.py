@@ -3,7 +3,7 @@ import datetime, os, glob, sys
 header = """
 <html>
 <head>
-<meta http-equiv="refresh" content="60">
+<meta http-equiv="refresh" content="30">
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm</title>
 </head>
@@ -15,7 +15,6 @@ header = """
 header_details = """
 <html>
 <head>
-<meta http-equiv="refresh" content="5">
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm Details</title>
 <script type="text/javascript" language="JavaScript" src="testfarm.js"></script>
