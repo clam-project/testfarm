@@ -18,6 +18,7 @@ header_details = """
 <meta http-equiv="refresh" content="5">
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm Details</title>
+<script type="text/javascript" language="JavaScript" src="testfarm.js"></script>
 </head>
 <body>
 """
@@ -167,6 +168,8 @@ class TestFarmServer:
 	
 	def html_single_iteration_details(self, client_name, wanted_date):
 		content = []
+		id_info = 1; # auto-increment id
+		id_output = 1; # auto-increment id
 		for entry in self.single_iteration_details(client_name, wanted_date ):
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY':
@@ -185,9 +188,13 @@ class TestFarmServer:
 					content.append( '<span class="command_ok">[OK]</span>' )
 				else:
 					content.append( '<span class="command_failure">[FAILURE]</span>' )
-					content.append( '<p class="output"> OUTPUT: %s </p>' % entry[3] )
+					content.append( '<p id="output%d" class="output"> OUTPUT: %s </p>' % ( id_output, entry[3] ) )
+					content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % id_output )
+					id_output += 1
 				if entry[4] :
-					content.append( '<p class="info"> INFO: %s </p>' % entry[4] )
+					content.append( '<p id="info%d" class="info"> INFO: %s </p>' % ( id_info, entry[4] ) )
+					content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % id_info )
+					id_info += 1
 				if entry[5] :
 					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
 				content.append( '</div>' )
