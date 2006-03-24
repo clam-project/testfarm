@@ -109,7 +109,8 @@ class ConsoleResultListener :
 	def listen_end_repository(self, repositoryname, status):
 		self.pprint ('BOLD', "END_REPOSITORY %s --> %s" % (repositoryname, status) )
 
-	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
+	def listen_found_new_commits( self, repository_name, new_commits_found, seconds_idle ):
+		self.pprint('MAGENTA', 'Checkig for new commits in :', repository_name)
 		self.pprint('MAGENTA', 'New commits found, or No checks specified :', new_commits_found)
 		self.pprint('MAGENTA', 'New check in %d seconds.' % seconds_idle)
 

@@ -12,11 +12,9 @@ def is_string( data ):
 		return False
 	
 class TestFarmClient :
-	# Attributes : repositories[]
-	
 	def __init__(self, 
-		name = '--unnamed_client--',
-		repositories=[], 
+		name,
+		repository,
 		listeners= [],
 		continuous=False,
 		generated_html_path = None,
@@ -26,36 +24,39 @@ class TestFarmClient :
 		assert is_string(name), '< %s > is not a valid client name (should be a string)' % str(name)
 		self.name = name
 
-		self.repositories = repositories
 		self.listeners = [ ConsoleResultListener() ]
+		self.listeners += listeners
+
 		if remote_server_url:
 			listenerproxy = ServerListenerProxy(name, remote_server_url)		
 			listeners.append( listenerproxy )
-		self.listeners += listeners
 		if generated_html_path :	
-			serverlistener = ServerListener( client_name=self.name, logs_base_dir=logs_path )
-			server_to_push = TestFarmServer( logs_base_dir=logs_path, html_dir=generated_html_path )
+			serverlistener = ServerListener( 
+				client_name=self.name, 
+				logs_base_dir=logs_path,
+				repository_name=repository.name )
+			server_to_push = TestFarmServer( 
+				logs_base_dir=logs_path, 
+				html_dir=generated_html_path, 
+				repository_name=repository.name )
 
 			self.listeners.append( serverlistener )
 		else:
 			server_to_push = None
 
 		while True :
-			for repo in self.repositories :
-				new_commits_found = repo.do_checking_for_new_commits( self.listeners )
-				if not new_commits_found:
-					if server_to_push: 
-						server_to_push.update_static_html_files()
-					time.sleep( repo.seconds_idle )
-					continue
-				repo.do_tasks( self.listeners, server_to_push = server_to_push )
-				if server_to_push : 
+			repository
+			new_commits_found = repository.do_checking_for_new_commits( self.listeners )
+			if not new_commits_found:
+				if server_to_push: 
 					server_to_push.update_static_html_files()
+				time.sleep( repository.seconds_idle )
+				continue
+			repository.do_tasks( self.listeners, server_to_push = server_to_push )
+			if server_to_push : 
+				server_to_push.update_static_html_files()
 			if not continuous: break
 		
-	def num_repositories(self) :
-		return len( self.repositories )
-
 
 def get_command_and_parsers(maybe_dict):
 	info_parser = None
@@ -237,7 +238,7 @@ class Repository :
 			zero_if_new_commits_found, output = commands.getstatusoutput( self.not_idle_checking_cmd )
 			new_commits_found = not zero_if_new_commits_found
 		for listener in listeners :
-			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
+			listener.listen_found_new_commits( self.name, new_commits_found, self.seconds_idle )
 		return new_commits_found
 
 	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.

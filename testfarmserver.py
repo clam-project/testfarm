@@ -30,11 +30,11 @@ footer = """
 def remove_path_and_extension( path ):
 	return os.path.splitext( os.path.basename( path ) )[0]
 
-def log_filename(logs_base_dir, client_name) :
-	return '%s/%s.testfarmlog' % (logs_base_dir, client_name)
+def log_filename(logs_base_dir, repository_name, client_name) :
+	return '%s/%s/%s.testfarmlog' % (logs_base_dir, repository_name, client_name)
 
-def idle_filename(logs_base_dir, client_name) :
-	return '%s/%s.idle' % (logs_base_dir, client_name)
+def idle_filename(logs_base_dir, repository_name, client_name) :
+	return '%s/%s/%s.idle' % (logs_base_dir, repository_name, client_name)
 
 def create_dir_if_needed(dir):
 	if not os.path.isdir( dir ) :
@@ -49,18 +49,28 @@ class ServerListener:
 	def __init__(self, 
 		client_name='testing_client', 
 		logs_base_dir = '/tmp/testfarm_tests',
+		repository_name=None
 	) :
 		self.iterations_needs_update = True
 		self.client_name = client_name
+		self.repository_name = repository_name
 		self.logs_base_dir = logs_base_dir
-		self.logfile = log_filename( logs_base_dir, client_name )
-		self.idle_file = idle_filename( logs_base_dir, client_name )
-		create_dir_if_needed( logs_base_dir )
+		self.logfile = None
+		self.idle_file = None
+		
+		assert repository_name, "Error, repository_name was expected"
+		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, repository_name) ) 
+		self.logfile = log_filename( self.logs_base_dir, repository_name, self.client_name )
+		self.idle_file = idle_filename( self.logs_base_dir, repository_name, self.client_name )
 
 		
 	def __append_log_entry(self, entry) :
 		f = open(self.logfile, 'a+')
 		f.write( entry )
+		f.close()
+	def __write_idle_info(self, idle_info) :
+		f = open(self.idle_file, 'w+')
+		f.write( idle_info )
 		f.close()
 
 	def list_log_files(self):
@@ -87,27 +97,25 @@ class ServerListener:
 		entry = "('END_TASK', '%s'),\n" % taskname
 		self.__append_log_entry(entry)
 	
-	def listen_begin_repository(self, repositoryname):
-		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repositoryname, self.current_time())
-		self.__append_log_entry(entry)
+	def listen_begin_repository(self, repository_name):
+		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repository_name, self.current_time())
 		self.iterations_needs_update = True
+		self.__append_log_entry(entry)
 
-	def listen_end_repository(self, repositoryname, status):
-		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repositoryname, self.current_time(), status)
+	def listen_end_repository(self, repository_name, status):
+		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repository_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
 
 	def iterations_updated(self):
 		self.iterations_needs_update = False
 	
-	def listen_found_new_commits(self, new_commits_found, next_run_in_seconds ):
+	def listen_found_new_commits(self, repository_name, new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
 		idle_dict['new_commits_found'] = new_commits_found
 		idle_dict['date'] = self.current_time()
 		idle_dict['next_run_in_seconds']=next_run_in_seconds	
-		f = open(self.idle_file, 'w')
-		f.write( str( idle_dict ) )
-		f.close()
+		self.__write_idle_info( str( idle_dict ) )
 	
 	
 
@@ -118,23 +126,25 @@ class ServerListener:
 class TestFarmServer:
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
-		html_dir = './html'
+		html_dir = './html',
+		repository_name = None
 	) :
 		self.logs_base_dir = logs_base_dir 
 		self.html_dir = html_dir
+		self.repository_name = repository_name
 		create_dir_if_needed( html_dir )
 
 	def client_names(self):
-		logfiles = glob.glob('%s/*.testfarmlog' % self.logs_base_dir )
+		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.repository_name) )
 		result = map( remove_path_and_extension, logfiles)
 		return result
 
 	def load_client_log(self, client_name):
-		filename = log_filename( self.logs_base_dir, client_name )
+		filename = log_filename( self.logs_base_dir, self.repository_name, client_name )
 		return eval("[ %s ]" % open( filename ).read() )
 
 	def load_client_idle(self, client_name):
-		filename = idle_filename( self.logs_base_dir, client_name )
+		filename = idle_filename( self.logs_base_dir, self.repository_name, client_name )
 		content = open( filename ).read() 
 		if not content :
 			return {}

@@ -3,7 +3,7 @@
 from testfarmclient import * 
 
 
-example = Repository("Example")
+example = Repository("this_is_just_a_test")
 
 example.add_deployment_task( [
 	{CMD: "echo lalala", INFO: lambda x : x},
@@ -21,23 +21,21 @@ example.add_task("just a CD", [
 ] )
 
 
-'''
-TestFarmClient( 
-	"an_example_client", 
-	[example ], 
-	generated_html_path='./html-example', 
-	logs_path='/tmp/testfarm_example_logs',
-	continuous=false 
-)
-'''
-	
-from serverlistenerproxy import ServerListenerProxy
 
-TestFarmClient( 
-	"davids_computer", 
-	[example ], 
-	listeners = [ServerListenerProxy()],
-	remote_server_url="http://10.55.0.66/testfarm_server",
-	continuous=False
-)
+if 1 :
+	TestFarmClient( 
+		"an_example_client", 
+		example, 
+		generated_html_path='./html-example', 
+		logs_path='/tmp/testfarm_example_logs',
+		continuous=False 
+	)
+
+else :	
+	TestFarmClient( 
+		"pau_computer", 
+		example, 
+		remote_server_url="http://10.55.0.66/testfarm_server",
+		continuous=False
+	)
 
