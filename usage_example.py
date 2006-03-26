@@ -22,7 +22,7 @@ example.add_task("just a CD", [
 
 
 
-if 1 :
+if 0 :
 	TestFarmClient( 
 		"an_example_client", 
 		example, 
@@ -35,7 +35,8 @@ else :
 	TestFarmClient( 
 		"pau_computer", 
 		example, 
-		remote_server_url="http://10.55.0.66/testfarm_server",
+		#remote_server_url="http://10.55.0.66/testfarm_server", #TODO check if url accessible, or responds
+		remote_server_url="http://localhost/testfarm_server",
 		continuous=False
 	)
 

@@ -110,7 +110,7 @@ class ServerListener:
 	def iterations_updated(self):
 		self.iterations_needs_update = False
 	
-	def listen_found_new_commits(self, repository_name, new_commits_found, next_run_in_seconds ):
+	def listen_found_new_commits(self,  new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
 		idle_dict['new_commits_found'] = new_commits_found
 		idle_dict['date'] = self.current_time()
@@ -122,7 +122,6 @@ class ServerListener:
 #
 #     SERVER
 #
-
 class TestFarmServer:
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
@@ -133,8 +132,15 @@ class TestFarmServer:
 		self.html_dir = html_dir
 		self.repository_name = repository_name
 		create_dir_if_needed( html_dir )
+		
+		self.tmp=open('/tmp/foo', 'a+')
+		self.foo('init server\n')
+	def foo(self, msg):
+		self.tmp.write(msg+'\n')
+		self.tmp.flush()
 
 	def client_names(self):
+		assert self.repository_name, "Error, repository_name was expected. But was None"
 		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.repository_name) )
 		result = map( remove_path_and_extension, logfiles)
 		return result
@@ -209,7 +215,8 @@ class TestFarmServer:
 
 		return header_details + '\n'.join(content) + footer	
 
-	'''#minimal version:
+	'''
+	#minimal version:
 	def html_single_iteration_details(self, client_name, wanted_date):
 		content = ["<pre>"]
 		for entry in self.single_iteration_details(client_name, wanted_date ):
@@ -224,6 +231,7 @@ class TestFarmServer:
 	
 	def write_last_details_static_html_file(self): 
 		for client in self.client_names():
+			self.foo('+++++ client : '+ client)
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			self.write_details_static_html_file(client, last_date)
@@ -315,5 +323,6 @@ class TestFarmServer:
 		open("%s/iterations.html" % self.html_dir, "w").write( self.html_iterations() )
 
 	def update_static_html_files(self):
+		self.foo( 'server write html')
 		self.write_last_details_static_html_file()
 		self.write_iterations_static_html_file()

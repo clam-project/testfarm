@@ -11,10 +11,9 @@ How To Install a TestFarm Server ?
   change the Alias /testfarm_server to point to  /your/path/to/testfarm/server_side.py
   change DirectoryMatch to point to /you/path/to/testfarm
 
-- check that the testfarm/server_side.py file is accessible and executable by a different
+- check that the testfarm/server_side.py file is accessible by a different
   user. Tip check this: 
-    $ su 
-    $ su nobody
+    $ sudo su nobody
     $ ls -l /you/paht/co/testfarm/server_side.py
 
 - $ sudo /etc/init.d/apache2 restart

@@ -28,13 +28,18 @@ class TestFarmClient :
 		self.listeners += listeners
 
 		if remote_server_url:
-			listenerproxy = ServerListenerProxy(name, remote_server_url)		
-			listeners.append( listenerproxy )
+			listenerproxy = ServerListenerProxy(
+				client_name=name, 
+				service_url=remote_server_url,
+				repository_name=repository.name
+			)		
+			self.listeners.append( listenerproxy )
 		if generated_html_path :	
 			serverlistener = ServerListener( 
 				client_name=self.name, 
 				logs_base_dir=logs_path,
-				repository_name=repository.name )
+				repository_name=repository.name
+			)
 			server_to_push = TestFarmServer( 
 				logs_base_dir=logs_path, 
 				html_dir=generated_html_path, 
@@ -238,7 +243,7 @@ class Repository :
 			zero_if_new_commits_found, output = commands.getstatusoutput( self.not_idle_checking_cmd )
 			new_commits_found = not zero_if_new_commits_found
 		for listener in listeners :
-			listener.listen_found_new_commits( self.name, new_commits_found, self.seconds_idle )
+			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
 		return new_commits_found
 
 	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.
