@@ -7,16 +7,6 @@ from testfarmclient import *
 def pass_text(text) :
 	return text
 
-def minicppunit_parser(text):
-	result = []
-	in_summary = False
-	for line in text.split('\n'):
-		if not in_summary and 'Summary:' in line:
-			in_summary = True
-			result.append( line )
-		if in_summary :
-			result.append( line )
-		return "\n".join(result)
 
 environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 
@@ -72,7 +62,7 @@ essentia.add_task("automatic tests", [
 	"cd test",
 	"scons prefix=/tmp/essentia",
 	"cd build/unittests/descriptortests/",
-	{CMD : "%s=/tmp/essentia/lib/ ./test" % lib_path, INFO : minicppunit_parser},
+	{CMD : "%s=/tmp/essentia/lib/ ./test" % lib_path, INFO : pass_text},
 ] )
 
 
