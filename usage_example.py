@@ -22,12 +22,12 @@ example.add_task("just a CD", [
 
 
 
-if 0 :
+if 1 :
 	TestFarmClient( 
 		"an_example_client", 
 		example, 
-		generated_html_path='./html-example', 
-		logs_path='/tmp/testfarm_example_logs',
+		html_base_dir='./html-example', 
+		logs_base_dir='/tmp/testfarm_example_logs',
 		continuous=False 
 	)
 

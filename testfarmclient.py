@@ -17,8 +17,8 @@ class TestFarmClient :
 		repository,
 		listeners= [],
 		continuous=False,
-		generated_html_path = None,
-		logs_path='/tmp/testfarm_logs',
+		html_base_dir = None,
+		logs_base_dir='/tmp/testfarm_logs',
 		remote_server_url = None
 	) :
 		assert is_string(name), '< %s > is not a valid client name (should be a string)' % str(name)
@@ -34,15 +34,15 @@ class TestFarmClient :
 				repository_name=repository.name
 			)		
 			self.listeners.append( listenerproxy )
-		if generated_html_path :	
+		if html_base_dir :	
 			serverlistener = ServerListener( 
 				client_name=self.name, 
-				logs_base_dir=logs_path,
+				logs_base_dir=logs_base_dir,
 				repository_name=repository.name
 			)
 			server_to_push = TestFarmServer( 
-				logs_base_dir=logs_path, 
-				html_dir=generated_html_path, 
+				logs_base_dir=logs_base_dir, 
+				html_base_dir=html_base_dir, 
 				repository_name=repository.name )
 
 			self.listeners.append( serverlistener )

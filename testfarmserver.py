@@ -125,17 +125,19 @@ class ServerListener:
 class TestFarmServer:
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
-		html_dir = './html',
+		html_base_dir = '/tmp/testfarm_html',
 		repository_name = None
 	) :
 		self.logs_base_dir = logs_base_dir 
-		self.html_dir = html_dir
-		self.repository_name = repository_name
-		create_dir_if_needed( html_dir )
+		self.html_base_dir = html_base_dir
+		create_dir_if_needed( html_base_dir )
+		if repository_name: #TODO not very sure of this  (PA)
+			create_dir_if_needed( '%s/%s' % (html_base_dir, repository_name) )
+			self.repository_name = repository_name
 		
-		self.tmp=open('/tmp/foo', 'a+')
+		self.tmp=open('/tmp/foo', 'a+') #TODO just for debugging.
 		self.foo('init server\n')
-	def foo(self, msg):
+	def foo(self, msg): #TODO debgg. remove!
 		self.tmp.write(msg+'\n')
 		self.tmp.flush()
 
@@ -227,7 +229,13 @@ class TestFarmServer:
 
 	def write_details_static_html_file(self, client_name, wanted_date):
 		details = self.html_single_iteration_details(client_name, wanted_date)
-		open("%s/details-%s-%s.html" % (self.html_dir, client_name, wanted_date), "w").write( details )
+		f = open("%s/%s/details-%s-%s.html" % (
+			self.html_base_dir, 
+			self.repository_name, 
+			client_name, 
+			wanted_date), "w")
+		f.write( details )
+		f.close()
 	
 	def write_last_details_static_html_file(self): 
 		for client in self.client_names():
@@ -320,7 +328,11 @@ class TestFarmServer:
 		return header + '\n'.join(content) + footer
 		
 	def write_iterations_static_html_file(self):
-		open("%s/iterations.html" % self.html_dir, "w").write( self.html_iterations() )
+		f = open("%s/%s/index.html" % (	
+			self.html_base_dir, 
+			self.repository_name), "w")
+		f.write( self.html_iterations() )
+		f.close()
 
 	def update_static_html_files(self):
 		self.foo( 'server write html')
