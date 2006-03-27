@@ -81,6 +81,6 @@ TestFarmClient(
 	essentia,  
 #	html_base_dir='./html',
 #	logs_base_dir='%s/essentia-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
-	remote_server_url='http://10.55.0.66/testfarm_server'
+	remote_server_url='http://10.55.0.66/testfarm_server',
 	continuous=True 
 )
