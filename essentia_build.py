@@ -27,7 +27,7 @@ essentia_update = 'svn update clean-essentia/trunk/'
 essentia_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
 
-essentia = Repository("essentia/trunk")
+essentia = Repository("essentia_trunk")
 
 essentia.add_task("TODO fix bug: update html at begin time ", [] )
 
@@ -79,7 +79,8 @@ essentia.add_task("automatic tests", [
 TestFarmClient( 
 	machine, 
 	essentia,  
-	html_base_dir='./html',
-	logs_base_dir='%s/essentia-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
+#	html_base_dir='./html',
+#	logs_base_dir='%s/essentia-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
+	remote_server_url='http://10.55.0.66/testfarm_server'
 	continuous=True 
 )
