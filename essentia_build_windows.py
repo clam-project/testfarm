@@ -66,7 +66,7 @@ essentia.add_task("automatic tests", [
 
 TestFarmClient( 
 	'testing-machine_windows', 
-	[essentia],  
+	essentia,  
 	#generated_html_path='./html',
 	#logs_path='g:\\sandbox\\essentia-sandbox\\testfarm_logs',
 	remote_server_url="http://10.55.0.66/testfarm_server",

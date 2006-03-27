@@ -51,13 +51,13 @@ essentia.add_deployment_task([
 essentia.add_task("build core libs", [
 	cd_essentia,
 	"scons base prefix=/tmp/essentia/",
-	"scons install base prefix=/tmp/essentia",
+	"scons install base prefix=/tmp/essentia/",
 ] )
 
 essentia.add_task("build plugin libs", [
 	cd_essentia,
 	"scons prefix=/tmp/essentia",
-	"scons install prefix=/tmp/essentia",
+	"scons install prefix=/tmp/essentia/",
 ] )
 
 essentia.add_task("automatic tests", [
@@ -65,7 +65,7 @@ essentia.add_task("automatic tests", [
 	"cd test",
 	"scons prefix=/tmp/essentia",
 	"cd build/unittests/descriptortests/",
-	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : minicppunit_parser},
+	{CMD : "DYLD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : minicppunit_parser},
 ] )
 
 
