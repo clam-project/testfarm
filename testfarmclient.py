@@ -49,10 +49,12 @@ class TestFarmClient :
 		else:
 			server_to_push = None
 
+		firsttime = True
 		while True :
 			repository
 			new_commits_found = repository.do_checking_for_new_commits( self.listeners )
-			if not new_commits_found:
+			if not firsttime and not new_commits_found:
+				firsttime = False
 				if server_to_push: 
 					server_to_push.update_static_html_files()
 				time.sleep( repository.seconds_idle )
