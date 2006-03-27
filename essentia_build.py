@@ -22,7 +22,7 @@ environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 
 cd_essentia = "cd $HOME/essentia-sandboxes/clean-essentia/trunk"
 
-essentia_update = 'svn update svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
+essentia_update = 'svn update clean-essentia/trunk/'
 
 essentia_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
@@ -40,12 +40,12 @@ essentia.add_deployment_task([
 	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
 	"cd essentia-sandboxes",
-	"rm -fr /tmp/essentia/",
-	"rm -fr clean-essentia/trunk/build",
-	"rm -fr clean-essentia/trunk/algorithms",
-	"rm -fr clean-essentia/trunk/test/build",
+	#"rm -fr /tmp/essentia/",
+	#"rm -fr clean-essentia/trunk/build",
+	#"rm -fr clean-essentia/trunk/algorithms",
+	#"rm -fr clean-essentia/trunk/test/build",
 	{CMD : "svn diff --revision HEAD clean-essentia/trunk", INFO: pass_text},
-	{CMD : essentia_update, INFO : pass_text },
+	{CMD : essentia_checkout, INFO : pass_text },
 ] )
 
 essentia.add_task("build core libs", [
@@ -60,19 +60,26 @@ essentia.add_task("build plugin libs", [
 	"scons install prefix=/tmp/essentia",
 ] )
 
+if sys.platform == "linux2":
+	lib_path = "LD_LIBRARY_PATH"
+	machine = "testing-machine_linux_breezy"
+elif sys.platform == "darwin":
+	lib_path = "DYLD_LIBRARY_PATH"
+	machine = "testing_machine_osx_tiger"
+
 essentia.add_task("automatic tests", [
 	cd_essentia,
 	"cd test",
 	"scons prefix=/tmp/essentia",
 	"cd build/unittests/descriptortests/",
-	{CMD : "LD_LIBRARY_PATH=/tmp/essentia/lib/ ./test", INFO : minicppunit_parser},
+	{CMD : "%s=/tmp/essentia/lib/ ./test" % lib_path, INFO : minicppunit_parser},
 ] )
 
 
 TestFarmClient( 
-	'testing-machine_linux_breezy', 
+	machine, 
 	essentia,  
-	generated_html_path='./html',
-	logs_path='%s/essentia-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
+	html_base_dir='./html',
+	logs_base_dir='%s/essentia-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
 	continuous=True 
 )

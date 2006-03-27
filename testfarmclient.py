@@ -49,20 +49,17 @@ class TestFarmClient :
 		else:
 			server_to_push = None
 
-		firsttime = True
-		while True :
-			repository
+		#do_tasks at lease one time	
+		repository.do_tasks( self.listeners, server_to_push = server_to_push )
+		
+		while continuous :
 			new_commits_found = repository.do_checking_for_new_commits( self.listeners )
-			if not firsttime and not new_commits_found:
-				firsttime = False
-				if server_to_push: 
+			if new_commits_found:
+				repository.do_tasks( self.listeners, server_to_push = server_to_push )
+			else:
+				if server_to_push: #update idle time display
 					server_to_push.update_static_html_files()
 				time.sleep( repository.seconds_idle )
-				continue
-			repository.do_tasks( self.listeners, server_to_push = server_to_push )
-			if server_to_push : 
-				server_to_push.update_static_html_files()
-			if not continuous: break
 		
 
 def get_command_and_parsers(maybe_dict):
@@ -87,13 +84,10 @@ def get_command_and_parsers(maybe_dict):
 	return (cmd, info_parser, stats_parser, status_ok_parser)
 
 
-def run_command_with_log(command, tmp_filename = None, output_to_stdout = True, logfile_filename = None, write_as_html = False):
+def run_command_with_log(command, verbose = True, logfilename = None, write_as_html = False):
 
-	tmpFile = open(tmp_filename, "w")
-	monitor = open(tmp_filename, "r")
-	
-	if logfile_filename:
-		logFile = open(logfile_filename, "a")
+	if logfilename:
+		logFile = open(logfilename, "a")
 		if write_as_html:
 			logFile.write("<hr/>")
 			logFile.write("<p><span style=\"color:red\">command</span>: %s</p>" % command)
@@ -108,13 +102,14 @@ def run_command_with_log(command, tmp_filename = None, output_to_stdout = True, 
 	
 	output = ""
 	 
-	pipe = subprocess.Popen(command, stdout=tmpFile, stderr=tmpFile, shell=True)
+	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 	  
 	while True:
-		tmp = monitor.read()
+		tmp = pipe.stdout.read()
+		tmp += pipe.stderr.read()
 		
 		if tmp:
-			if output_to_stdout:
+			if verbose:
 				print tmp.strip()
 						
 			if logFile:
@@ -130,9 +125,6 @@ def run_command_with_log(command, tmp_filename = None, output_to_stdout = True, 
 
 	status = pipe.wait()
 	
-	monitor.close()
-	tmpFile.close()
-	
 	if logFile:
 		if write_as_html:
 			logFile.write("</pre><p><span style=\"color:red\">status</span>: %d</p>" % status)
@@ -141,17 +133,12 @@ def run_command_with_log(command, tmp_filename = None, output_to_stdout = True, 
 		logFile.flush()
 		logFile.close()
 	
-	os.remove(tmp_filename)
-	
 	return (output, status)
 	
 	
 def run_command(command, initial_working_dir):
 	logfile = initial_working_dir + "/command_log.html"
-	tmp_filename = initial_working_dir + "/tmp.txt"
-	write_as_html = True
-	output_to_stdout = False
-	return run_command_with_log(command, tmp_filename, output_to_stdout, logfile, write_as_html)
+	return run_command_with_log(command, verbose=False, logfilename=logfile, write_as_html=True)
 
 
 class Task:
@@ -239,10 +226,11 @@ class Repository :
 		self.tasks.append(Task(taskname, commands)) 
 
 	def do_checking_for_new_commits(self, listeners):
+		initial_working_dir = os.path.abspath(os.curdir)
 		if not self.not_idle_checking_cmd :
 			new_commits_found = True #default
 		else :
-			zero_if_new_commits_found, output = commands.getstatusoutput( self.not_idle_checking_cmd )
+			output, zero_if_new_commits_found = run_command( self.not_idle_checking_cmd, initial_working_dir )
 			new_commits_found = not zero_if_new_commits_found
 		for listener in listeners :
 			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
@@ -260,6 +248,8 @@ class Repository :
 				server_to_push.update_static_html_files()
 		for listener in listeners:
 			listener.listen_end_repository( self.name, all_ok )
+		if server_to_push : #TODO remove. this is just provisional. Is it?
+			server_to_push.update_static_html_files()
 		return all_ok
 CMD = 1
 INFO = 2
