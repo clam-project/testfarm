@@ -29,27 +29,27 @@ class ColoredTestCase(unittest.TestCase):
 class Tests_TestFarmServer(ColoredTestCase):
 
 	def tearDown(self):
-		listener = ServerListener()
+		listener = ServerListener( repository_name='repo' )
 		listener.clean_log_files()
 
 	def setUp(self):
-		listener = ServerListener()
+		listener = ServerListener( repository_name='repo' )
 		listener.clean_log_files()
 
 	def test_iterations__one_green_iteration(self):
-		listener = ServerListener()
+		listener = ServerListener( repository_name='repo' )
 		listener.current_time = lambda : "a date"
-		server = TestFarmServer()
+		server = TestFarmServer(repository_name='repo')
 		repo = Repository('repo')	
 		repo.add_task('task1', [])	
-		TestFarmClient('a client', [repo],[listener])
+		TestFarmClient('a client', repo, testinglisteners=[listener])
 		self.assertEquals(
 			{'testing_client' : [('a date', 'a date', 'repo', 'stable')]}, 
 			server.iterations() )
 
 	def test_details(self):
-		listener = ServerListener( client_name='a client')
-		server = TestFarmServer()
+		listener = ServerListener( client_name='a client', repository_name='repo')
+		server = TestFarmServer(repository_name='repo')
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_repository("not wanted")
 		listener.listen_begin_task("task")
@@ -77,17 +77,22 @@ class Tests_TestFarmServer(ColoredTestCase):
 		self.assertEquals( expected, server.single_iteration_details('a client', '1999-99-99-99-99-99') )
 
 	def test_two_clients(self):
-		listener1 = ServerListener(client_name='client 1', logs_base_dir='/tmp/clients_testdir')
-		listener2 = ServerListener(client_name='client 2', logs_base_dir='/tmp/clients_testdir')
-		listener1.clean_log_files()
-		listener2.clean_log_files()
+		listener1 = ServerListener(
+			client_name='client 1', 
+			logs_base_dir='/tmp/clients_testdir', 
+			repository_name='repo')
+		listener2 = ServerListener(
+			client_name='client 2', 
+			logs_base_dir='/tmp/clients_testdir', 
+			repository_name='repo')
 		listener1.current_time = lambda : "some date"
 		listener2.current_time = lambda : "some other date"
-		server = TestFarmServer(logs_base_dir='/tmp/clients_testdir')
+		server = TestFarmServer(logs_base_dir='/tmp/clients_testdir', repository_name='repo')
 		repo = Repository('repo')
 		repo.add_task('task1', [])
-		TestFarmClient('a client', [repo], [listener1])
-		TestFarmClient('another client', [repo], [listener2])
+
+		TestFarmClient('a client', repo, testinglisteners=[listener1])
+		TestFarmClient('another client', repo, testinglisteners=[listener2])
 		self.assertEquals( 
 			{'client 1':[('some date', 'some date', 'repo', 'stable')],
 			 'client 2':[('some other date', 'some other date', 'repo', 'stable')]}, 
@@ -96,41 +101,62 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener2.clean_log_files()
 
 	def test_idles(self):
-		listener = ServerListener()
+		listener = ServerListener(repository_name='repo', client_name='a client')
 		listener.current_time = lambda : "a date"
-		server = TestFarmServer()
+		server = TestFarmServer(repository_name='repo')
 		repo = Repository('repo')	
-		repo.add_checking_for_new_commits( checking_cmd="echo P patched file | grep ^[UP]", minutes_idle=1 )
-		TestFarmClient('a client', [repo],[listener])
+		repo.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
+		TestFarmClient('a client', repo, testinglisteners=[listener])
 		self.assertEquals(
-			{'testing_client' : {'date':'a date', 'new_commits_found': True,'next_run_in_seconds':60}}, 
+			{'a client' : 
+				{'date':'a date', 
+				'new_commits_found': True,
+				'next_run_in_seconds':60
+				}
+			}, 
 			server.idle() )
+
+	def test_stats(self):
+		server = TestFarmServer(repository_name='repo')
+		listener = ServerListener(repository_name='repo', client_name='a client')
+		listener.current_time = lambda : "a date"
+		server = TestFarmServer(repository_name='repo', )
+		repo = Repository('repo')	
+		repo.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
+		TestFarmClient('a client', repo, testinglisteners=[listener])
+		self.assertEquals('''\
+00:00	1
+00:10	2 TODO finish
+''', server.collect_stats() )
 
 
 class Tests_ServerListener(ColoredTestCase):
 
 	def tearDown(self):
-		listener = ServerListener()
+		listener = ServerListener( repository_name='repo' )
 		listener.clean_log_files()
 
 	def setUp(self):
-		listener = ServerListener()
+		listener = ServerListener( repository_name='repo' )
 		listener.clean_log_files()
 
 	def test_multiple_repositories_multiple_tasks(self):
 		id = lambda txt : txt
-		listener = ServerListener()
-		listener.current_time = lambda : "2006-03-17-13-26-20"
-		repo1 = Repository('repo1')	
-		repo2 = Repository('repo2')	
+		listener1 = ServerListener( repository_name='repo')
+		listener2 = ServerListener( repository_name='repo')
+		listener1.current_time = lambda : "2006-03-17-13-26-20"
+		listener2.current_time = lambda : "2006-03-17-13-26-20"
+		repo1 = Repository('repo')	
+		repo2 = Repository('repo')	
 		repo1.add_task('task1', ["echo task1"])	
 		repo1.add_task('task2', [{CMD:"echo something echoed", INFO:id}, "./lalala gh"])
 		repo2.add_task('task1', [])
 		repo2.add_task('task2', ["ls"])	
-		TestFarmClient('a client', [repo1, repo2],[listener])
+		TestFarmClient('a client', repo1, testinglisteners=[listener1])
+		TestFarmClient('a client', repo2, testinglisteners=[listener2])
 		self.assertEquals("""\
 
-('BEGIN_REPOSITORY', 'repo1', '2006-03-17-13-26-20'),
+('BEGIN_REPOSITORY', 'repo', '2006-03-17-13-26-20'),
 ('BEGIN_TASK', 'task1'),
 ('CMD', 'echo task1', True, '', '', {}),
 ('END_TASK', 'task1'),
@@ -138,19 +164,19 @@ class Tests_ServerListener(ColoredTestCase):
 ('CMD', 'echo something echoed', True, '', 'something echoed\\n', {}),
 ('CMD', './lalala gh', False, '/bin/sh: ./lalala: No such file or directory\\n', '', {}),
 ('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo1', '2006-03-17-13-26-20', False),
+('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', False),
 
-('BEGIN_REPOSITORY', 'repo2', '2006-03-17-13-26-20'),
+('BEGIN_REPOSITORY', 'repo', '2006-03-17-13-26-20'),
 ('BEGIN_TASK', 'task1'),
 ('END_TASK', 'task1'),
 ('BEGIN_TASK', 'task2'),
 ('CMD', 'ls', True, '', '', {}),
 ('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo2', '2006-03-17-13-26-20', True),
-""", open( listener.logfile ).read() )
+('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', True),
+""", open( listener2.logfile ).read() )
 	
 	def test_idle_state(self):
-		listener = ServerListener()
+		listener = ServerListener( repository_name='repo' )
 		listener.current_time = lambda : "1000-10-10-10-10-10"
 		listener.listen_found_new_commits(True, next_run_in_seconds=60)
 		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 

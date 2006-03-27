@@ -8,8 +8,22 @@ Done	- xml/easier text format YAML --> Plain Python Code!!
 Done	- essentia in linux
 Done	- Remove "log" sufix in idle methods
 Done	- Examples use appropiate logs dir
+Done!!	- Adapt to Windows
+Done	- Adapt to MacOS X
+Done	- essentia in windows
+Done	- BUG : Fix idle messages in console - MS
+Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
+Done	- communication via http post 
+Done	- Mileston 2: remote server
+Done	- Multiple repositories 
+Done	- Expandible info (and stats) with javascript - MS
+Done	- Integrate Bram's nice javascript
+Done	- Multiple clients in a single script (usage_example.py) REJECTED: script==one build
+Done	- Think: first iteration new_commits should return always true
+
 
 Low Priority
+----------------
 	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
 	- client info to the server. not only the name
 	- separate config script and command line tool with options: verbose, disable repository, server url
@@ -18,12 +32,12 @@ Low Priority
 	  -> alarms instead of stability level
 	- Idle with threading repositories (very low priority)
 	  -> or just now allow multiple repositories
-	- Multiple clients in a single script (usage_example.py)
-	- Maybe change Repository -> Build (like quickupdate, large checkout, subproject)
 	- Now executing con AJAX
 
 Medium Priority
+----------------
 	- set up a "universal" server for any project (be aware of security issues, spam...)
+	  -> Done but inside MTG
 	- Stop client "gently"
 	  -> Propagate "user aborted" to HTML
 	- Mandatory / Breaking tasks
@@ -31,28 +45,28 @@ Medium Priority
 	- Rotate logs
 	- Send begin command 
 	- CLAM in windows
-Done	- essentia in windows
 	- ardour2 in linux
-	- Think: first iteration new_commits should return always true 
 	- verbose client argument: adds info : pass_text to every command
 
 High Priority
-
-	- communication via http post
-	- Mileston 2: remote server
-
-Done!!	- Adapt to Windows 
-Done	- Adapt to MacOS X
-	- Checking <-> Check. Ask Bram
-Done	- BUG : Fix idle messages in console - MS
-Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
+----------------
+	- stats diagrams
+	- API: Checking <-> Check. Ask Bram
 	  -> assert that name is a string
 Done??	- BUG after command completion should update html - MS
-	- Multiple repositories 
-	- Expandible info (and stats) with javascript - MS
-	- Integrate Bram's nice javascript
-	- CLAM in linux - PA
-Done	- publish CLAM htmls, via script that makes scp each X minutes - PA
+	- All CLAM tests working in linux - PA
+	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
 	- CLAM in mac osx
+	- windows new commits check (INFO:func)
+	- mac osx new commits check. why it fails?
+	- refactoring: remove listener at client constructor
+	- refactoring: remote communication code and (.py) file names
+	- refactoring: init project phase
+	- refactoring: init platform phase
 
-
+	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
+	  -> no client, only project object
+	  -> find a name for Task concept.
+	  -> Task name in the html 
+	  -> rename repository->project
+	  -> rename client->platform

@@ -1,7 +1,7 @@
 import commands, os, time, sys, subprocess
 
 from listeners import NullResultListener, ConsoleResultListener
-from testfarmserver import * #TODO provisional
+from testfarmserver import * 
 from serverlistenerproxy import ServerListenerProxy
 
 def is_string( data ):
@@ -15,17 +15,17 @@ class TestFarmClient :
 	def __init__(self, 
 		name,
 		repository,
-		listeners= [],
 		continuous=False,
 		html_base_dir = None,
 		logs_base_dir='/tmp/testfarm_logs',
-		remote_server_url = None
+		remote_server_url = None,
+		testinglisteners = []
+
 	) :
 		assert is_string(name), '< %s > is not a valid client name (should be a string)' % str(name)
 		self.name = name
 
 		self.listeners = [ ConsoleResultListener() ]
-		self.listeners += listeners
 
 		if remote_server_url:
 			listenerproxy = ServerListenerProxy(
@@ -40,18 +40,22 @@ class TestFarmClient :
 				logs_base_dir=logs_base_dir,
 				repository_name=repository.name
 			)
+			self.listeners.append( serverlistener )
 			server_to_push = TestFarmServer( 
 				logs_base_dir=logs_base_dir, 
 				html_base_dir=html_base_dir, 
 				repository_name=repository.name )
 
-			self.listeners.append( serverlistener )
 		else:
 			server_to_push = None
 
+		if testinglisteners:
+			self.listeners = testinglisteners
+
 		#do_tasks at lease one time	
+		repository.do_checking_for_new_commits( self.listeners ) #this creates a valid .idle file
 		repository.do_tasks( self.listeners, server_to_push = server_to_push )
-		
+
 		while continuous :
 			new_commits_found = repository.do_checking_for_new_commits( self.listeners )
 			if new_commits_found:
@@ -239,7 +243,6 @@ class Repository :
 	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.
 		all_ok = True
 		for listener in listeners:
-#			print "LISTENEr = ", listener
 			listener.listen_begin_repository( self.name )
 		for task in self.tasks :
 			current_result = task.do_task(listeners, server_to_push)

@@ -1,15 +1,15 @@
 import datetime, os, glob, sys
-
-header = """
+import subprocess
+ 
+header_index = """
 <html>
 <head>
 <meta http-equiv="refresh" content="30">
 <link href="style.css" rel="stylesheet" type="text/css">
-<title>Tests Farm</title>
+<title>Tests Farm for project %(repository_name)s </title>
 </head>
 <body>
-<h1>testfarm monitor</h1>
-<p>this file is the default html log for all testfarm tasks (from any repository) </p>
+<h1>testfarm for project %(repository_name)s </h1>
 """
 
 header_details = """
@@ -38,7 +38,7 @@ def idle_filename(logs_base_dir, repository_name, client_name) :
 
 def create_dir_if_needed(dir):
 	if not os.path.isdir( dir ) :
-		sys.stderr.write("Warning: directory '%s' is not available. Creating it." % dir)
+		sys.stderr.write("\nWarning: directory '%s' is not available. Creating it." % dir)
 		os.makedirs(dir)
 
 #
@@ -59,6 +59,7 @@ class ServerListener:
 		self.idle_file = None
 		
 		assert repository_name, "Error, repository_name was expected"
+
 		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, repository_name) ) 
 		self.logfile = log_filename( self.logs_base_dir, repository_name, self.client_name )
 		self.idle_file = idle_filename( self.logs_base_dir, repository_name, self.client_name )
@@ -69,18 +70,12 @@ class ServerListener:
 		f.write( entry )
 		f.close()
 	def __write_idle_info(self, idle_info) :
-		f = open(self.idle_file, 'w+')
+		f = open(self.idle_file, 'w')
 		f.write( idle_info )
 		f.close()
 
-	def list_log_files(self):
-		return glob.glob('%s/*' % self.logs_base_dir)
-
 	def clean_log_files(self):
-		for filename in self.list_log_files():
-			os.remove(filename)
-		open( self.logfile, "w")
-		open( self.idle_file, "w")
+		subprocess.call('rm -rf %s' % self.logs_base_dir, shell=True)
 
 	def current_time(self):
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -135,12 +130,6 @@ class TestFarmServer:
 			create_dir_if_needed( '%s/%s' % (html_base_dir, repository_name) )
 			self.repository_name = repository_name
 		
-		self.tmp=open('/tmp/foo', 'a+') #TODO just for debugging.
-		self.foo('init server\n')
-	def foo(self, msg): #TODO debgg. remove!
-		self.tmp.write(msg+'\n')
-		self.tmp.flush()
-
 	def client_names(self):
 		assert self.repository_name, "Error, repository_name was expected. But was None"
 		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.repository_name) )
@@ -153,7 +142,10 @@ class TestFarmServer:
 
 	def load_client_idle(self, client_name):
 		filename = idle_filename( self.logs_base_dir, self.repository_name, client_name )
-		content = open( filename ).read() 
+		try :
+			content = open( filename ).read() 
+		except IOError:
+			return {}
 		if not content :
 			return {}
 		return eval( content )
@@ -239,7 +231,6 @@ class TestFarmServer:
 	
 	def write_last_details_static_html_file(self): 
 		for client in self.client_names():
-			self.foo('+++++ client : '+ client)
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			self.write_details_static_html_file(client, last_date)
@@ -325,7 +316,7 @@ class TestFarmServer:
 			content += self.__html_format_client_iterations(client, client_idle, client_iterations) 
 			content.append('</td>')
 		content.append('</table>')
-		return header + '\n'.join(content) + footer
+		return header_index % {'repository_name':self.repository_name} + '\n'.join(content) + footer
 		
 	def write_iterations_static_html_file(self):
 		f = open("%s/%s/index.html" % (	
@@ -335,6 +326,8 @@ class TestFarmServer:
 		f.close()
 
 	def update_static_html_files(self):
-		self.foo( 'server write html')
 		self.write_last_details_static_html_file()
 		self.write_iterations_static_html_file()
+
+	def collect_stats(self):
+		return '00:00\t1\n00:10\t2\n' 
