@@ -24,7 +24,7 @@ cd_essentia = "cd g:\\sandbox\\essentia-sandbox\\clean-essentia\\trunk\\"
 essentia_update = '"c:\\program files\\svn\\svn" update svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 essentia_checkout = '"c:\\program files\\svn\\svn" checkout svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
-essentia = Repository("essentia/trunk")
+essentia = Repository("essentia_trunk")
 
 '''essentia.add_checking_for_new_commits( 
 	checking_cmd='cd g:\\sandbox\\essentia-sandbox\\ && "c:\\program files\\svn\\svn" status -u clean-essentia/trunk | grep \*', 
