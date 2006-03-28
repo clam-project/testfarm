@@ -78,14 +78,14 @@ clam.add_task("Deploy SMSTools srcdeps branch for SMSBase tests", [
 	"cd $HOME/clam-sandboxes",
 	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
 	'echo "CLAM_PATH=$HOME/clam-sandboxes/testing-clam/" > testing-smstools-srcdeps/build/clam-location.cfg'
-] }
-clam.add_task("Testing SMSTransformations (using SMSTools srcdeps branch)")
+] )
+clam.add_task("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"cd $HOME/clam-sandboxes",
 	"cd testing-smstools-srcdeps/build/FunctionalTests",
 	"make depend",
 	"CONFIG=release make",
 	{CMD: "./SMSToolsTests", INFO: lambda x : x}
-])
+] )
 
 TestFarmClient( 
 	"testing_machine_linux_breezy", 
