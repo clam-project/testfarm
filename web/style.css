@@ -1,0 +1,231 @@
+body
+{
+	font-family: 'Trebuchet MS', 'lucida grande', verdana, sans-serif; 
+	color: #333;
+	background-color: #FFFFFF;
+	background-image: url(imatges/bkd.gif);
+	margin: 1em 10em 1em 10em;
+}
+
+h1 
+{ 
+  font-family: serif; 
+  font-weight: bold; 
+  text-align: left; 
+  background-color: #E2E9EF; 
+  padding: 6px; 
+  border: #cccccc 1px solid;
+}
+
+h2 { font-family: serif; font-weight: bold; text-align: left;  margin-top: 24px; color:#222222; }
+h3 { font-family: sans-serif; font-weight: bold; text-align: left; color:#555555; }
+h4 { font-family: sans-serif; font-weight: bold; text-align: left;  }
+h5 { font-family: sans-serif; font-weight: bold; text-align: left;  }
+
+
+pre
+{
+	border-top: gray 1pt solid;
+	border-right: gray 1pt solid;
+	border-left: gray 1pt solid;
+	border-bottom: gray 1pt solid;
+
+	padding-top: 2pt;
+	padding-right: 2pt;
+	padding-left: 2pt;
+	padding-bottom: 2pt;
+	display: block;
+	font-family: "courier new", courier, mono;
+	background-color: #eeeeee; font-size: small
+}
+
+tt
+{
+	font-family: Courier;
+	color: Maroon;
+	/*font-size: smaller;
+	font-weight: bold;*/
+		
+}
+
+code
+{
+	font-family: "Courier New", Courier, mono;
+	font-size: small
+}
+
+	font-family: "Courier New", Courier, mono;
+tt
+{
+	display: inline;
+	font-family: "Courier New", Courier, mono;
+	color: #000099;
+	font-size: small
+}
+
+p
+{
+	text-align: justify;
+}
+
+
+ul
+{
+  list-style-image: url(imatges/bullet.gif);
+  margin-bottom: 8px;
+}
+
+ul ul, ol ul
+{ 
+  list-style-image: none;
+  list-style-type: disc;
+}
+li
+{
+  margin: 1em;
+}
+
+
+
+a
+{
+	font-weight: bold;
+	color: #003366;
+	text-decoration: none;
+}
+
+td
+{
+	vertical-align:top;
+}
+
+a:hover { color: #f0f07F; }
+
+.literal        {  color: #666666; font-style: italic}
+.keyword        {  color: #000099}
+.identifier     {}
+.comment        {  font-style: italic; color: #990000}
+.special        {  color: #800040}
+.preprocessor   {  color: #FF0000}
+.string         {  font-style: italic; color: #666666}
+.copyright      {  color: #666666; font-size: small}
+.white_bkd      {  background-color: #FFFFFF}
+.dk_grey_bkd    {  background-color: #999999}
+.quotes         {  color: #666666; font-style: italic; font-weight: bold}
+
+.note_box
+{
+	display: block;
+	border: gray 1pt solid;
+	padding: 12px;
+	margin: 12px 34px 12px 34px;
+	font-family:  sans-serif;
+	background-color: #E2E9EF;
+	text-align: justify
+}
+
+.caixa_nota
+{ 
+	display: block;
+	border: gray 1pt solid;
+	padding: 12px;
+	margin: 12px 34px 12px 34px;
+	font-family:  sans-serif;
+	background-color: #E2E9EF;
+	text-align: justify
+}
+
+.caixa_text
+{ 
+	display: block;
+	border: gray 1pt solid;
+	padding: 12px;
+	margin: 12px 34px 12px 34px;
+
+	font-family:  sans-serif;
+        background-color: #f2f5e8;
+	text-align: justify
+
+}
+
+.cita
+{ 
+  font-style: italic;
+  padding-left: 8px;
+}
+
+td
+{ padding: 10px; }
+table.planificacio
+{ 
+  margin-top: 20px;
+  margin-left: 20px;
+
+}
+
+table.planificacio td
+{
+  background-color: #E2E9EF;
+  padding: 4pt;
+}
+
+table.planificacio th
+{
+  background-color:  #648CCA;
+  font-family: sans-serif; 
+  color: #FFFFFF;
+  font-weight: bold; 
+  padding: 4px;
+}
+
+.navegacio table
+{ 
+        background-color: #E9E9EF;
+	font-family: Geneva, Arial, Helvetica, san-serif;
+	font-size: small;
+	padding: 0px;
+        margin: 0px;
+        border: #ccb 1px solid;
+        
+}
+
+.navegacio .td
+{ 
+        padding: 0px;
+}
+
+.navegacio a:hover 
+{ 
+        background-color: #ff9;
+        color: #555;
+} 
+
+.table_title
+{
+	background-color: #648CCA;
+  
+	font-family: Verdana, Arial, Helvetica, sans-serif; 
+        color: #FFFFFF;
+	font-weight: bold; 
+        padding: 4px; 
+}
+
+.table_cells
+{
+	background-color: #E2E9EF;
+
+	font-family: Geneva, Arial, Helvetica, san-serif;
+	font-size: small;
+	padding: 4px;
+}
+
+.table_cells h1
+{ 
+  border: none;
+  text-align: center; 
+}
+
+table h2
+{ 
+  margin-top: 45px;
+}

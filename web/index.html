@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="cat" xml:lang="cat">
+<head>
+  <title>TestFarm home page</title>
+  <link rel="stylesheet" href="style.css" type="text/css">
+</head>
+
+<body>
+
+<h1>TestFarm</h1>
+<h3>the continuous testing and monitoring tool</h3>
+
+<h2>Description</h2>
+<p>
+TestFarm is a client-server <tt>Python</tt> app that allows monitoring the stability and efficiency of a devel project by performing continuous builds and tests in multiple platforms. The overall idea is based on Mozilla Tinderbox. 
+With a really simple approach and sound extensibility mechanisms.
+</p>
+
+<p>Compared to other alternatives:</p>
+
+<ul>
+  <li>TestFarm <tt>doesn't depend on anything</tt> other that python 2.4 and apache mod_python (which is optional).
+      No bonsai or other CVS tools, and no databases (maiybe this will change)</li>
+  
+  <li>A TestFarm client is also <tt>useful without a server</tt>, since it
+      can generate html pages locally.</li>
+  
+  <li>A TestFarm <tt>server needs no configuration</tt> and is independent of the clients. 
+      When a new client is executed a new column is automatically be added in the project page. 
+      And the same applies for the whole project.</li>
+  
+  <li><tt>Simple client scripts</tt> (See an example: <a href="../clam_build.py">clam_build.py</a>.) 
+      which are extensible with pluggable python functions. 
+      These python functions allows publishing informational data, 
+      change the status of a command, add statistics...
+      That allows testfarm to integrat very easily with anything: from testing framework (ala xUnit)
+      to concurrent management system</li>
+  
+  <li><tt>It is multiplatform</tt>, of course!  It works (at least) on Linux, Windows and Mac OSX</li>
+</ul>
+
+<p>TestFarm is being developed mainly by Pau Arumí (parumi at iua dot upf dot edu).
+And it started as a need for the <a href="http://clam.iua.upf.edu">CLAM</a> (C++ Library for Audio and Music) project.
+Other contributors are Bram de Jong and Mohamed Sordo.
+</p>
+
+<h2>A real life example</h2>
+<p>See our <a href="http://clam.iua.upf.edu/testfarm">CLAM testfarm</a> server html pages.</p>
+
+<h2>Wiki</h2>
+<p>All the information about the project is on the 
+<a href="http://iua-share.upf.es/wikis/testfarm">TestFarm Wiki</a></p>
+
+<h2>Download</h2>
+All the code tarballs are accessible <a href="download.html">here</a>.
+</p>
+<p>
+This sofware is licenced with the GPL and kindly 
+<a href="http://sourceforge.net/projects/minicppunit">hosted</a> in sourceforge.
+</p>
+
+
+<h2>Related projects</h2>
+<ul>
+  <li><a href="http://www.iua.upf.es/~parumi/MiniCppUnit/">MiniCppUnit</a> 
+   a C++ xUnit framework, developed by the same author.</li> 
+
+  <li><a href="http://clam.iua.upf.edu">CLAM</a>, 
+   	a C++ Library for Audio and Music developed at the <a href="http://mtg.upf.edu">MTG</a> (Music Technology Group) in the <a href="http://www.upf.edu">UPF</a> (Universitat Pompeu Fabra)</li>
+</ul>
+<hr />
+</body>
+</html>
