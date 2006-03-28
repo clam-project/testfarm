@@ -8,11 +8,11 @@ Done	- xml/easier text format YAML --> Plain Python Code!!
 Done	- essentia in linux
 Done	- Remove "log" sufix in idle methods
 Done	- Examples use appropiate logs dir
-Done!!	- Adapt to Windows
+Done!!	- Adapt to Windows => Bram rules!
 Done	- Adapt to MacOS X
 Done	- essentia in windows
 Done	- BUG : Fix idle messages in console - MS
-Done, But Find Another Clean Way	- BUG TestFarmClient without name - MS 
+Done 	- BUG TestFarmClient without name - MS  => But Find Another Clean Way!
 Done	- communication via http post 
 Done	- Mileston 2: remote server
 Done	- Multiple repositories 
@@ -20,6 +20,11 @@ Done	- Expandible info (and stats) with javascript - MS
 Done	- Integrate Bram's nice javascript
 Done	- Multiple clients in a single script (usage_example.py) REJECTED: script==one build
 Done	- Think: first iteration new_commits should return always true
+Done	- All CLAM tests working in linux - PA
+Done	- windows new commits check (INFO:func) => NOT WITH INFO, but a native grep-like command
+Done	- mac osx new commits check. why it fails? => it was a run_command bug
+Done	- refactoring: remove listener at client constructor
+
 
 
 Low Priority
@@ -50,16 +55,13 @@ Medium Priority
 
 High Priority
 ----------------
-	- stats diagrams
+Current	- stats diagrams
 	- API: Checking <-> Check. Ask Bram
 	  -> assert that name is a string
 Done??	- BUG after command completion should update html - MS
-	- All CLAM tests working in linux - PA
-	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
-	- CLAM in mac osx
-	- windows new commits check (INFO:func)
-	- mac osx new commits check. why it fails?
-	- refactoring: remove listener at client constructor
+Current	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
+Current	- CLAM in mac osx
+	- CLAM in windows
 	- refactoring: remote communication code and (.py) file names
 	- refactoring: init project phase
 	- refactoring: init platform phase

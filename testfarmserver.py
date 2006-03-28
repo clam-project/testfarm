@@ -123,12 +123,16 @@ class TestFarmServer:
 		html_base_dir = '/tmp/testfarm_html',
 		repository_name = None
 	) :
+		print '++++++++++++++++++++++++++++++++++'
 		self.logs_base_dir = logs_base_dir 
 		self.html_base_dir = html_base_dir
 		create_dir_if_needed( html_base_dir )
 		if repository_name: #TODO not very sure of this  (PA)
 			create_dir_if_needed( '%s/%s' % (html_base_dir, repository_name) )
 			self.repository_name = repository_name
+		else:
+			print 'Warning: html dir was not created because Server was not initialized with a repository_name'
+	
 		
 	def client_names(self):
 		assert self.repository_name, "Error, repository_name was expected. But was None"
@@ -174,7 +178,7 @@ class TestFarmServer:
 					break
 		return result
 	
-	def html_single_iteration_details(self, client_name, wanted_date):
+	def __html_single_iteration_details(self, client_name, wanted_date):
 		content = []
 		id_info = 1; # auto-increment id
 		id_output = 1; # auto-increment id
@@ -219,21 +223,26 @@ class TestFarmServer:
 		return header_details + "\n".join(content) + footer
 	'''
 
-	def write_details_static_html_file(self, client_name, wanted_date):
-		details = self.html_single_iteration_details(client_name, wanted_date)
-		f = open("%s/%s/details-%s-%s.html" % (
+	def __write_details_static_html_file(self, client_name, wanted_date):
+		details = self.__html_single_iteration_details(client_name, wanted_date)
+		filename = "%s/%s/details-%s-%s.html" % (
 			self.html_base_dir, 
 			self.repository_name, 
 			client_name, 
-			wanted_date), "w")
+			wanted_date )
+		f = open( filename, 'w' )
 		f.write( details )
 		f.close()
+		return filename
 	
-	def write_last_details_static_html_file(self): 
+	def __write_last_details_static_html_file(self):
+		filenames = []
 		for client in self.client_names():
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
-			self.write_details_static_html_file(client, last_date)
+			filename = self.__write_details_static_html_file(client, last_date)
+			filenames.append(filename)
+		return filenames
 
 	def __get_client_iterations(self, client_name):
 		log = self.load_client_log(client_name)
@@ -301,7 +310,7 @@ class TestFarmServer:
 				status, name_html, begintime_html, endtime_html, details_html) )
 		return content
 
-	def html_iterations(self):
+	def __html_iterations(self):
 		iterations_per_client = self.iterations()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
@@ -318,16 +327,27 @@ class TestFarmServer:
 		content.append('</table>')
 		return header_index % {'repository_name':self.repository_name} + '\n'.join(content) + footer
 		
-	def write_iterations_static_html_file(self):
-		f = open("%s/%s/index.html" % (	
+	def __write_iterations_static_html_file(self):
+		filename = "%s/%s/index.html" % (	
 			self.html_base_dir, 
-			self.repository_name), "w")
-		f.write( self.html_iterations() )
+			self.repository_name )
+		f = open( filename, 'w' )
+		f.write( self.__html_iterations() )
 		f.close()
+		return filename
 
+	def __helper_apache_log(self, msg):
+			from mod_python import apache
+			apache.log_error('TestFarm: out '+ str(out) )
+		
 	def update_static_html_files(self):
-		self.write_last_details_static_html_file()
-		self.write_iterations_static_html_file()
+		htmls = self.__write_last_details_static_html_file()
+		htmls.append( self.__write_iterations_static_html_file() )
+		if self.repository_name == 'CLAM': #TODO the proper way
+			filesstr = ' '.join(htmls)
+			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
+			sys.stderr.write(str(out))
+#			self.__helper_apache_log('TestFarm: sended: %s \nout: %s ' % (filesstr, str(out)) )
 
 	def collect_stats(self):
 		return '00:00\t1\n00:10\t2\n' 

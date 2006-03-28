@@ -10,7 +10,6 @@ def _idle_filename(logs_base_dir, repository_name, client_name) :
 	return '%s/%s/%s.idle' % (logs_base_dir, repository_name, client_name)
 
 def _create_dir_if_needed(dir):
-	print "=================== CREATING DIR if needed", dir
 	if not os.path.isdir( dir ) :
 		sys.stderr.write("Warning: directory '%s' is not available. Creating it." % dir)
 		os.makedirs(dir)
@@ -34,7 +33,7 @@ def append_log_entry(req, repository_name, client_name, entry):
 	f.write(entry)
 	f.close()
 	server.update_static_html_files()
-	return "log entry received"
+	return "remote OK"
 	return apache.OK
 
 def write_idle_info( req, repository_name, client_name, idle_info ) :
@@ -46,7 +45,7 @@ def write_idle_info( req, repository_name, client_name, idle_info ) :
 	f.write(idle_info)
 	f.close()
 	server.update_static_html_files()
-	return "idle info received"
+	return "remote Ok"
 	return apache.OK
 	
 
