@@ -10,10 +10,12 @@ def filter_cvs_update( text ):
 
 clam = Repository("CLAM")
 clam.add_task("starting clam", ["echo foo"])
+'''
 clam.add_checking_for_new_commits( 
 	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
 	minutes_idle=5
 )
+'''
 clam.add_task("Which new commits?", [	
 	"cd $HOME/clam-sandboxes",
 	{ CMD: "cd testing-clam && cvs -q up -dP", INFO: filter_cvs_update },
@@ -21,7 +23,8 @@ clam.add_task("Which new commits?", [
 clam.add_deployment_task( [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-clam CLAM",
-	"cd testing-clam && cvs up -dP",
+	"cd testing-clam",
+	{CMD: "cvs up -dP", INFO: lambda x:x},
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure",
 	"scons",
@@ -60,6 +63,7 @@ TestFarmClient(
 	"testing-machine_osx-tiger", 
 	clam, 
 	remote_server_url='http://10.55.0.66/testfarm_server',
-	continuous=True
+	continuous=True,
+	verbose=True
 )
 

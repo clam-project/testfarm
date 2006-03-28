@@ -19,6 +19,7 @@ class TestFarmClient :
 		html_base_dir = None,
 		logs_base_dir='/tmp/testfarm_logs',
 		remote_server_url = None,
+		verbose = False,
 		testinglisteners = []
 
 	) :
@@ -53,13 +54,13 @@ class TestFarmClient :
 			self.listeners = testinglisteners
 
 		#do_tasks at lease one time	
-		repository.do_checking_for_new_commits( self.listeners ) #this creates a valid .idle file
-		repository.do_tasks( self.listeners, server_to_push = server_to_push )
+		repository.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
+		repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 
 		while continuous :
-			new_commits_found = repository.do_checking_for_new_commits( self.listeners )
+			new_commits_found = repository.do_checking_for_new_commits( self.listeners, verbose=verbose )
 			if new_commits_found:
-				repository.do_tasks( self.listeners, server_to_push = server_to_push )
+				repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 			else:
 				if server_to_push: #update idle time display
 					server_to_push.update_static_html_files()
@@ -140,9 +141,9 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 	return (output, status)
 	
 	
-def run_command(command, initial_working_dir):
+def run_command(command, initial_working_dir, verbose=False):
 	logfile = initial_working_dir + "/command_log.html"
-	return run_command_with_log(command, verbose=False, logfilename=logfile, write_as_html=True)
+	return run_command_with_log(command, verbose=verbose, logfilename=logfile, write_as_html=True)
 
 
 class Task:
@@ -162,7 +163,7 @@ class Task:
 		for listener in listeners :
 			listener.listen_result( cmd, status, output, info, stats )
 
-	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None):
+	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False):
 		self.__begin_task(listeners)
 		if server_to_push:
 				server_to_push.update_static_html_files()
@@ -174,7 +175,7 @@ class Task:
 				cmd_with_pwd = cmd + " && cd > %s" % temp_file
 			else:
 				cmd_with_pwd = cmd + " && pwd > %s" % temp_file
-			output, exit_status = run_command(cmd_with_pwd, initial_working_dir)
+			output, exit_status = run_command(cmd_with_pwd, initial_working_dir, verbose=verbose)
 			if status_ok_parser :
 				status_ok = status_ok_parser( output ) #TODO assert that returns a boolean
 			else:
@@ -229,23 +230,23 @@ class Repository :
 	def add_task(self, taskname, commands):
 		self.tasks.append(Task(taskname, commands)) 
 
-	def do_checking_for_new_commits(self, listeners):
+	def do_checking_for_new_commits(self, listeners, verbose=False):
 		initial_working_dir = os.path.abspath(os.curdir)
 		if not self.not_idle_checking_cmd :
 			new_commits_found = True #default
 		else :
-			output, zero_if_new_commits_found = run_command( self.not_idle_checking_cmd, initial_working_dir )
+			output, zero_if_new_commits_found = run_command( self.not_idle_checking_cmd, initial_working_dir, verbose=verbose )
 			new_commits_found = not zero_if_new_commits_found
 		for listener in listeners :
 			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
 		return new_commits_found
 
-	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None): #TODO remove server_to_push.
+	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
 		all_ok = True
 		for listener in listeners:
 			listener.listen_begin_repository( self.name )
 		for task in self.tasks :
-			current_result = task.do_task(listeners, server_to_push)
+			current_result = task.do_task(listeners, server_to_push, verbose=verbose)
 			all_ok = all_ok and current_result
 			if server_to_push : #TODO remove. this is just provisional. Is it?
 				server_to_push.update_static_html_files()
