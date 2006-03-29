@@ -22,28 +22,29 @@ With a really simple approach and sound extensibility mechanisms.
 
 <ul>
   <li>TestFarm <tt>doesn't depend on anything</tt> other that python 2.4 and apache mod_python (which is optional).
-      No bonsai or other CVS tools, and no databases (maiybe this will change)</li>
+      No bonsai or other CVS tools, and no databases (although maybe this will change)</li>
   
   <li>A TestFarm client is also <tt>useful without a server</tt>, since it
       can generate html pages locally.</li>
   
-  <li>A TestFarm <tt>server needs no configuration</tt> and is independent of the clients. 
-      When a new client is executed a new column is automatically be added in the project page. 
-      And the same applies for the whole project.</li>
+  <li>A TestFarm <tt>server needs no configuration</tt> and is independent of the clients, allowing this:
+      when a new client is executed, a new column is automatically added in the project page. 
+      And the same applies for the whole project, when a client referes to a new project.</li>
   
-  <li><tt>Simple client scripts</tt> (See an example: <a href="../clam_build.py">clam_build.py</a>.) 
-      which are extensible with pluggable python functions. 
+  <li><tt>Simple client scripts</tt> (See an example: <a href="export/clam_build.py">clam_build.py</a>.) 
+      which are extensible with <tt>pluggable python functions</tt>. 
       These python functions allows publishing informational data, 
       change the status of a command, add statistics...
       That allows testfarm to integrat very easily with anything: from testing framework (ala xUnit)
       to concurrent management system</li>
   
   <li><tt>It is multiplatform</tt>, of course!  It works (at least) on Linux, Windows and Mac OSX</li>
+
 </ul>
 
 <p>TestFarm is being developed mainly by Pau Arumí (parumi at iua dot upf dot edu).
 And it started as a need for the <a href="http://clam.iua.upf.edu">CLAM</a> (C++ Library for Audio and Music) project.
-Other contributors are Bram de Jong and Mohamed Sordo.
+Other contributors are Bram de Jong, Mohamed Sordo and David Garcia.
 </p>
 
 <h2>A real life example</h2>
@@ -54,11 +55,11 @@ Other contributors are Bram de Jong and Mohamed Sordo.
 <a href="http://iua-share.upf.es/wikis/testfarm">TestFarm Wiki</a></p>
 
 <h2>Download</h2>
-All the code tarballs are accessible <a href="download.html">here</a>.
+The code tarballs are accessible <a href="download.html">here</a>.
 </p>
 <p>
-This sofware is licenced with the GPL and kindly 
-<a href="http://sourceforge.net/projects/minicppunit">hosted</a> in sourceforge.
+This sofware is licenced under the GPL, and kindly 
+<a href="http://sourceforge.net/projects/testfarm">hosted</a> in sourceforge.
 </p>
 
 
