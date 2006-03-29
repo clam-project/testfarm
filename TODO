@@ -30,6 +30,7 @@ Done	- refactoring: remove listener at client constructor
 Low Priority
 ----------------
 	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
+	  -> write a html column for commits and synchronize commits with boxes.
 	- client info to the server. not only the name
 	- separate config script and command line tool with options: verbose, disable repository, server url
 	  ala scons and SConstruct.  testfarm --verbose --force
@@ -38,6 +39,8 @@ Low Priority
 	- Idle with threading repositories (very low priority)
 	  -> or just now allow multiple repositories
 	- Now executing con AJAX
+	- Nice diagrams: gnuplot, rrdtools, ploticus(*)
+	- Nice html, ala tinderbox
 
 Medium Priority
 ----------------
@@ -48,7 +51,7 @@ Medium Priority
 	- Mandatory / Breaking tasks
 	- Think: Tasks in HTML with proportional size
 	- Rotate logs
-	- Send begin command 
+	- Send begin command --MS
 	- CLAM in windows
 	- ardour2 in linux
 	- verbose client argument: adds info : pass_text to every command
@@ -64,7 +67,8 @@ Current	- CLAM in mac osx
 	- CLAM in windows
 	- refactoring: remote communication code and (.py) file names
 	- refactoring: init project phase
-	- refactoring: init platform phase
+	- refactoring: init client phase
+	- organize src directories
 
 	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
 	  -> no client, only project object

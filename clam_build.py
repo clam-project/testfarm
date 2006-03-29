@@ -76,6 +76,7 @@ clam.add_task("Functional Tests (with srcdeps)", [
 
 clam.add_task("Deploy SMSTools srcdeps branch for SMSBase tests", [
 	"cd $HOME/clam-sandboxes",
+	"rm -rf testing-smstools-srcdeps",
 	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
 	'echo "CLAM_PATH=$HOME/clam-sandboxes/testing-clam/" > testing-smstools-srcdeps/build/clam-location.cfg'
 ] )
@@ -83,7 +84,7 @@ clam.add_task("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"cd $HOME/clam-sandboxes",
 	"cd testing-smstools-srcdeps/build/FunctionalTests",
 	"make depend",
-	"CONFIG=release make",
+	"CONFIG=debug make", #release doesn't work
 	{CMD: "./SMSToolsTests", INFO: lambda x : x}
 ] )
 

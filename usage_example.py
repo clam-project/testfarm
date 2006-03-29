@@ -35,8 +35,7 @@ else :
 	TestFarmClient( 
 		"pau_computer", 
 		example, 
-		#remote_server_url="http://10.55.0.66/testfarm_server", #TODO check if url accessible, or responds
-		remote_server_url="http://localhost/testfarm_server",
+		remote_server_url="http://10.55.0.66/testfarm_server", #TODO check if url accessible, or responds
 		continuous=False
 	)
 
