@@ -125,13 +125,14 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 	else:
 		logFile = None
 	
-	output = ""
+	output = []
 	 
-	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 	  
 	while True:
-		tmp = pipe.stdout.read()
-		tmp += pipe.stderr.read()
+		tmp = pipe.stdout.readline()
+		
+		output.append( tmp )
 		
 		if tmp:
 			if verbose:
@@ -141,13 +142,9 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 				logFile.write(tmp)
 				logFile.flush()
 							
-			output = output + tmp
-			
 		if pipe.poll() is not None:
 			break
-		
-		time.sleep(0.200) # sleep 200 ms
-
+	
 	status = pipe.wait()
 	
 	if logFile:
@@ -158,7 +155,7 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 		logFile.flush()
 		logFile.close()
 	
-	return (output, status)
+	return (''.join(output), status)
 	
 	
 def run_command(command, initial_working_dir, verbose=False):
