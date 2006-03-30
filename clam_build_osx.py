@@ -8,23 +8,27 @@ def filter_cvs_update( text ):
 	result = filter(dont_start_interr, text.split('\n') )	
 	return '\n'.join(result)
 
+def pass_text(text):
+	return text
+
 clam = Repository("CLAM")
-clam.add_task("starting clam", ["echo foo"])
+clam.add_task("starting clam", ["cd .. && cd testfarm && echo foo && pwd"])
 '''
 clam.add_checking_for_new_commits( 
-	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
+	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up  | grep ^[UP]",  
 	minutes_idle=5
 )
-'''
+
 clam.add_task("Which new commits?", [	
 	"cd $HOME/clam-sandboxes",
-	{ CMD: "cd testing-clam && cvs -q up -dP", INFO: filter_cvs_update },
+	{ CMD: "cd testing-clam && cvs -q up", INFO: filter_cvs_update },
 ] )
+'''
 clam.add_deployment_task( [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-clam CLAM",
 	"cd testing-clam",
-	{CMD: "cvs up -dP", INFO: lambda x:x},
+	{CMD: "cvs up -dP", INFO: pass_text},
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure",
 	"scons",
@@ -34,7 +38,7 @@ clam.add_deployment_task( [
 clam.add_task("SMSTools installation", [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-smstools CLAM_SMSTools",
-	"cd testing-smstools && cvs up -dP",
+	"cd testing-smstools && cvs up ",
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"scons"
 ] )
