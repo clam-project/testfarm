@@ -10,12 +10,16 @@
 <body>
 
 <h1>TestFarm</h1>
-<h3>the continuous testing and monitoring tool</h3>
+<h3>continuous testing and monitoring tool</h3>
 
 <h2>Description</h2>
 <p>
-TestFarm is a client-server <tt>Python</tt> app that allows monitoring the stability and efficiency of a devel project by performing continuous builds and tests in multiple platforms. The overall idea is based on Mozilla Tinderbox. 
-With a really simple approach and sound extensibility mechanisms.
+
+TestFarm is a client-server <tt>Python</tt> application that allows 
+you to monitor the stability and efficiency of a development project 
+by performing continuous builds and tests on multiple platforms. 
+The overall idea is based on Mozilla Tinderbox, but has a really simple 
+approach and sound extensibility mechanisms.
 </p>
 
 <p>Compared to other alternatives:</p>
@@ -28,15 +32,15 @@ With a really simple approach and sound extensibility mechanisms.
       can generate html pages locally.</li>
   
   <li>A TestFarm <tt>server needs no configuration</tt> and is independent of the clients, allowing this:
-      when a new client is executed, a new column is automatically added in the project page. 
+      when a new client is executed, a new column is automatically added to the project page. 
       And the same applies for the whole project, when a client referes to a new project.</li>
   
   <li><tt>Simple client scripts</tt> (See an example: <a href="export/clam_build.py">clam_build.py</a>.) 
       which are extensible with <tt>pluggable python functions</tt>. 
       These python functions allows publishing informational data, 
       change the status of a command, add statistics...
-      That allows testfarm to integrat very easily with anything: from testing framework (ala xUnit)
-      to concurrent management system</li>
+	
+      Thit allows testfarm to integrate very easily with anything: from testing frameworks (ala xUnit) to concurrent management systems.</li>
   
   <li><tt>It is multiplatform</tt>, of course!  It works (at least) on Linux, Windows and Mac OSX</li>
 
