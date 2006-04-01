@@ -1,3 +1,21 @@
+body {
+	font-family: 'Trebuchet MS', 'lucida grande', verdana, sans-serif; 
+}
+p {
+	padding: 0.3;
+	margin:0.3;
+}
+h1 {
+	color: #666;
+}
+a:link {
+	color: #006699;
+}
+
+a:visited {
+	color: blue;
+}
+
 
 .inprogress
 {
@@ -10,6 +28,7 @@
 	font-size: 0.8em;
 	color: black;
 	background-color: yellow;
+	-moz-border-radius: 0.8em; /* mozilla only */
 }
 
 .idle
@@ -41,6 +60,7 @@
 	font-size: 0.8em;
 	color: white;
 	background-color: #00C200;
+	-moz-border-radius: 0.8em; /* mozilla only */
 }
 .broken
 {
@@ -53,6 +73,7 @@
 	font-size: 0.8em;
 	color: white;
 	background-color: red;
+	-moz-border-radius: 0.8em; /* mozilla only */
 }
 table
 {
