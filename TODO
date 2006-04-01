@@ -25,6 +25,7 @@ Done	- windows new commits check (INFO:func) => NOT WITH INFO, but a native grep
 Done	- mac osx new commits check. why it fails? => it was a run_command bug
 Done	- refactoring: remove listener at client constructor
 
+Done	- verbose client argument: adds info : pass_text to every command => in a different way. it write text to a log file. Moreover it does it continuously (without having to wait to the command finalization)
 
 
 Low Priority
@@ -54,7 +55,6 @@ Medium Priority
 	- Send begin command --MS
 	- CLAM in windows
 	- ardour2 in linux
-	- verbose client argument: adds info : pass_text to every command
 
 High Priority
 ----------------
@@ -78,4 +78,4 @@ Current	- CLAM in mac osx
 	  -> rename client->platform
 
 
-xxxx
+
