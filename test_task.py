@@ -78,7 +78,7 @@ END_TASK task""", listener.log() )
 		task.do_task( [listener] )
 		self.assertEquals("""\
 BEGIN_TASK task
-('./write_to_stderr_and_stdout.py', 'failure', 'OUT\\nERR ', '', {})
+('./write_to_stderr_and_stdout.py', 'failure', 'ERR OUT\\n', '', {})
 END_TASK task""", listener.log() )
 		
 	def test_results_log__of_two_listeners(self):

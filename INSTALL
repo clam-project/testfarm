@@ -1,5 +1,6 @@
 
 How To Install a TestFarm Server ?
+---------------------------------------
 
 - install libapache2-mod-python ( version >= 3.1 )
 
@@ -19,5 +20,31 @@ How To Install a TestFarm Server ?
 - $ sudo /etc/init.d/apache2 restart
 
 - give permissions to the logs and html directory. TODO explain
+
+
+
+
+SF project administration  
+----------------------------
+
+(not interesting for users, just a personal note. 
+SF is slow and its help is over verbose :-( )
+
+how to upload a sourceforge release?
+
+ftp upload.sourceforge.net
+user: anonymous / mail
+cd /incoming
+put file
+
+in sourceforge.net
+add release
+
+
+how to update the home page ?
+(actually it's only a redirection to www.iua.upf.es/~parumi/testsfarm/)
+
+ssh  shell.sourceforge.net / sf pw
+cd /home/groups/t/te/testsfarm/htdocs
 
 

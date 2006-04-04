@@ -62,13 +62,13 @@ class Tests_TestFarmServer(ColoredTestCase):
 		server = TestFarmServer(repository_name='repo')
 		repo = Repository('repo')	
 		repo.add_task('task1', [])	
-		TestFarmClient('a client', repo, testinglisteners=[listener])
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
 		self.assertEquals(
 			{'testing_client' : [('a date', 'a date', 'repo', 'stable')]}, 
 			server.iterations() )
 
 	def test_details(self):
-		listener = ServerListener( client_name='a client', repository_name='repo')
+		listener = ServerListener( client_name='a_client', repository_name='repo')
 		server = TestFarmServer(repository_name='repo')
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_repository("not wanted")
@@ -94,7 +94,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
 ]
-		self.assertEquals( expected, server.single_iteration_details('a client', '1999-99-99-99-99-99') )
+		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
 
 	def test_two_clients(self):
 		listener1 = ServerListener(
@@ -111,7 +111,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 		repo = Repository('repo')
 		repo.add_task('task1', [])
 
-		TestFarmClient('a client', repo, testinglisteners=[listener1])
+		TestFarmClient('a_client', repo, testinglisteners=[listener1])
 		TestFarmClient('another client', repo, testinglisteners=[listener2])
 		self.assertEquals( 
 			{'client 1':[('some date', 'some date', 'repo', 'stable')],
@@ -121,14 +121,14 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener2.clean_log_files()
 
 	def test_idles(self):
-		listener = ServerListener(repository_name='repo', client_name='a client')
+		listener = ServerListener(repository_name='repo', client_name='a_client')
 		listener.current_time = lambda : "a date"
 		server = TestFarmServer(repository_name='repo')
 		repo = Repository('repo')	
 		repo.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
-		TestFarmClient('a client', repo, testinglisteners=[listener])
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
 		self.assertEquals(
-			{'a client' : 
+			{'a_client' : 
 				{'date':'a date', 
 				'new_commits_found': True,
 				'next_run_in_seconds':60
@@ -136,20 +136,141 @@ class Tests_TestFarmServer(ColoredTestCase):
 			}, 
 			server.idle() )
 
-	def test_stats(self):
+	def test_stats_single_client_single_key(self):
+		listener = ServerListener(repository_name='repo', client_name='a_client')
 		server = TestFarmServer(repository_name='repo')
-		listener = ServerListener(repository_name='repo', client_name='a client')
-		listener.current_time = lambda : "a date"
-		server = TestFarmServer(repository_name='repo', )
+
+		listener.current_time = lambda : "2006-04-04-00-00-00"
 		repo = Repository('repo')	
-		repo.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
-		TestFarmClient('a client', repo, testinglisteners=[listener])
+		repo.add_task("task", [{STATS:lambda x: {'key':5} }] )
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
+		
+		listener.current_time = lambda : "2006-04-05-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key':1} }] )
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
+		
+		self.assertEquals({
+			'a_client': {
+				'key': [5, 1], 
+				'time': ['2006-04-04-00-00-00', '2006-04-05-00-00-00']
+				}
+			}, server.collect_stats() )
+
+	def test_no_stats(self):
+		listener = ServerListener(repository_name='repo', client_name='a_client')
+		server = TestFarmServer(repository_name='repo')
+
+		listener.current_time = lambda : "2006-04-04-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", ["echo no stats"] )
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
+		
+		self.assertEquals( {'a_client': {'time': []} }, server.collect_stats() )
+
+	def test_stats_single_client_multiple_key(self):
+		listener = ServerListener(repository_name='repo', client_name='a_client')
+		server = TestFarmServer(repository_name='repo')
+
+		listener.current_time = lambda : "2006-04-04-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key1':5, 'key2':0} }] )
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
+		
+		listener.current_time = lambda : "2006-04-05-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key1':-1, 'key2':4} }] )
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
+		
+		self.assertEquals({
+			'a_client': {
+				'key1': [5, -1], 
+				'key2': [0, 4], 
+				'time': ['2006-04-04-00-00-00', '2006-04-05-00-00-00']
+				}
+			}, server.collect_stats() )
+
+
+	def test_stats_multiple_client_single_key(self):
+		listener1 = ServerListener(repository_name='repo', client_name='client1')
+		listener2 = ServerListener(repository_name='repo', client_name='client2')
+		server = TestFarmServer(repository_name='repo')
+
+		listener1.current_time = lambda : "2006-04-04-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key':5} }] )
+		TestFarmClient('client1', repo, testinglisteners=[listener1])
+		
+		listener1.current_time = lambda : "2006-04-05-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key':1} }] )
+		TestFarmClient('client1', repo, testinglisteners=[listener1])
+		
+		listener2.current_time = lambda : "1000-00-00-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'clau':0} }] )
+		TestFarmClient('client2', repo, testinglisteners=[listener2])
+
+
+		self.assertEquals( {
+			'client1': { 
+				'key': [5, 1], 
+				'time': ['2006-04-04-00-00-00', '2006-04-05-00-00-00']
+				},
+			'client2': {
+				'clau': [0],
+				'time': ['1000-00-00-00-00-00']
+				}
+			}, server.collect_stats() )
+
+	def test_plot_data_file(self):
+		listener1 = ServerListener(repository_name='repo', client_name='client1')
+		listener2 = ServerListener(repository_name='repo', client_name='client2')
+		server = TestFarmServer(repository_name='repo')
+
+		listener1.current_time = lambda : "2006-04-04-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key':5} }] )
+		TestFarmClient('client1', repo, testinglisteners=[listener1])
+		
+		listener1.current_time = lambda : "2006-04-05-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'key':1} }] )
+		TestFarmClient('client1', repo, testinglisteners=[listener1])
+		
+		listener2.current_time = lambda : "2000-01-01-12-54-00"
+		repo = Repository('repo')	
+		repo.add_task("task", [{STATS:lambda x: {'clau1':0, 'clau2':10} }] )
+		TestFarmClient('client2', repo, testinglisteners=[listener2])
+		
+		server.plot_stats()
+
 		self.assertEquals('''\
-00:00	1
-00:10	2 TODO finish
-''', server.collect_stats() )
+time	key
+2006/04/04.00:00	5
+2006/04/05.00:00	1
+''', open("%s/%s/client1.plot" % (server.logs_base_dir, server.repository_name)).read() )
+
+		self.assertEquals('''\
+time	clau1	clau2
+2000/01/01.12:54	0	10
+''', open("%s/%s/client2.plot" % (server.logs_base_dir, server.repository_name)).read() )
 
 
+
+	def test_plotdata_no_stats(self):
+		listener = ServerListener(repository_name='repo', client_name='a_client')
+		server = TestFarmServer(repository_name='repo')
+
+		listener.current_time = lambda : "2006-04-04-00-00-00"
+		repo = Repository('repo')	
+		repo.add_task("task", ["echo no stats"] )
+		TestFarmClient('a_client', repo, testinglisteners=[listener])
+		
+		server.plot_stats()
+#
+# Tests ServerListener
+#
 class Tests_ServerListener(ColoredTestCase):
 
 	def tearDown(self):
@@ -172,8 +293,8 @@ class Tests_ServerListener(ColoredTestCase):
 		repo1.add_task('task2', [{CMD:"echo something echoed", INFO:id}, "./lalala gh"])
 		repo2.add_task('task1', [])
 		repo2.add_task('task2', ["ls"])	
-		TestFarmClient('a client', repo1, testinglisteners=[listener1])
-		TestFarmClient('a client', repo2, testinglisteners=[listener2])
+		TestFarmClient('a_client', repo1, testinglisteners=[listener1])
+		TestFarmClient('a_client', repo2, testinglisteners=[listener2])
 		self.assertEquals("""\
 
 ('BEGIN_REPOSITORY', 'repo', '2006-03-17-13-26-20'),

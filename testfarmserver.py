@@ -30,6 +30,7 @@ header_index = """
 </head>
 <body>
 <h1>testfarm for project %(repository_name)s </h1>
+
 """
 
 header_details = """
@@ -43,6 +44,7 @@ header_details = """
 """
 
 footer = """
+<p>TestFarm is free software. Learn <a href="www.iua.upf.es/~parumi/testfarm">about TestFarm</a>.</p>
 </body>
 </html>
 """
@@ -143,7 +145,6 @@ class TestFarmServer:
 		html_base_dir = '/tmp/testfarm_html',
 		repository_name = None
 	) :
-		print '++++++++++++++++++++++++++++++++++'
 		self.logs_base_dir = logs_base_dir 
 		self.html_base_dir = html_base_dir
 		create_dir_if_needed( html_base_dir )
@@ -290,6 +291,26 @@ class TestFarmServer:
 		iterations.reverse()
 		return iterations
 
+	def __get_client_stats(self, client_name):
+		log = self.load_client_log(client_name)
+		allstats = { 'time':[] }
+		begin_time = ''
+		for entry in log :
+			tag = entry[0]
+			if tag == 'BEGIN_REPOSITORY':
+				begin_time = entry[2]
+			if tag == 'CMD' :
+				assert begin_time, "Error. found a stat before a begin_repository"
+				stats_entry = entry[5]
+				if not stats_entry:
+					continue
+				for key in stats_entry.keys():
+					if not allstats.has_key(key):
+						allstats[key] = []
+					allstats[key].append( stats_entry[key] )
+				allstats['time'].append( begin_time )
+		return allstats
+
 	def idle(self):
 		result = {}
 		for client_name in self.client_names():
@@ -330,14 +351,25 @@ class TestFarmServer:
 				status, name_html, begintime_html, endtime_html, details_html) )
 		return content
 
-	def __html_iterations(self):
+	def __html_index(self, clients_with_stats):
 		iterations_per_client = self.iterations()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
 		for client in iterations_per_client.keys():
 			content.append('<th> Client: %s </th>' % client )
 		content.append('</tr>')
-		
+
+		content.append('<tr>')
+		for client in iterations_per_client.keys():
+			if client in clients_with_stats:
+				thumb_html = '<a target="_blank" href="%s.png"><img src="%s-thumb.png" /></a> <a href="%s.svg">svg</a>' % (client, client, client)
+				
+			else:
+				thumb_html = ''
+			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
+		content.append('</tr>')
+			
+
 		for client in iterations_per_client.keys():
 			content.append('<td>')
 			client_iterations = iterations_per_client[client]
@@ -347,12 +379,12 @@ class TestFarmServer:
 		content.append('</table>')
 		return header_index % {'repository_name':self.repository_name} + '\n'.join(content) + footer
 		
-	def __write_iterations_static_html_file(self):
+	def __write_html_index(self, clients_with_stats):
 		filename = "%s/%s/index.html" % (	
 			self.html_base_dir, 
 			self.repository_name )
 		f = open( filename, 'w' )
-		f.write( self.__html_iterations() )
+		f.write( self.__html_index( clients_with_stats ) )
 		f.close()
 		return filename
 
@@ -361,13 +393,87 @@ class TestFarmServer:
 			apache.log_error('TestFarm: out '+ str(out) )
 		
 	def update_static_html_files(self):
-		htmls = self.__write_last_details_static_html_file()
-		htmls.append( self.__write_iterations_static_html_file() )
+		newfiles, clients_with_stats = self.plot_stats()
+		newfiles += self.__write_last_details_static_html_file()
+		newfiles.append( self.__write_html_index( clients_with_stats ) )
 		if self.repository_name == 'CLAM': #TODO the proper way
-			filesstr = ' '.join(htmls)
+			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
 			sys.stderr.write(str(out))
 #			self.__helper_apache_log('TestFarm: sended: %s \nout: %s ' % (filesstr, str(out)) )
 
 	def collect_stats(self):
-		return '00:00\t1\n00:10\t2\n' 
+		result = {}
+		for client in self.client_names():
+			result[client] = self.__get_client_stats(client)
+		return result
+	def __assert_all_keys_equal_length(self, stats, length):
+		keys = stats.keys()
+		for key in keys:
+			assert length == len(stats[key]), "Error found stat with diferent length. key: %s\n%s" %(key, stats)
+
+	def __format_datetime(self, time_str, pattern):
+		time_tags = ["Y", "M", "D", "hour", "min", "sec"] #TODO move to attribute
+		time_dict = dict(zip( time_tags, time_str.split("-") ))
+		return pattern % time_dict 
+
+	def plot_stats(self):
+		allclients_stats = self.collect_stats()
+		clients = allclients_stats.keys()
+		images = []
+		clients_with_stats = []
+		for client in clients:
+			stats = allclients_stats[ client ]
+			keys = stats.keys()
+			if len(keys)>1: #more fields than just 'time'
+				clients_with_stats.append( client )
+			length = len( stats[ keys[0] ] )
+			self.__assert_all_keys_equal_length(stats, length)
+
+			ploticus_data_filename = '%s/%s/%s.plot' % (self.logs_base_dir, self.repository_name, client)
+			print 'writing file:', ploticus_data_filename
+			f = open(ploticus_data_filename, 'w')
+			f.write("time")
+			# Write header
+			for key in keys:
+				if key == 'time': continue
+				f.write("\t%s" % key)
+			f.write("\n")
+				
+			for i in range(length):
+				time_str = stats['time'][i]
+				time_formatted = self.__format_datetime(time_str, "%(Y)s/%(M)s/%(D)s.%(hour)s:%(min)s")
+				f.write(time_formatted)
+				for key in keys:
+					if key == 'time': continue
+					f.write("\t%s" % stats[key][i])
+				f.write('\n')
+			f.close()
+
+			columns = ""
+			for i in range(len(keys)-2): # the first column is time, and the second is "y=1" already in the ploticus_cmd
+				columns += " y%d=%d" % (i+2, i+3) # y2=3 y3=4, etc.
+
+			png_filename = '%s/%s/%s.png' % (self.html_base_dir, self.repository_name, client)
+			png_thumbfilename = '%s/%s/%s-thumb.png' % (self.html_base_dir, self.repository_name, client)
+			svg_filename = '%s/%s/%s.svg' % (self.html_base_dir, self.repository_name, client)
+			ploticus_cmd_tmpl = '''\
+ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
+datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime\
+title="some statistics (still experimental)" autow=yes -o %s '''
+			
+			ploticus_cmd_tmpl = '''\
+ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
+datefmt=yyyy/mm/dd  mode=line unittype=datetime\
+title="some statistics (still experimental)" xrange="2006/04/04.21:00 2006/04/04.23:30" -o %s '''
+			subprocess.call(ploticus_cmd_tmpl % ( 
+				"-png", ploticus_data_filename, columns, png_filename), shell=True )
+			subprocess.call( (ploticus_cmd_tmpl + '-scale 0.4') % ( 
+				"-png", ploticus_data_filename, columns, png_thumbfilename), shell=True )
+			subprocess.call(ploticus_cmd_tmpl % ( 
+				"-svg", ploticus_data_filename, columns, svg_filename), shell=True )
+			images += [png_filename, png_thumbfilename, svg_filename]
+
+		return images, clients_with_stats
+
+		
