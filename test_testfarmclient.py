@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2006 Pau Arumí, Bram de Jong, Mohamed Sordo 
+#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
 #  and Universitat Pompeu Fabra
 # 
 # This program is free software; you can redistribute it and/or modify

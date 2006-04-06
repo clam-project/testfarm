@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2006 Pau Arumí, Bram de Jong, Mohamed Sordo 
+#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
 #  and Universitat Pompeu Fabra
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -150,10 +150,14 @@ class Tests_TestFarmServer(ColoredTestCase):
 		repo.add_task("task", [{STATS:lambda x: {'key':1} }] )
 		TestFarmClient('a_client', repo, testinglisteners=[listener])
 		
-		self.assertEquals({
-			'a_client': {
-				'key': [5, 1], 
-				'time': ['2006-04-04-00-00-00', '2006-04-05-00-00-00']
+		self.assertEquals(
+			{
+			'a_client': 
+				{
+				'task': [
+					('2006-04-04-00-00-00', {'key': 5}), 
+					('2006-04-05-00-00-00', {'key': 1})
+					]
 				}
 			}, server.collect_stats() )
 
@@ -166,7 +170,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 		repo.add_task("task", ["echo no stats"] )
 		TestFarmClient('a_client', repo, testinglisteners=[listener])
 		
-		self.assertEquals( {'a_client': {'time': []} }, server.collect_stats() )
+		self.assertEquals( {'a_client': {} }, server.collect_stats() )
 
 	def test_stats_single_client_multiple_key(self):
 		listener = ServerListener(repository_name='repo', client_name='a_client')
@@ -182,11 +186,15 @@ class Tests_TestFarmServer(ColoredTestCase):
 		repo.add_task("task", [{STATS:lambda x: {'key1':-1, 'key2':4} }] )
 		TestFarmClient('a_client', repo, testinglisteners=[listener])
 		
-		self.assertEquals({
-			'a_client': {
-				'key1': [5, -1], 
-				'key2': [0, 4], 
-				'time': ['2006-04-04-00-00-00', '2006-04-05-00-00-00']
+		self.assertEquals( 
+			{
+			'a_client': 
+				{
+				'task': 
+					[
+					('2006-04-04-00-00-00', {'key2': 0, 'key1': 5}),
+					('2006-04-05-00-00-00', {'key2': 4, 'key1': -1})
+					]
 				}
 			}, server.collect_stats() )
 
@@ -212,14 +220,21 @@ class Tests_TestFarmServer(ColoredTestCase):
 		TestFarmClient('client2', repo, testinglisteners=[listener2])
 
 
-		self.assertEquals( {
-			'client1': { 
-				'key': [5, 1], 
-				'time': ['2006-04-04-00-00-00', '2006-04-05-00-00-00']
+		self.assertEquals( 
+			{
+			'client1': 
+				{
+				'task': 
+					[
+					('2006-04-04-00-00-00', {'key': 5}),
+					('2006-04-05-00-00-00', {'key': 1})
+					]
 				},
-			'client2': {
-				'clau': [0],
-				'time': ['1000-00-00-00-00-00']
+			'client2': 
+				{'task': 
+					[
+					('1000-00-00-00-00-00', {'clau': 0})
+					]
 				}
 			}, server.collect_stats() )
 
@@ -235,26 +250,32 @@ class Tests_TestFarmServer(ColoredTestCase):
 		
 		listener1.current_time = lambda : "2006-04-05-00-00-00"
 		repo = Repository('repo')	
-		repo.add_task("task", [{STATS:lambda x: {'key':1} }] )
+		repo.add_task("task", [{STATS:lambda x: {'kk':3} }, {STATS:lambda x: {'key':1, 'key2':2} }] )
 		TestFarmClient('client1', repo, testinglisteners=[listener1])
 		
 		listener2.current_time = lambda : "2000-01-01-12-54-00"
 		repo = Repository('repo')	
-		repo.add_task("task", [{STATS:lambda x: {'clau1':0, 'clau2':10} }] )
+		repo.add_task("task", [{STATS:lambda x: {'clau 1':0, 'clau 2':10} }] )
+		repo.add_task("another task", [{STATS:lambda x: {'clau 1':2, 'clau 2':13} }] )
 		TestFarmClient('client2', repo, testinglisteners=[listener2])
 		
 		server.plot_stats()
 
 		self.assertEquals('''\
-time	key
-2006/04/04.00:00	5
-2006/04/05.00:00	1
-''', open("%s/%s/client1.plot" % (server.logs_base_dir, server.repository_name)).read() )
+time	kk	key2	key
+2006/04/04.00:00	-	-	5
+2006/04/05.00:00	3	-	-
+2006/04/05.00:00	-	2	1
+''', open("%s/%s/client1#1.plot" % (server.logs_base_dir, server.repository_name)).read() )
 
 		self.assertEquals('''\
-time	clau1	clau2
+time	clau_1	clau_2
 2000/01/01.12:54	0	10
-''', open("%s/%s/client2.plot" % (server.logs_base_dir, server.repository_name)).read() )
+''', open("%s/%s/client2#1.plot" % (server.logs_base_dir, server.repository_name)).read() )
+		self.assertEquals('''\
+time	clau_1	clau_2
+2000/01/01.12:54	2	13
+''', open("%s/%s/client2#2.plot" % (server.logs_base_dir, server.repository_name)).read() )
 
 
 

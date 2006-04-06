@@ -1,3 +1,5 @@
+Version 0.6
+------------------
 
 Done 	- summary text format based on: key, [ok|no] so that the server can easily parse it
 Done 	- efficiency, etc. statistics. based on TAG, number also in the summary? statistics section
@@ -27,6 +29,12 @@ Done	- refactoring: remove listener at client constructor
 
 Done	- verbose client argument: adds info : pass_text to every command => in a different way. it write text to a log file. Moreover it does it continuously (without having to wait to the command finalization)
 
+Version 0.7
+------------
+
+Done	- stats diagrams in a rough way
+Done	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
+	 => solution should be more generalizable
 
 Low Priority
 ----------------
@@ -45,26 +53,38 @@ Low Priority
 
 Medium Priority
 ----------------
+Done	- statistics with holes
+Done	- different statistics plots for each commands or task
+Done	- robust statistics: allow adding new stats, renaming it. 
+Done	- how to name different plots? taskname? taskname+#cmd
+
 	- set up a "universal" server for any project (be aware of security issues, spam...)
 	  -> Done but inside MTG
 	- Stop client "gently"
 	  -> Propagate "user aborted" to HTML
 	- Mandatory / Breaking tasks
 	- Think: Tasks in HTML with proportional size
-	- Rotate logs
+	- Rotate logsi
+	- remove info and output from logs, once html file is writen.
+	- an alternative to rotate: extract info and outputs to external files
 	- Send begin command --MS
-	- CLAM in windows
 	- ardour2 in linux
+	- ardour2 in osx
 
 High Priority
 ----------------
-Current	- stats diagrams
+	- Manage string variables with blanks not supported by ploticus
+	- Manage client_name string variables with blanks not supported by ploticus
+	- Statistics from efficiency task in CLAM
+	- Stats refactoring: internal data format for collected stats:
+	 -> [(time, {key:val, key2:val2})...]
+	 -> global tree structure: client->diagram->data
+
 	- API: Checking <-> Check. Ask Bram
 	  -> assert that name is a string
 Done??	- BUG after command completion should update html - MS
-Current	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
 Current	- CLAM in mac osx
-	- CLAM in windows
+Current	- CLAM in windows
 	- refactoring: remote communication code and (.py) file names
 	- refactoring: init project phase
 	- refactoring: init client phase

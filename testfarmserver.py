@@ -1,5 +1,5 @@
 #
-#  Copyright (c) 2006 Pau Arumí, Bram de Jong, Mohamed Sordo 
+#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
 #  and Universitat Pompeu Fabra
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ header_details = """
 """
 
 footer = """
-<p>TestFarm is free software. Learn <a href="www.iua.upf.es/~parumi/testfarm">about TestFarm</a>.</p>
+<p>TestFarm is free software. Learn <a href="http://www.iua.upf.es/~parumi/testfarm">about TestFarm</a>.</p>
 </body>
 </html>
 """
@@ -60,7 +60,7 @@ def idle_filename(logs_base_dir, repository_name, client_name) :
 
 def create_dir_if_needed(dir):
 	if not os.path.isdir( dir ) :
-		sys.stderr.write("\nWarning: directory '%s' is not available. Creating it." % dir)
+#		sys.stderr.write("\nWarning: directory '%s' is not available. Creating it." % dir)
 		os.makedirs(dir)
 
 #
@@ -291,24 +291,25 @@ class TestFarmServer:
 		iterations.reverse()
 		return iterations
 
-	def __get_client_stats(self, client_name):
+	def __collect_client_stats(self, client_name):
 		log = self.load_client_log(client_name)
-		allstats = { 'time':[] }
+		allstats = {}
 		begin_time = ''
 		for entry in log :
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY':
 				begin_time = entry[2]
-			if tag == 'CMD' :
+			elif tag == 'BEGIN_TASK':
+				current_task = entry[1]
+			elif tag == 'CMD' :
 				assert begin_time, "Error. found a stat before a begin_repository"
 				stats_entry = entry[5]
 				if not stats_entry:
 					continue
-				for key in stats_entry.keys():
-					if not allstats.has_key(key):
-						allstats[key] = []
-					allstats[key].append( stats_entry[key] )
-				allstats['time'].append( begin_time )
+				assert current_task, "Error. stats in an unamed task"
+				if not allstats.has_key(current_task) :
+					allstats[current_task] = []
+				allstats[current_task].append( (begin_time, stats_entry) )
 		return allstats
 
 	def idle(self):
@@ -326,11 +327,11 @@ class TestFarmServer:
 
 	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
 		content = []
-		time_tags = ["Y", "M", "D", "hour", "min", "sec"]
+		time_tmpl = "%(hour)s:%(min)s:%(sec)s %(D)s/%(M)s"
 		if client_idle and not client_idle['new_commits_found'] :
 			idlechecktime_str = client_idle['date']
-			idlechecktime_dict = dict(zip( time_tags, idlechecktime_str.split("-") ))
-			client_idle['date'] = "<p>Last check done at : %(hour)s:%(min)s:%(sec)s</p>" % idlechecktime_dict
+			client_idle['date'] = "<p>Last check done at : %s" % self.__format_datetime(
+				idlechecktime_str, time_tmpl )
 			content.append('''\
 <div class="idle">
 %(date)s
@@ -339,11 +340,9 @@ class TestFarmServer:
 
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
-			begintime_dict = dict(zip( time_tags, begintime_str.split("-") ))
-			begintime_html = "<p>Begin time: %(hour)s:%(min)s:%(sec)s</p>" % begintime_dict
+			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
 			if endtime_str :
-				endtime_dict = dict(zip( time_tags, endtime_str.split("-") ))
-				endtime_html = "<p>End time: %(hour)s:%(min)s:%(sec)s</p>" % endtime_dict
+				endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
 			else:
 				endtime_html = "<p>in progres...</p>"
 			details_html = '<p><a href="details-%s-%s.html">details</a></p>' % (client_name, begintime_str)
@@ -362,7 +361,7 @@ class TestFarmServer:
 		content.append('<tr>')
 		for client in iterations_per_client.keys():
 			if client in clients_with_stats:
-				thumb_html = '<a target="_blank" href="%s.png"><img src="%s-thumb.png" /></a> <a href="%s.svg">svg</a>' % (client, client, client)
+				thumb_html = '<a href="%s-stats.html"><img src="%s_1-thumb.png" /></a> <a href="%s-stats.html">more...</a>' % (client, client, client)
 				
 			else:
 				thumb_html = ''
@@ -390,9 +389,10 @@ class TestFarmServer:
 
 	def __helper_apache_log(self, msg):
 			from mod_python import apache
-			apache.log_error('TestFarm: out '+ str(out) )
+			apache.log_error('TestFarm:  '+ str(msg) )
 		
 	def update_static_html_files(self):
+		sys.stderr.write( 'update static html files' )
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
@@ -405,8 +405,9 @@ class TestFarmServer:
 	def collect_stats(self):
 		result = {}
 		for client in self.client_names():
-			result[client] = self.__get_client_stats(client)
+			result[client] = self.__collect_client_stats(client)
 		return result
+
 	def __assert_all_keys_equal_length(self, stats, length):
 		keys = stats.keys()
 		for key in keys:
@@ -417,63 +418,97 @@ class TestFarmServer:
 		time_dict = dict(zip( time_tags, time_str.split("-") ))
 		return pattern % time_dict 
 
-	def plot_stats(self):
+	def plot_stats(self): # TODO refactor extract methods
 		allclients_stats = self.collect_stats()
 		clients = allclients_stats.keys()
 		images = []
+		pngs = []
+		pngs_thumb = []
+		svgs = []
 		clients_with_stats = []
+		prefix_html = '%s/%s' % (self.html_base_dir, self.repository_name)
+		prefix_logs = '%s/%s' % (self.logs_base_dir, self.repository_name)
 		for client in clients:
-			stats = allclients_stats[ client ]
-			keys = stats.keys()
-			if len(keys)>1: #more fields than just 'time'
-				clients_with_stats.append( client )
-			length = len( stats[ keys[0] ] )
-			self.__assert_all_keys_equal_length(stats, length)
+			diagram_count = 0
+			alltasks_stats = allclients_stats[ client ]	
+			for task in alltasks_stats.keys():
+				stats_list = alltasks_stats[task ]
+				if stats_list :
+					clients_with_stats.append( client )
+				else:
+					print '++++++++ found client without stats:', client #TODO remove
+					continue
 
-			ploticus_data_filename = '%s/%s/%s.plot' % (self.logs_base_dir, self.repository_name, client)
-			print 'writing file:', ploticus_data_filename
-			f = open(ploticus_data_filename, 'w')
-			f.write("time")
-			# Write header
-			for key in keys:
-				if key == 'time': continue
-				f.write("\t%s" % key)
-			f.write("\n")
+				diagram_count += 1
+
+					
+				# 1. collect all keys and remove spaces
+				allkeys = set()
+				for time, stat in stats_list:
+					allkeys.update( stat.keys() )
+				normalizedkeys = map(lambda x: '_'.join(x.split()), allkeys) #TODO this lambda should be global function
+
+				# 2. write a line for each item in a list
+				diagram_name = '%s_%d' % (client, diagram_count)
+				plotfilename = '%s/%s.plot' % (prefix_logs, diagram_name)
+
+				plotfile_content = ['time']
+				for key in normalizedkeys :
+					plotfile_content.append( '\t'+key )
+				plotfile_content.append('\n')
+
+				for time, stat in stats_list:
+					plotfile_content.append( self.__format_datetime(time, "%(Y)s/%(M)s/%(D)s.%(hour)s:%(min)s") )
+					for key in allkeys: 
+						plotfile_content.append( '\t'+str( stat.get(key, '-') ) )
+					plotfile_content.append('\n')
+				print ''.join(plotfile_content)
+
+				# 3. write list to file
+				f = open(plotfilename, 'w')
+				f.writelines( plotfile_content )
+				f.close()
+
+				# 4. execute ploticus command
+				columns = ""
+				for i in range(len(allkeys)-1): # "y=1" already in the ploticus_cmd
+					columns += " y%d=%d" % (i+2, i+3) # y2=3 y3=4, etc.
+
+				png_filename = '%s/%s.png' % (prefix_html, diagram_name)
+				print png_filename
+				png_thumbfilename = '%s/%s-thumb.png' % (prefix_html, diagram_name)
+				svg_filename = '%s/%s.svg' % (prefix_html, diagram_name)
 				
-			for i in range(length):
-				time_str = stats['time'][i]
-				time_formatted = self.__format_datetime(time_str, "%(Y)s/%(M)s/%(D)s.%(hour)s:%(min)s")
-				f.write(time_formatted)
-				for key in keys:
-					if key == 'time': continue
-					f.write("\t%s" % stats[key][i])
-				f.write('\n')
-			f.close()
-
-			columns = ""
-			for i in range(len(keys)-2): # the first column is time, and the second is "y=1" already in the ploticus_cmd
-				columns += " y%d=%d" % (i+2, i+3) # y2=3 y3=4, etc.
-
-			png_filename = '%s/%s/%s.png' % (self.html_base_dir, self.repository_name, client)
-			png_thumbfilename = '%s/%s/%s-thumb.png' % (self.html_base_dir, self.repository_name, client)
-			svg_filename = '%s/%s/%s.svg' % (self.html_base_dir, self.repository_name, client)
-			ploticus_cmd_tmpl = '''\
+				#maybe use: 'xrange="2006/04/04.22:00 2006/04/05.12:00"'
+				ploticus_cmd_tmpl = '''\
 ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
 datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime\
-title="some statistics (still experimental)" autow=yes -o %s '''
-			
-			ploticus_cmd_tmpl = '''\
-ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
-datefmt=yyyy/mm/dd  mode=line unittype=datetime\
-title="some statistics (still experimental)" xrange="2006/04/04.21:00 2006/04/04.23:30" -o %s '''
-			subprocess.call(ploticus_cmd_tmpl % ( 
-				"-png", ploticus_data_filename, columns, png_filename), shell=True )
-			subprocess.call( (ploticus_cmd_tmpl + '-scale 0.4') % ( 
-				"-png", ploticus_data_filename, columns, png_thumbfilename), shell=True )
-			subprocess.call(ploticus_cmd_tmpl % ( 
-				"-svg", ploticus_data_filename, columns, svg_filename), shell=True )
-			images += [png_filename, png_thumbfilename, svg_filename]
+title="some statistics (still experimental)" -o %s %s''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
 
+				cmd = ploticus_cmd_tmpl % ("-png", plotfilename, columns, png_filename, '')
+				subprocess.call( cmd, shell=True) 
+
+				cmd = ploticus_cmd_tmpl % ("-png", plotfilename, columns, png_thumbfilename, '-scale 0.3') 
+				subprocess.call( cmd, shell=True) 
+
+				cmd = ploticus_cmd_tmpl % ( "-svg", plotfilename, columns, svg_filename, '')
+				subprocess.call( cmd, shell=True) 
+
+				pngs.append('%s.png' % diagram_name)
+				pngs_thumb.append('%s-thumb.png' % diagram_name)
+				svgs.append('%s.svg' % diagram_name)
+				images += [png_filename, png_thumbfilename, svg_filename]
+			# write stats client page
+			stats_html_filename = '%s/%s-stats.html' % (prefix_html, client)
+			f = open(stats_html_filename, 'w')
+			f.write('<html><body>\n')
+			for png, svg in zip(pngs, svgs):
+				f.write('<img src="%s"> <p><a href="%s">svg</a></p>\n' % (png, svg) )
+			f.write('</body></html>\n')
+			f.close()
+			images.append(stats_html_filename)
 		return images, clients_with_stats
+					
+
 
 		
