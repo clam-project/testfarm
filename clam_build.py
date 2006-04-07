@@ -1,7 +1,19 @@
 #! /usr/bin/python
 
 from testfarmclient import *
-import os
+import os, time
+
+start_time = -1
+def start_timer(output):
+	global start_time
+	start_time = time.time()
+def exectime_unittests(output):
+	global start_time
+	return {'exectime_unittests' : time.time() - start_time}
+def exectime_functests(output):
+	global start_time
+	return {'exectime_functests' : time.time() - start_time}
+
 
 os.environ['LD_LIBRARY_PATH']='%s/clam-sandboxes/tlocal/lib:/usr/local/lib' % os.environ['PATH']
 def filter_cvs_update( text ):
@@ -64,14 +76,19 @@ clam.add_task("Unit Tests (with srcdeps)", [
 	"cd build/Tests/UnitTests",
 	"make depend",
 	"CONFIG=release make",
+	{INFO : start_timer}, 
 	{CMD:"./UnitTests", INFO: lambda x : x}
+	{STATS : exectime_unittests}
+
 ] )
 clam.add_task("Functional Tests (with srcdeps)", [
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd build/Tests/FunctionalTests",
 	"make depend",
 	"CONFIG=release make",
+	{INFO : start_timer}, 
 	{CMD:"./FunctionalTests", INFO: lambda x : x}
+	{STATS : exectime_functests}
 ] )
 
 clam.add_task("Deploy SMSTools srcdeps branch for SMSBase tests", [
