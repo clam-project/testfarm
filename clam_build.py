@@ -77,7 +77,7 @@ clam.add_task("Unit Tests (with srcdeps)", [
 	"make depend",
 	"CONFIG=release make",
 	{INFO : start_timer}, 
-	{CMD:"./UnitTests", INFO: lambda x : x}
+	{CMD:"./UnitTests", INFO: lambda x : x},
 	{STATS : exectime_unittests}
 
 ] )
@@ -87,7 +87,7 @@ clam.add_task("Functional Tests (with srcdeps)", [
 	"make depend",
 	"CONFIG=release make",
 	{INFO : start_timer}, 
-	{CMD:"./FunctionalTests", INFO: lambda x : x}
+	{CMD:"./FunctionalTests", INFO: lambda x : x},
 	{STATS : exectime_functests}
 ] )
 
