@@ -24,7 +24,7 @@ import subprocess
 header_index = """
 <html>
 <head>
-<meta http-equiv="refresh" content="30">
+<meta http-equiv="refresh" content="120">
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm for project %(repository_name)s </title>
 </head>
@@ -198,6 +198,22 @@ class TestFarmServer:
 					in_wanted_iteration = False
 					break
 		return result
+	'''
+	def purge_client_logfile(self, client_name):
+		log = self.load_client_log(client_name)
+		for entry in log :
+			tag = entry[0]
+			if tag == 'BEGIN_REPOSITORY':
+				date = 
+				self.__extract_info_and_output_to_auxiliar_file(entry, wanted_date)
+		return result
+		
+	@staticmethod
+	def __extract_info_and_output_to_auxiliar_file( cmd_tuple, date ):
+		print '======================'
+		print cmd_tuple
+		print date
+	'''
 	
 	def __html_single_iteration_details(self, client_name, wanted_date):
 		content = []
@@ -462,7 +478,6 @@ class TestFarmServer:
 					for key in allkeys: 
 						plotfile_content.append( '\t'+str( stat.get(key, '-') ) )
 					plotfile_content.append('\n')
-				print ''.join(plotfile_content)
 
 				# 3. write list to file
 				f = open(plotfilename, 'w')
@@ -475,7 +490,6 @@ class TestFarmServer:
 					columns += " y%d=%d" % (i+2, i+3) # y2=3 y3=4, etc.
 
 				png_filename = '%s/%s.png' % (prefix_html, diagram_name)
-				print png_filename
 				png_thumbfilename = '%s/%s-thumb.png' % (prefix_html, diagram_name)
 				svg_filename = '%s/%s.svg' % (prefix_html, diagram_name)
 				

@@ -266,16 +266,16 @@ time	kk	key2	key
 2006/04/04.00:00	-	-	5
 2006/04/05.00:00	3	-	-
 2006/04/05.00:00	-	2	1
-''', open("%s/%s/client1#1.plot" % (server.logs_base_dir, server.repository_name)).read() )
+''', open("%s/%s/client1_1.plot" % (server.logs_base_dir, server.repository_name)).read() )
 
 		self.assertEquals('''\
 time	clau_1	clau_2
 2000/01/01.12:54	0	10
-''', open("%s/%s/client2#1.plot" % (server.logs_base_dir, server.repository_name)).read() )
+''', open("%s/%s/client2_1.plot" % (server.logs_base_dir, server.repository_name)).read() )
 		self.assertEquals('''\
 time	clau_1	clau_2
 2000/01/01.12:54	2	13
-''', open("%s/%s/client2#2.plot" % (server.logs_base_dir, server.repository_name)).read() )
+''', open("%s/%s/client2_2.plot" % (server.logs_base_dir, server.repository_name)).read() )
 
 
 
