@@ -287,15 +287,13 @@ class TestFarmServer:
 
 		return header_details + '\n'.join(content) + footer	
 
-	'''
 	#minimal version:
-	def html_single_iteration_details(self, client_name, wanted_date):
-		content = ["<pre>"]
-		for entry in self.single_iteration_details(client_name, wanted_date ):
-			content.append( "\n".join( map(str, entry) ) )	
-		content.append("</pre>")
-		return header_details + "\n".join(content) + footer
-	'''
+#	def html_single_iteration_details(self, client_name, wanted_date):
+#		content = ["<pre>"]
+#		for entry in self.single_iteration_details(client_name, wanted_date ):
+#			content.append( "\n".join( map(str, entry) ) )	
+#		content.append("</pre>")
+#		return header_details + "\n".join(content) + footer
 
 	def __write_details_static_html_file(self, client_name, wanted_date):
 		details = self.__html_single_iteration_details(client_name, wanted_date)
@@ -315,7 +313,7 @@ class TestFarmServer:
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
-			self.purge_client_logfile(client)
+#TODO 			self.purge_client_logfile(client)
 			filenames.append(filename)
 		return filenames
 
@@ -453,7 +451,6 @@ class TestFarmServer:
 		if self.repository_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-			sys.stderr.write(str(out))
 #			self.__helper_apache_log('TestFarm: sended: %s \nout: %s ' % (filesstr, str(out)) )
 
 	def collect_stats(self):
