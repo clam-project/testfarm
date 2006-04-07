@@ -96,6 +96,27 @@ class Tests_TestFarmServer(ColoredTestCase):
 ]
 		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
 
+	def test_purged_details(self):
+		listener = ServerListener( client_name='a_client', repository_name='repo')
+		server = TestFarmServer(repository_name='repo')
+		listener.current_time = lambda : "1999-99-99-99-99-99"
+		listener.listen_begin_repository("we want this one")
+		listener.listen_begin_task("task")
+		listener.listen_result("a command", False, "some output", "some info", {'a':1})
+		listener.listen_result("a command", False, "some more output", "some more info", {'a':1})
+		listener.listen_end_task("task")
+		listener.current_time = lambda : "2000-00-00-00-00-00"
+		listener.listen_end_repository("we want this one", False)
+		expected = [
+('BEGIN_REPOSITORY', 'we want this one', '1999-99-99-99-99-99'),
+('BEGIN_TASK', 'task'),
+('CMD', 'a command', False, 'some output', 'some info', {'a':1}),
+('END_TASK', 'task'),
+('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
+]
+		server.purge_client_logfile('a_client')
+		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
+
 	def test_two_clients(self):
 		listener1 = ServerListener(
 			client_name='client 1', 

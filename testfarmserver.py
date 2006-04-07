@@ -198,23 +198,60 @@ class TestFarmServer:
 					in_wanted_iteration = False
 					break
 		return result
-	'''
+
 	def purge_client_logfile(self, client_name):
 		log = self.load_client_log(client_name)
+		date = ''
+		prefix = '%s/%s' % (self.logs_base_dir, self.repository_name)
+		logfilename = log_filename( self.logs_base_dir, self.repository_name, client_name )
+		f = open(logfilename, 'w') #TODO maybe is dangerous !! (if somebody else is reading at the moment)
 		for entry in log :
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY':
-				date = 
-				self.__extract_info_and_output_to_auxiliar_file(entry, wanted_date)
-		return result
+				assert entry[2] != date, "Error. found two repos with same date."
+				date = entry[2]
+				count = 1
+				f.write('\n')
+				print 
+			if tag == 'CMD':
+				postfix = '%s_%s_%s' % (client_name, date, count)
+				new_entry = self.__extract_info_and_output_to_auxiliar_file(entry, prefix, postfix)
+				f.write( '%s,\n' % str(new_entry) )
+				count += 1
+			else :
+				f.write( '%s,\n' % str(entry) )
+		f.close()
 		
-	@staticmethod
-	def __extract_info_and_output_to_auxiliar_file( cmd_tuple, date ):
-		print '======================'
-		print cmd_tuple
-		print date
-	'''
-	
+	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, prefix, postfix ):
+		extracted_msg = '[SAVED TO FILE]'
+		output = cmd_tuple[3]
+		info = cmd_tuple[4]
+		if output and output != extracted_msg :
+			filename = '%s/purged_output__%s' % (prefix, postfix)
+			f = open(filename, 'w')
+			f.write(output)
+			f.close()
+			output = extracted_msg
+		else:
+			print 'dont extract output: ', output
+
+		if info and info != extracted_msg :
+			filename = '%s/purged_info__%s' % (prefix, postfix)
+			f = open(filename, 'w')
+			f.write(info)
+			f.close()
+			info = extracted_msg
+		else:
+			print 'dont extract output: ', output
+		return (
+			cmd_tuple[0], # tag CMD 
+			cmd_tuple[1], # "the" cmd
+			cmd_tuple[2], # status
+			output,
+			info,
+			cmd_tuple[5] # stats
+			)	
+
 	def __html_single_iteration_details(self, client_name, wanted_date):
 		content = []
 		id_info = 1; # auto-increment id
@@ -278,6 +315,7 @@ class TestFarmServer:
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
+			self.purge_client_logfile(client)
 			filenames.append(filename)
 		return filenames
 
