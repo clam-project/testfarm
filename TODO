@@ -65,7 +65,7 @@ Done	- how to name different plots? taskname? taskname+#cmd
 	- Mandatory / Breaking tasks
 	- Think: Tasks in HTML with proportional size
 	- Rotate logsi
-	- remove info and output from logs, once html file is writen.
+Done	- remove info and output from logs, once html file is writen.
 	- an alternative to rotate: extract info and outputs to external files
 	- Send begin command --MS
 	- ardour2 in linux
@@ -76,9 +76,9 @@ High Priority
 	- Manage string variables with blanks not supported by ploticus
 	- Manage client_name string variables with blanks not supported by ploticus
 	- Statistics from efficiency task in CLAM
-	- Stats refactoring: internal data format for collected stats:
-	 -> [(time, {key:val, key2:val2})...]
-	 -> global tree structure: client->diagram->data
+Done	- Stats refactoring: internal data format for collected stats:
+Done	 -> [(time, {key:val, key2:val2})...]
+Done	 -> global tree structure: client->diagram->data
 
 	- API: Checking <-> Check. Ask Bram
 	  -> assert that name is a string
