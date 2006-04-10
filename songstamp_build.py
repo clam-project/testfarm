@@ -15,6 +15,8 @@ cd_songstamp = "cd " + songstamp_path
 songstamptest_path = "$HOME/songstamp-sandboxes/clean-songstamp/export/sdk-benchmark/example/"
 cd_songstamptest = "cd " + songstamptest_path
 testdb_path = "$HOME/songstamp-sandboxes/test-db/"
+fingerprint_path = "$HOME/songstamp-sandboxes/clean-songstamp/export/sdk-benchmark/example/database/"
+cd_fingerprint_path = "cd " + fingerprint_path
 
 songstamp_update = 'svn update clean-songstamp'
 
@@ -35,9 +37,10 @@ songstamp.add_deployment_task([
 	"cd $HOME/",
 	"mkdir -p songstamp-sandboxes",
 	"cd songstamp-sandboxes",
-	"rm -rf clean-songstamp",
-#	songstamp_update
-	songstamp_checkout,
+#	"rm -rf clean-songstamp",
+#
+	songstamp_update,
+#	songstamp_checkout,
 #	{CMD : "svn diff --revision HEAD clean-songstamp/", INFO: pass_text},
 #	{CMD : songstamp_checkout, INFO : pass_text },
 ] )
@@ -73,16 +76,22 @@ songstamp.add_task("build executables linked to the exported core library", [
 	"scons",
 ] )
 
+songstamp.add_task("clean-up database", [
+	cd_fingerprint_path,
+	"rm -f *.afp",
+	"rm -f *.lst",
+] )
+
 songstamp.add_task("SongStamp Extractor functional test ->  benchmark data", [
 	cd_songstamptest,
 	#"bin/songstamp_extractor data/settings.bin testdb_path/reference reference_audio.lst database interactive",
-	"bin/songstamp_extractor data/settings.bin " + testdb_path + "/reference reference_audio.lst database interactive",
+	"bin/songstamp_extractor data/settings.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
 ] )
 
 
 songstamp.add_task("SongStamp Identifier functional test -> benchmark data", [
 	cd_songstamptest,
-	"bin/songstamp_identifier data/settings.bin database database_index.lst testdb_path/user/dummy_22kHz_16bit_mono.wav playlist.lst",
+	"bin/songstamp_identifier data/settings.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
 ] )
 
 
