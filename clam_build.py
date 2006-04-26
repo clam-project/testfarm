@@ -15,7 +15,9 @@ def exectime_functests(output):
 	return {'exectime_functests' : time.time() - start_time}
 
 
-os.environ['LD_LIBRARY_PATH']='%s/clam-sandboxes/tlocal/lib:/usr/local/lib' % os.environ['PATH']
+HOME = os.environ['HOME']
+os.environ['LD_LIBRARY_PATH']='%s/clam-sandboxes/tlocal/lib:/usr/local/lib' % HOME
+
 def filter_cvs_update( text ):
 	dont_start_interr = lambda line : not line or not line[0]=='?'
 	result = filter(dont_start_interr, text.split('\n') )	

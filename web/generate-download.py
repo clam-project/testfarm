@@ -25,8 +25,12 @@ def write_download_page() :
 
 def create_tarball(version):
 		print 'Creating tarball: testfarm-%s' % version
-		cmd = 'cd export && cvs export -r HEAD -d testfarm-%(version)s testfarm && tar cvf testfarm-%(version)s.tar.gz testfarm-%(version)s/ && rm -rf testfarm-%(version)s/' % {'version':version}
+		cmd = 'cd export && cvs export -r HEAD -d testfarm-%(ver)s testfarm' % {'ver':version}
 		print cmd
+		print execute(cmd)
+ 		cmd = 'cd export && rm songstamp* essentia*'
+		print execute(cmd)
+		cmd = 'cd export && tar cvf testfarm-%(ver)s.tar.gz testfarm-%(ver)s/ && rm -rf testfarm-%(ver)s/' % {'ver':version}
 		print execute(cmd)
 
 
@@ -34,7 +38,6 @@ if __name__ == '__main__':
 	if len( sys.argv ) == 2:
 		version = sys.argv[1]
 		create_tarball(version)
-		
 	else :
 		print 'Version argument not detected. So will not create any tarball' 
 	write_download_page()
