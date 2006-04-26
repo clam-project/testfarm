@@ -199,7 +199,7 @@ class TestFarmServer:
 					break
 		return result
 
-	def purge_client_logfile(self, client_name):
+	def purge_client_logfile(self, client_name, last_date):
 		log = self.load_client_log(client_name)
 		date = ''
 		prefix = '%s/%s' % (self.logs_base_dir, self.repository_name)
@@ -212,8 +212,10 @@ class TestFarmServer:
 				date = entry[2]
 				count = 1
 				f.write('\n')
-				print 
-			if tag == 'CMD':
+				print
+
+			# write the maybe modified entry 
+			if tag == 'CMD' and date != last_date:
 				postfix = '%s_%s_%s' % (client_name, date, count)
 				new_entry = self.__extract_info_and_output_to_auxiliar_file(entry, prefix, postfix)
 				f.write( '%s,\n' % str(new_entry) )
@@ -313,7 +315,7 @@ class TestFarmServer:
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
-#TODO 			self.purge_client_logfile(client)
+ 			self.purge_client_logfile(client, last_date) #TODO
 			filenames.append(filename)
 		return filenames
 

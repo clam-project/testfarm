@@ -28,8 +28,8 @@ clam.add_checking_for_new_commits(
 )
 clam.add_deployment_task( [
 	"cd $HOME/clam-sandboxes",
-#	"cvs co -d testing-clam CLAM",
-	{ CMD: "cd testing-clam && cvs -q up -dP", INFO: filter_cvs_update },
+	"cvs co -d testing-clam CLAM",
+#	{ CMD: "cd testing-clam && cvs -q up -dP", INFO: filter_cvs_update },
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
 	"scons install",
@@ -38,8 +38,8 @@ clam.add_deployment_task( [
 
 clam.add_task("SMSTools installation", [
 	"cd $HOME/clam-sandboxes",
-#	"cvs co -d testing-smstools CLAM_SMSTools",
-	"cd testing-smstools && cvs up -dP",
+	"cvs co -d testing-smstools CLAM_SMSTools",
+#	"cd testing-smstools && cvs up -dP",
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )

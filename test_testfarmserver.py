@@ -111,10 +111,11 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('BEGIN_REPOSITORY', 'we want this one', '1999-99-99-99-99-99'),
 ('BEGIN_TASK', 'task'),
 ('CMD', 'a command', False, 'some output', 'some info', {'a':1}),
+('CMD', 'a command', False, 'some more output','some more info', {'a':1}),
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
 ]
-		server.purge_client_logfile('a_client')
+		server.purge_client_logfile('a_client','1999-99-99-99-99-99')
 		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
 
 	def test_two_clients(self):
