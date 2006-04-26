@@ -35,8 +35,8 @@ def _create_dir_if_needed(dir):
 		os.makedirs(dir)
 
 
-_logs_base_dir = '/tmp/remote_testfarm_logs'
-_html_base_dir = '/tmp/remote_testfarm_html'
+_logs_base_dir = '/var/www/testfarm_logs'
+_html_base_dir = '/var/www/testfarm_html'
 
 server = TestFarmServer(
 	logs_base_dir = _logs_base_dir,
