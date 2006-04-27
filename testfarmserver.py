@@ -134,7 +134,38 @@ class ServerListener:
 		idle_dict['next_run_in_seconds']=next_run_in_seconds	
 		self.__write_idle_info( str( idle_dict ) )
 	
-	
+	def __get_last_task_name(self, log): # TODO: make static | LOG already reversed by listen_stop_repository_gently
+		for entry in log :
+			tag = entry[0]
+			if tag == 'BEGIN_TASK' :
+				return  entry[1]
+		assert "BEGIN_TASK not found"
+		
+	def listen_stop_repository_gently(self): #TODO: Refactor 
+		log = eval("[ %s ]" % open( self.logfile ).read() )
+		if log :
+			log.reverse()
+			entry = log[0]
+			if entry[0] == 'CMD' : # TODO What happens when the keyboard interrupts in middle of cmd ?  
+				task_name = self.__get_last_task_name(log)
+				log.reverse()
+				append_entry = "('END_TASK', '%s'),\n" % task_name 
+				self.__append_log_entry(append_entry)	
+				append_entry = "('END_REPOSITORY', '%s', '%s', False),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				self.__append_log_entry(append_entry)
+			elif entry[0] == 'BEGIN_TASK' : # TODO What happens when the keyboard interrupts in middle of task ?  
+				task_name = entry[1]
+				log.reverse()
+				append_entry = "('END_TASK', '%s'),\n" % task_name 
+				self.__append_log_entry(append_entry)	
+				append_entry = "('END_REPOSITORY', '%s', '%s', False),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				self.__append_log_entry(append_entry)
+			
+			elif entry[0] == 'END_TASK' or entry[0] == 'BEGIN_REPOSITORY': 
+				log.reverse()
+				append_entry = "('END_REPOSITORY', '%s', '%s', False),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				self.__append_log_entry(append_entry)	
+			
 
 #
 #     SERVER
@@ -454,6 +485,7 @@ class TestFarmServer:
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
 #			self.__helper_apache_log('TestFarm: sended: %s \nout: %s ' % (filesstr, str(out)) )
+
 
 	def collect_stats(self):
 		result = {}

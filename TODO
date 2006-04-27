@@ -47,8 +47,9 @@ Low Priority
 	  -> alarms instead of stability level
 	- Idle with threading repositories (very low priority)
 	  -> or just now allow multiple repositories
-	- Now executing con AJAX
-	- Nice diagrams: gnuplot, rrdtools, ploticus(*)
+	- Now executing con AJAX 
+	- html details of current task should be done with AJAX
+	- Nice diagrams: gnuplot, rrdtools, ploticus(*) -> patch ploticus to solve anti-aliasing 
 	- Nice html, ala tinderbox
 
 Medium Priority
@@ -60,14 +61,15 @@ Done	- how to name different plots? taskname? taskname+#cmd
 
 	- set up a "universal" server for any project (be aware of security issues, spam...)
 	  -> Done but inside MTG
-	- Stop client "gently"
+Done-Refactor	- Stop client "gently"
 	  -> Propagate "user aborted" to HTML
 	- Mandatory / Breaking tasks
 	- Think: Tasks in HTML with proportional size
-	- Rotate logsi
+Done	- Rotate logs => Purge logs
 Done	- remove info and output from logs, once html file is writen.
-	- an alternative to rotate: extract info and outputs to external files
+Done	- an alternative to rotate: extract info and outputs to external files
 	- Send begin command --MS
+	- brake index.html columns by days
 	- ardour2 in linux
 	- ardour2 in osx
 
@@ -89,6 +91,7 @@ Current	- CLAM in windows
 	- refactoring: init project phase
 	- refactoring: init client phase
 	- organize src directories
+	
 
 	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
 	  -> no client, only project object

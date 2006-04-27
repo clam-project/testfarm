@@ -48,6 +48,8 @@ class TestFarmClient :
 
 		self.listeners = [ ConsoleResultListener() ]
 
+		serverlistener = None # for keyboard interrupt purpose
+
 		if remote_server_url:
 			listenerproxy = ServerListenerProxy(
 				client_name=name, 
@@ -73,18 +75,23 @@ class TestFarmClient :
 		if testinglisteners:
 			self.listeners = testinglisteners
 
-		#do_tasks at lease one time	
-		repository.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
-		repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+		try :
+			#do_tasks at lease one time	
+			repository.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
+			repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 
-		while continuous :
-			new_commits_found = repository.do_checking_for_new_commits( self.listeners, verbose=verbose )
-			if new_commits_found:
-				repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
-			else:
-				if server_to_push: #update idle time display
-					server_to_push.update_static_html_files()
-				time.sleep( repository.seconds_idle )
+			while continuous :
+				new_commits_found = repository.do_checking_for_new_commits( self.listeners, verbose=verbose )
+				if new_commits_found:
+					repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+				else:
+					if server_to_push: #update idle time display
+						server_to_push.update_static_html_files()
+					time.sleep( repository.seconds_idle )
+		except KeyboardInterrupt :
+			print "Keyboard Interrupt. Stopping execution gently"
+			if serverlistener :
+				repository.stop_execution_gently([serverlistener], server_to_push = server_to_push)
 		
 
 def get_command_and_parsers(maybe_dict):
@@ -272,6 +279,14 @@ class Repository :
 		if server_to_push : #TODO remove. this is just provisional. Is it?
 			server_to_push.update_static_html_files()
 		return all_ok
+
+	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
+		for listener in listeners:
+			listener.listen_stop_repository_gently()
+		if server_to_push :
+			server_to_push.update_static_html_files()
+		pass 
+
 CMD = 1
 INFO = 2
 STATS = 3
