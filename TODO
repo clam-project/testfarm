@@ -62,8 +62,8 @@ Done	- how to name different plots? taskname? taskname+#cmd
 	- set up a "universal" server for any project (be aware of security issues, spam...)
 	  -> Done but inside MTG
 Done-Refactor	- Stop client "gently"
-	  -> Propagate "user aborted" to HTML
-	- Mandatory / Breaking tasks
+Done	  -> Propagate "user aborted" to HTML
+Done	- Mandatory / Breaking tasks
 	- Think: Tasks in HTML with proportional size
 Done	- Rotate logs => Purge logs
 Done	- remove info and output from logs, once html file is writen.

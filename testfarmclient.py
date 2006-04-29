@@ -171,9 +171,10 @@ def run_command(command, initial_working_dir, verbose=False):
 
 
 class Task:
-	def __init__(self, name, commands):
+	def __init__(self, name, commands, mandatory = False):
 		self.name = name
 		self.commands = commands
+		self.mandatory = mandatory
 
 	def __begin_task(self, listeners):
 		for listener in listeners :
@@ -186,6 +187,9 @@ class Task:
 	def __send_result(self, listeners, cmd, status, output, info, stats):		
 		for listener in listeners :
 			listener.listen_result( cmd, status, output, info, stats )
+
+	def is_mandatory(self):
+		return self.mandatory
 
 	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False):
 		self.__begin_task(listeners)
@@ -252,7 +256,10 @@ class Repository :
 		self.add_task("Deployment Task", commands)
 
 	def add_task(self, taskname, commands):
-		self.tasks.append(Task(taskname, commands)) 
+		self.tasks.append(Task(taskname, commands))
+
+	def add_mandatory_task(self, taskname, commands):
+		self.tasks.append(Task(taskname, commands, mandatory = True))
 
 	def do_checking_for_new_commits(self, listeners, verbose=False):
 		initial_working_dir = os.path.abspath(os.curdir)
@@ -272,6 +279,9 @@ class Repository :
 		for task in self.tasks :
 			current_result = task.do_task(listeners, server_to_push, verbose=verbose)
 			all_ok = all_ok and current_result
+			print "current result => ", current_result, "task is mandatory ? => ", task.is_mandatory()			
+			if not current_result and task.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
+				break 
 			if server_to_push : #TODO remove. this is just provisional. Is it?
 				server_to_push.update_static_html_files()
 		for listener in listeners:
