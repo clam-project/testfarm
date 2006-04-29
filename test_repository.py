@@ -88,3 +88,22 @@ BEGIN_TASK task2
 ('echo foo', 'ok', '', '', {})
 END_TASK task2
 END_REPOSITORY repo name""", listener.log() )
+
+	def test_mandatory_task(self):
+		repo = Repository('repo')	
+		repo.add_task('task1', ["echo task1"])	
+		repo.add_mandatory_task('task2', ["echo something echoed", "lsss gh"])
+		repo.add_task('task3', ["echo task3"])	
+		listener = DummyResultListener()
+		repo.do_tasks([listener])
+		self.assertEquals("""\
+BEGIN_REPOSITORY repo
+BEGIN_TASK task1
+('echo task1', 'ok', '', '', {})
+END_TASK task1
+BEGIN_TASK task2
+('echo something echoed', 'ok', '', '', {})
+('lsss gh', 'failure', '/bin/sh: lsss: command not found\\n', '', {})
+END_TASK task2
+END_REPOSITORY repo""", listener.log() )
+		pass

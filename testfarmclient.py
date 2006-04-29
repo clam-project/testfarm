@@ -279,7 +279,6 @@ class Repository :
 		for task in self.tasks :
 			current_result = task.do_task(listeners, server_to_push, verbose=verbose)
 			all_ok = all_ok and current_result
-			print "current result => ", current_result, "task is mandatory ? => ", task.is_mandatory()			
 			if not current_result and task.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
 				break 
 			if server_to_push : #TODO remove. this is just provisional. Is it?

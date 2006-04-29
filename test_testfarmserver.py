@@ -366,27 +366,6 @@ class Tests_ServerListener(ColoredTestCase):
 		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 
 			open(listener.idle_file).read())
 
-	def test_mandatory_task(self):
-		listener = ServerListener( repository_name='repo')
-		listener.current_time = lambda : "2006-03-17-13-26-20"
-		repo = Repository('repo')	
-		repo.add_task('task1', ["echo task1"])	
-		repo.add_mandatory_task('task2', ["echo something echoed", "lsss gh"])
-		repo.add_task('task3', ["echo task3"])	
-		TestFarmClient('a_client', repo, testinglisteners=[listener])
-		self.assertEquals("""\
-
-('BEGIN_REPOSITORY', 'repo', '2006-03-17-13-26-20'),
-('BEGIN_TASK', 'task1'),
-('CMD', 'echo task1', True, '', '', {}),
-('END_TASK', 'task1'),
-('BEGIN_TASK', 'task2'),
-('CMD', 'echo something echoed', True, '', '', {}),
-('CMD', 'lsss gh', False, '/bin/sh: lsss: command not found\\n', '', {}),
-('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', 'False'),
-""", open( listener.logfile ).read() )
-		pass
 
 
 			
