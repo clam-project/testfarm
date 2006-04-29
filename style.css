@@ -31,6 +31,20 @@ a:visited {
 	-moz-border-radius: 0.8em; /* mozilla only */
 }
 
+.aborted
+{
+	margin-top: 1em;
+	margin-bottom: 1em;
+	margin-left: 2em;
+	margin-right: 2em;
+	padding: 0.3em;
+	text-align: center;
+	font-size: 0.8em;
+	color: black;
+	background-color: yellow;
+	-moz-border-radius: 0.8em; /* mozilla only */
+}
+
 .idle
 {
 	margin-top: 1em;

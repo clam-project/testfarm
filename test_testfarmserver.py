@@ -92,7 +92,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('BEGIN_TASK', 'task'),
 ('CMD', 'a command', False, '', 'some info', {'a':1}),
 ('END_TASK', 'task'),
-('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
+('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
 		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
 
@@ -113,7 +113,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('CMD', 'a command', False, 'some output', 'some info', {'a':1}),
 ('CMD', 'a command', False, 'some more output','some more info', {'a':1}),
 ('END_TASK', 'task'),
-('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', False),
+('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
 		server.purge_client_logfile('a_client','1999-99-99-99-99-99')
 		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
@@ -348,7 +348,7 @@ class Tests_ServerListener(ColoredTestCase):
 ('CMD', 'echo something echoed', True, '', 'something echoed\\n', {}),
 ('CMD', './lalala gh', False, '/bin/sh: ./lalala: No such file or directory\\n', '', {}),
 ('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', False),
+('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', 'False'),
 
 ('BEGIN_REPOSITORY', 'repo', '2006-03-17-13-26-20'),
 ('BEGIN_TASK', 'task1'),
@@ -356,7 +356,7 @@ class Tests_ServerListener(ColoredTestCase):
 ('BEGIN_TASK', 'task2'),
 ('CMD', 'ls', True, '', '', {}),
 ('END_TASK', 'task2'),
-('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', True),
+('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', 'True'),
 """, open( listener2.logfile ).read() )
 	
 	def test_idle_state(self):

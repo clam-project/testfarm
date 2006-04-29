@@ -120,7 +120,7 @@ class ServerListener:
 		self.__append_log_entry(entry)
 
 	def listen_end_repository(self, repository_name, status):
-		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repository_name, self.current_time(), status)
+		entry = "('END_REPOSITORY', '%s', '%s', '%s'),\n" % (repository_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
 
@@ -151,19 +151,19 @@ class ServerListener:
 				log.reverse()
 				append_entry = "('END_TASK', '%s'),\n" % task_name 
 				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', False),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
 				self.__append_log_entry(append_entry)
 			elif entry[0] == 'BEGIN_TASK' : # TODO What happens when the keyboard interrupts in middle of task ?  
 				task_name = entry[1]
 				log.reverse()
 				append_entry = "('END_TASK', '%s'),\n" % task_name 
 				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', False),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
 				self.__append_log_entry(append_entry)
 			
 			elif entry[0] == 'END_TASK' or entry[0] == 'BEGIN_REPOSITORY': 
 				log.reverse()
-				append_entry = "('END_REPOSITORY', '%s', '%s', False),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
 				self.__append_log_entry(append_entry)	
 			
 
@@ -363,9 +363,10 @@ class TestFarmServer:
 			if tag == 'END_REPOSITORY' :
 				end_time = entry[2]
 				status_ok = entry[3]
-				if status_ok :
+				if status_ok == 'True' :
 					status = 'stable'
-					pass
+				elif status_ok == 'Aborted' :
+					status = 'aborted'
 				else :
 					status = 'broken'
 				iterations.append( (begin_time, end_time, repo_name, status) )
@@ -426,8 +427,10 @@ class TestFarmServer:
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
 			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
-			if endtime_str :
+			if endtime_str :					
 				endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
+				if status == "aborted" :
+					endtime_html += "\n<p>Client Aborted</p>"
 			else:
 				endtime_html = "<p>in progres...</p>"
 			details_html = '<p><a href="details-%s-%s.html">details</a></p>' % (client_name, begintime_str)
