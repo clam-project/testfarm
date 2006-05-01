@@ -18,7 +18,7 @@
 #
 #
 
-import commands, os, time, sys, subprocess
+import commands, os, time, sys, subprocess, tempfile
 
 from listeners import NullResultListener, ConsoleResultListener
 from testfarmserver import * 
@@ -198,11 +198,12 @@ class Task:
 		initial_working_dir = os.path.abspath(os.curdir)
 		for maybe_dict in self.commands :
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
-			temp_file = "%s/current_dir.temp" % initial_working_dir #TODO multiplatform
-			if sys.platform == 'win32':
-				cmd_with_pwd = cmd + " && cd > %s" % temp_file
+			#temp_file = "%s/current_dir.temp" % initial_working_dir #TODO multiplatform
+			temp_file = tempfile.NamedTemporaryFile()
+			if sys.platform == 'win32': #TODO multiplatform
+				cmd_with_pwd = cmd + " && cd > %s" % temp_file.name
 			else:
-				cmd_with_pwd = cmd + " && pwd > %s" % temp_file
+				cmd_with_pwd = cmd + " && pwd > %s" % temp_file.name
 			output, exit_status = run_command(cmd_with_pwd, initial_working_dir, verbose=verbose)
 			if status_ok_parser :
 				status_ok = status_ok_parser( output ) #TODO assert that returns a boolean
@@ -221,13 +222,15 @@ class Task:
 			self.__send_result(listeners, cmd, status_ok, output, info, stats)
 			if False and server_to_push: #TODO
 				server_to_push.update_static_html_files()
-			current_dir = open( temp_file ).read().strip()
+			current_dir = temp_file.read().strip()
 			if current_dir:
 				os.chdir( current_dir )
 			if not status_ok :
 				self.__end_task(listeners)
+				temp_file.close()
 				os.chdir ( initial_working_dir )
 				return False
+			temp_file.close()
 		self.__end_task(listeners)
 		os.chdir ( initial_working_dir )
 		return True
