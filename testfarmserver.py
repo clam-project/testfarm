@@ -350,7 +350,7 @@ class TestFarmServer:
 			filenames.append(filename)
 		return filenames
 
-	def __get_client_iterations(self, client_name):
+	def __get_client_day_iterations(self, client_name): #TODO: MS - Refactor
 		log = self.load_client_log(client_name)
 		iterations = []
 		iteration_opened = False
@@ -373,7 +373,6 @@ class TestFarmServer:
 				iteration_opened = False
 		if iteration_opened :
 			iterations.append( (begin_time, '', repo_name, 'inprogress') )
-				
 		iterations.reverse()
 		return iterations
 
@@ -408,7 +407,7 @@ class TestFarmServer:
 	def iterations(self):
 		result = {}
 		for client_name in self.client_names():
-			result[client_name] = self.__get_client_iterations(client_name)
+			result[client_name] = self.__get_client_day_iterations(client_name)
 		return result
 
 	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
@@ -423,19 +422,72 @@ class TestFarmServer:
 %(date)s
 <p>Next run after %(next_run_in_seconds)s seconds </p>
 </div>''' % client_idle)
-
 		for begintime_str, endtime_str, repo_name, status in client_iterations:
 			name_html = "<p>%s</p>" % repo_name
 			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
 			if endtime_str :					
-				endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
 				if status == "aborted" :
-					endtime_html += "\n<p>Client Aborted</p>"
+					endtime_html = "\n<p>Client Aborted: %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
+				else:
+					endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
+	
 			else:
 				endtime_html = "<p>in progres...</p>"
 			details_html = '<p><a href="details-%s-%s.html">details</a></p>' % (client_name, begintime_str)
 			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
 				status, name_html, begintime_html, endtime_html, details_html) )
+		return content
+
+	def __initialize_clients_in_day_iterations(self, day_iterations, iterations_per_client): #TODO: rename method
+		# we have to initialize all clients in a day even though they are not present in it 
+		for day in day_iterations :
+			day_clients = day_iterations[day]
+			for client in iterations_per_client.keys():
+				if client not in day_clients:
+					day_clients[client] = []	
+		return day_iterations
+
+	def day_iterations(self, iterations_per_client):
+		day_iterations = {}
+		# order iterations per day
+		time_tags = ["Y", "M", "D", "hour", "min", "sec"] #TODO move to attribute
+		for client in iterations_per_client.keys():
+			client_iterations = iterations_per_client[client]
+			for begintime_str, endtime_str, repo_name, status in client_iterations:
+				time_dict = dict(zip( time_tags, begintime_str.split("-") ))
+				day = "%s-%s-%s" % (time_dict["Y"], time_dict["M"], time_dict["D"])
+				if day not in day_iterations:
+					day_iterations[day] = {}
+			#	if client not in day_iterations[day]:
+			#		day_iterations[day][client] = []
+				day_iterations = self.__initialize_clients_in_day_iterations(day_iterations, iterations_per_client)
+				day_iterations[day][client].append( (begintime_str, endtime_str, repo_name, status) )
+		
+	#	print "##################DICTIONARY FORMAT CLIENTS DAY ITERATIONS#######################"
+	#	print day_iterations
+	#	print "#################################################################################"
+	
+		return day_iterations
+
+	def __html_format_clients_day_iterations(self, idle_per_client, iterations_per_day, num_clients): # TODO : MS Finish Implementation
+		content = []
+		iterations_per_day_key_sorted = iterations_per_day.keys()
+		iterations_per_day_key_sorted.sort(reverse = True)
+		for day in iterations_per_day_key_sorted :
+			content.append('<tr>')
+			day_clients = iterations_per_day[day]
+			for client in day_clients.keys():
+		#		print "CLIENT_KEY IN DAY CLIENTS = ", client
+				content.append('<td>')
+				client_iterations = day_clients[client]
+		#		print "CLIENT_VALUE IN DAY CLIENTS = ", client_iterations
+				client_idle = idle_per_client[client]
+				content += self.__html_format_client_iterations(client, client_idle, client_iterations) 
+				content.append('</td>')
+		#	print "CONTENT = ", content
+			aux = '</tr><tr><td colspan="%s"><hr/></td>' % num_clients
+			content.append(aux) # insert a brake line
+			content.append('</tr>')
 		return content
 
 	def __html_index(self, clients_with_stats):
@@ -454,15 +506,9 @@ class TestFarmServer:
 			else:
 				thumb_html = ''
 			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
-		content.append('</tr>')
-			
-
-		for client in iterations_per_client.keys():
-			content.append('<td>')
-			client_iterations = iterations_per_client[client]
-			client_idle = idle_per_client[client]
-			content += self.__html_format_client_iterations(client, client_idle, client_iterations) 
-			content.append('</td>')
+		content.append('</tr>')	
+		iterations_per_day = self.day_iterations(iterations_per_client)
+		content += self.__html_format_clients_day_iterations(idle_per_client, iterations_per_day, len(iterations_per_client))
 		content.append('</table>')
 		return header_index % {'repository_name':self.repository_name} + '\n'.join(content) + footer
 		

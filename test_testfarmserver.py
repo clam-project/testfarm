@@ -67,6 +67,69 @@ class Tests_TestFarmServer(ColoredTestCase):
 			{'testing_client' : [('a date', 'a date', 'repo', 'stable')]}, 
 			server.iterations() )
 
+	def test_iterations__day_iterations__single_client(self):
+		listener = ServerListener( repository_name='repo' )
+		listener.current_time = lambda : "2006-04-29-12-00-00"
+		server = TestFarmServer(repository_name='repo')
+		repo = Repository('repo')	
+		repo.add_task('task1', [])	
+		TestFarmClient('a_client', repo, testinglisteners=[listener])	
+		listener.current_time = lambda : "2006-04-30-12-00-00"	
+		TestFarmClient('a_client', repo, testinglisteners=[listener])	
+		self.assertEquals(
+			{'2006-04-30':
+				 {'testing_client': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'repo', 'stable')]},
+			'2006-04-29':
+				{'testing_client': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'repo', 'stable')]}
+			}, server.day_iterations(server.iterations()) )
+
+	def test_iterations__day_iterations__multiple_clients__first_client_with_last_day_empty(self):
+		listener1 = ServerListener( client_name='a_client', repository_name='repo' )
+		listener1.current_time = lambda : "2006-04-29-12-12-00"
+		listener2 = ServerListener( client_name='a_client2', repository_name='repo' )
+		listener2.current_time = lambda : "2006-04-29-12-00-00"
+		server = TestFarmServer(repository_name='repo')
+		repo = Repository('repo')	
+		repo.add_task('task1', [])	
+		TestFarmClient('a_client', repo, testinglisteners=[listener1])
+		TestFarmClient('a_client2', repo, testinglisteners=[listener2])
+		listener2.current_time = lambda : "2006-04-30-12-00-00"	
+		TestFarmClient('a_client2', repo, testinglisteners=[listener2])
+		self.assertEquals(
+			{'2006-04-30':
+				{'a_client2': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'repo', 'stable')],
+				'a_client': []
+				},
+			'2006-04-29':
+				{'a_client2': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'repo', 'stable')],
+				'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'repo', 'stable')]
+				}
+			}, server.day_iterations(server.iterations()) )
+
+	def test_iterations__day_iterations__multiple_clients__last_client_with_first_day_empty(self):
+		listener1 = ServerListener( client_name='a_client', repository_name='repo' )
+		listener1.current_time = lambda : "2006-04-29-12-12-00"
+		server = TestFarmServer(repository_name='repo')
+		repo = Repository('repo')	
+		repo.add_task('task1', [])	
+		TestFarmClient('a_client', repo, testinglisteners=[listener1])
+		listener1.current_time = lambda : "2006-04-30-12-12-00"
+		listener2 = ServerListener( client_name='a_client2', repository_name='repo' )
+		listener2.current_time = lambda : "2006-04-30-12-00-00"	
+		TestFarmClient('a_client', repo, testinglisteners=[listener1])
+		TestFarmClient('a_client2', repo, testinglisteners=[listener2])
+		self.assertEquals(
+			{'2006-04-30':
+				{'a_client2': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'repo', 'stable')],
+				'a_client': [('2006-04-30-12-12-00', '2006-04-30-12-12-00', 'repo', 'stable')]
+				},
+			'2006-04-29':
+				{'a_client2': [],
+				'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'repo', 'stable')]
+				}
+			}, server.day_iterations(server.iterations()) )
+
+
 	def test_details(self):
 		listener = ServerListener( client_name='a_client', repository_name='repo')
 		server = TestFarmServer(repository_name='repo')

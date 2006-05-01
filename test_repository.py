@@ -106,4 +106,3 @@ BEGIN_TASK task2
 ('lsss gh', 'failure', '/bin/sh: lsss: command not found\\n', '', {})
 END_TASK task2
 END_REPOSITORY repo""", listener.log() )
-		pass
