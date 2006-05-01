@@ -1,4 +1,4 @@
-#
+ #
 #  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
 #  and Universitat Pompeu Fabra
 # 
@@ -18,27 +18,28 @@
 #
 #
 
-from coloredtest import ColoredTestCase
-from listeners import *
-from testfarmclient import *
+import unittest
 
-class Tests_TestFarmClient(ColoredTestCase):
+class ColoredTestCase(unittest.TestCase):
+	def assertEquals(self, expected, result):
+		if expected == result :
+			return
+		expectedstr = str(expected)
+		resultstr = str(result)
+		red = "\x1b[31;01m"
+		green ="\x1b[32;01m"
+		yellow = "\x1b[33;01m" # unreadable on white backgrounds
+		cyan = "\x1b[36;01m"
+		normal = "\x1b[0m"
 
-	def test_constructor_with_one_task_repository(self):
-		repository = Repository("repo name")
-		repository.add_task( "taskname" , ["echo hello"] )
-		dummylistener = DummyResultListener()
-		client = TestFarmClient( 'a client', repository, testinglisteners = [ dummylistener ] )
-		self.assertEquals("""\
-BEGIN_REPOSITORY repo name
-BEGIN_TASK taskname
-BEGIN_CMD echo hello
-('echo hello', 'ok', '', '', {})
-END_CMD echo hello
-END_TASK taskname
-END_REPOSITORY repo name""", dummylistener.log() )
-
-
+		index_diff = 0
+		for i in range(len(resultstr)):
+			if expectedstr[i]!=resultstr[i]:
+				index_diff = i
+				break
 		
-
-
+		msg = "\n<expected>\n%s%s%s%s%s\n</expected>\n" % (cyan, expectedstr[:index_diff], green, expectedstr[index_diff:], normal)
+		msg += "\n<but was>\n%s%s%s%s%s\n</but was>" % (cyan, resultstr[:index_diff], red, resultstr[index_diff:], normal)
+	
+		self.fail(msg)
+		

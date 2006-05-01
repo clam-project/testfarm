@@ -183,6 +183,14 @@ class Task:
 	def __end_task(self, listeners):
 		for listener in listeners :
 			listener.listen_end_task( self.name )
+
+	def __begin_command(self, cmd, listeners):
+		for listener in listeners :
+			listener.listen_begin_command( cmd )
+
+	def __end_command(self, cmd, listeners):
+		for listener in listeners :
+			listener.listen_end_command( cmd )
 	
 	def __send_result(self, listeners, cmd, status, output, info, stats):		
 		for listener in listeners :
@@ -191,19 +199,24 @@ class Task:
 	def is_mandatory(self):
 		return self.mandatory
 
-	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False):
+	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False): #TODO : Refactor
 		self.__begin_task(listeners)
 		if server_to_push:
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		for maybe_dict in self.commands :
+			# 1 : Create a temp file to save working directory
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
 			#temp_file = "%s/current_dir.temp" % initial_working_dir #TODO multiplatform
 			temp_file = tempfile.NamedTemporaryFile()
 			if sys.platform == 'win32': #TODO multiplatform
 				cmd_with_pwd = cmd + " && cd > %s" % temp_file.name
 			else:
-				cmd_with_pwd = cmd + " && pwd > %s" % temp_file.name
+				cmd_with_pwd = cmd + " && pwd > %s" % temp_file.name	
+			# 2 : Begin command run 
+			self.__begin_command(cmd, listeners)
+			if server_to_push: #TODO
+				server_to_push.update_static_html_files()
 			output, exit_status = run_command(cmd_with_pwd, initial_working_dir, verbose=verbose)
 			if status_ok_parser :
 				status_ok = status_ok_parser( output ) #TODO assert that returns a boolean
@@ -220,17 +233,20 @@ class Task:
 			if status_ok :
 				output = ''
 			self.__send_result(listeners, cmd, status_ok, output, info, stats)
-			if False and server_to_push: #TODO
-				server_to_push.update_static_html_files()
 			current_dir = temp_file.read().strip()
 			if current_dir:
 				os.chdir( current_dir )
 			if not status_ok :
+				self.__end_command(cmd, listeners)
 				self.__end_task(listeners)
 				temp_file.close()
 				os.chdir ( initial_working_dir )
 				return False
+			# 3: End command run 
 			temp_file.close()
+			self.__end_command(cmd, listeners)
+			if server_to_push: #TODO
+				server_to_push.update_static_html_files()
 		self.__end_task(listeners)
 		os.chdir ( initial_working_dir )
 		return True

@@ -18,11 +18,11 @@
 #
 #
 
-import unittest
 from testfarmclient import *
+from coloredtest import ColoredTestCase
 from listeners import DummyResultListener
 
-class Tests_Repository(unittest.TestCase):
+class Tests_Repository(ColoredTestCase):
 
 	def test_name(self):
 		repository = Repository('reponame') 
@@ -82,10 +82,14 @@ END_REPOSITORY repo name""", listener.log() )
 		self.assertEquals(  """\
 BEGIN_REPOSITORY repo name
 BEGIN_TASK task1
+BEGIN_CMD non-existing-command
 ('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
+END_CMD non-existing-command
 END_TASK task1
 BEGIN_TASK task2
+BEGIN_CMD echo foo
 ('echo foo', 'ok', '', '', {})
+END_CMD echo foo
 END_TASK task2
 END_REPOSITORY repo name""", listener.log() )
 
@@ -99,10 +103,16 @@ END_REPOSITORY repo name""", listener.log() )
 		self.assertEquals("""\
 BEGIN_REPOSITORY repo
 BEGIN_TASK task1
+BEGIN_CMD echo task1
 ('echo task1', 'ok', '', '', {})
+END_CMD echo task1
 END_TASK task1
 BEGIN_TASK task2
+BEGIN_CMD echo something echoed
 ('echo something echoed', 'ok', '', '', {})
+END_CMD echo something echoed
+BEGIN_CMD lsss gh
 ('lsss gh', 'failure', '/bin/sh: lsss: command not found\\n', '', {})
+END_CMD lsss gh
 END_TASK task2
 END_REPOSITORY repo""", listener.log() )

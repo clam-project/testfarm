@@ -20,31 +20,10 @@
 
 import unittest
 import datetime
+from coloredtest import ColoredTestCase
 from listeners import *
 from testfarmclient import *
 from testfarmserver import *
-
-class ColoredTestCase(unittest.TestCase):
-	def assertEquals(self, expected, result):
-		if expected == result :
-			return
-		expectedstr = str(expected)
-		resultstr = str(result)
-		red = "\x1b[31;01m"
-		green ="\x1b[32;01m"
-		yellow = "\x1b[33;01m" # unreadable on white backgrounds
-		cyan = "\x1b[36;01m"
-		normal = "\x1b[0m"
-
-		index_diff = 0
-		for i in range(len(resultstr)):
-			if expectedstr[i]!=resultstr[i]:
-				index_diff = i
-				break
-		print "\n<expected>%s%s%s%s%s</expected>" % (cyan, expectedstr[:index_diff], green, expectedstr[index_diff:], normal)
-		print "\n<but was>%s%s%s%s%s</but was>" % (cyan, resultstr[:index_diff], red, resultstr[index_diff:], normal)
-		
-		assert False, "different strings"
 
 class Tests_TestFarmServer(ColoredTestCase):
 
@@ -141,7 +120,9 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener.current_time = lambda : "1999-99-99-99-99-99"
 		listener.listen_begin_repository("we want this one")
 		listener.listen_begin_task("task")
+		listener.listen_begin_command("a command")
 		listener.listen_result("a command", False, "", "some info", {'a':1})
+		listener.listen_end_command("a command")
 		listener.listen_end_task("task")
 		listener.current_time = lambda : "2000-00-00-00-00-00"
 		listener.listen_end_repository("we want this one", False)
@@ -153,7 +134,9 @@ class Tests_TestFarmServer(ColoredTestCase):
 		expected = [
 ('BEGIN_REPOSITORY', 'we want this one', '1999-99-99-99-99-99'),
 ('BEGIN_TASK', 'task'),
+('BEGIN_CMD', 'a command'),
 ('CMD', 'a command', False, '', 'some info', {'a':1}),
+('END_CMD', 'a command'),
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
@@ -165,16 +148,24 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener.current_time = lambda : "1999-99-99-99-99-99"
 		listener.listen_begin_repository("we want this one")
 		listener.listen_begin_task("task")
+		listener.listen_begin_command("a command")
 		listener.listen_result("a command", False, "some output", "some info", {'a':1})
+		listener.listen_end_command("a command")
+		listener.listen_begin_command("a command")
 		listener.listen_result("a command", False, "some more output", "some more info", {'a':1})
+		listener.listen_end_command("a command")
 		listener.listen_end_task("task")
 		listener.current_time = lambda : "2000-00-00-00-00-00"
 		listener.listen_end_repository("we want this one", False)
 		expected = [
 ('BEGIN_REPOSITORY', 'we want this one', '1999-99-99-99-99-99'),
 ('BEGIN_TASK', 'task'),
+('BEGIN_CMD', 'a command'),
 ('CMD', 'a command', False, 'some output', 'some info', {'a':1}),
+('END_CMD', 'a command'),
+('BEGIN_CMD', 'a command'),
 ('CMD', 'a command', False, 'some more output','some more info', {'a':1}),
+('END_CMD', 'a command'),
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
@@ -405,11 +396,17 @@ class Tests_ServerListener(ColoredTestCase):
 
 ('BEGIN_REPOSITORY', 'repo', '2006-03-17-13-26-20'),
 ('BEGIN_TASK', 'task1'),
+('BEGIN_CMD', 'echo task1'),
 ('CMD', 'echo task1', True, '', '', {}),
+('END_CMD', 'echo task1'),
 ('END_TASK', 'task1'),
 ('BEGIN_TASK', 'task2'),
+('BEGIN_CMD', 'echo something echoed'),
 ('CMD', 'echo something echoed', True, '', 'something echoed\\n', {}),
+('END_CMD', 'echo something echoed'),
+('BEGIN_CMD', './lalala gh'),
 ('CMD', './lalala gh', False, '/bin/sh: ./lalala: No such file or directory\\n', '', {}),
+('END_CMD', './lalala gh'),
 ('END_TASK', 'task2'),
 ('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', 'False'),
 
@@ -417,7 +414,9 @@ class Tests_ServerListener(ColoredTestCase):
 ('BEGIN_TASK', 'task1'),
 ('END_TASK', 'task1'),
 ('BEGIN_TASK', 'task2'),
+('BEGIN_CMD', 'ls'),
 ('CMD', 'ls', True, '', '', {}),
+('END_CMD', 'ls'),
 ('END_TASK', 'task2'),
 ('END_REPOSITORY', 'repo', '2006-03-17-13-26-20', 'True'),
 """, open( listener2.logfile ).read() )

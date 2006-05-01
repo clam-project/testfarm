@@ -24,6 +24,10 @@ class NullResultListener : #TODO base class
 	"Discards messages"
 	def listen_result(self, command, ok, output, info, stats):
 		pass
+	def listen_begin_command(self, cmd):
+		pass
+	def listen_end_command(self, cmd):
+		pass
 	def listen_begin_task(self, taskname):
 		pass	
 	def listen_end_task(self, taskname):
@@ -49,6 +53,12 @@ class DummyResultListener :
 		else :
 			status_text = "failure"
 		self.results.append( str( (command, status_text, output, info, stats) ) )
+
+	def listen_begin_command(self, cmd):
+		self.results.append("BEGIN_CMD %s" % cmd)
+	
+	def listen_end_command(self, cmd):
+		self.results.append("END_CMD %s" % cmd)
 
 	def listen_begin_task(self, taskname):
 		self.results.append( "BEGIN_TASK %s" % taskname )
@@ -111,12 +121,18 @@ class ConsoleResultListener :
 			ending += '%s\n---------------------------------------------%s\n' % (yellow, normal)
 		else:
 			ending = ''
-		sys.stdout.write( " | %scmd:%s%60s\t\t%s%s%s\n | %sinfo:%s %s\n | %sstats:%s %s\n%s%s%s |\n" % (yellow, cmd_color, cmd, status_color, status_text, normal, yellow, normal, info, yellow, normal, stats, output_color, ending, normal) )
+		sys.stdout.write( "    | %scmd:%s%60s\t\t%s%s%s\n    | %sinfo:%s %s\n    | %sstats:%s %s\n%s%s%s    |\n" % (yellow, cmd_color, cmd, status_color, status_text, normal, yellow, normal, info, yellow, normal, stats, output_color, ending, normal) )
 
 
 	def listen_result(self, command, ok, output, info, stats):
 		self.pprint_cmd_result( command, ok, output, info, stats )
 
+	def listen_begin_command(self, cmd):
+		self.pprint('BOLD', "    BEGIN_CMD %s" % cmd )
+	
+	def listen_end_command(self, cmd):
+		self.pprint ('BOLD', "    END_CMD %s\n" % cmd )
+	
 	def listen_begin_task(self, taskname):
 		self.pprint('BOLD', "  BEGIN_TASK %s" % taskname )
 

@@ -126,6 +126,8 @@ td
 
 .command
 {
+	position: relative;
+	left: 2%;
 }
 
 .command_string

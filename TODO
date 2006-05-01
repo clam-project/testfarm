@@ -62,13 +62,14 @@ Done	- how to name different plots? taskname? taskname+#cmd
 	- set up a "universal" server for any project (be aware of security issues, spam...)
 	  -> Done but inside MTG
 Done-Refactor	- Stop client "gently"
-Done	  -> Propagate "user aborted" to HTML --> BUG : some times, the index.html is not loaded properly
+Done	  -> Propagate "user aborted" to HTML 
+		--> BUG : some times, the index.html is not loaded properly
 Done	- Mandatory / Breaking tasks
 	- Think: Tasks in HTML with proportional size
 Done	- Rotate logs => Purge logs
 Done	- remove info and output from logs, once html file is writen.
 Done	- an alternative to rotate: extract info and outputs to external files
-	- Send begin command --MS
+Done	- Send begin command --MS
 Done	- brake index.html columns by days
 	- ardour2 in linux
 	- ardour2 in osx
@@ -84,8 +85,8 @@ Done	 -> global tree structure: client->diagram->data
 
 	- API: Checking <-> Check. Ask Bram
 	  -> assert that name is a string
-Current	- BUG : temp files should be unique
-Done??	- BUG after command completion should update html - MS
+Done	- BUG : temp files should be unique
+Done	- BUG after command completion should update html - MS
 Current	- CLAM in mac osx
 Current	- CLAM in windows
 	- refactoring: remote communication code and (.py) file names

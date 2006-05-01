@@ -18,16 +18,16 @@
 #
 #
 
-import unittest
 from testfarmclient import *
 from listeners import *
+from coloredtest import ColoredTestCase
 import os, os.path
 
 
 def helperCurrentDir() :
 	return os.path.abspath(os.curdir)
 
-class Tests_Task(unittest.TestCase):
+class Tests_Task(ColoredTestCase):
 	def test_do_task__single_command_successful(self):
 		task = Task("task", ["echo hello"])
 		self.assertEquals(True, task.do_task())
@@ -59,7 +59,9 @@ END_TASK task name""" , listener.log() )
 		task.do_task( [listener] )
 		self.assertEquals("""\
 BEGIN_TASK task
+BEGIN_CMD echo hello
 ('echo hello', 'ok', '', '', {})
+END_CMD echo hello
 END_TASK task""", listener.log() )
 	
 	def test_results_log__second_command_fails_so_exit(self):
@@ -68,8 +70,12 @@ END_TASK task""", listener.log() )
 		task.do_task( [listener] )
 		self.assertEquals("""\
 BEGIN_TASK task
+BEGIN_CMD echo hello
 ('echo hello', 'ok', '', '', {})
+END_CMD echo hello
+BEGIN_CMD non-existing-command
 ('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
+END_CMD non-existing-command
 END_TASK task""", listener.log() )
 	
 	def test_results_log__command_fails_with_stderr_and_stdout(self):
@@ -78,7 +84,9 @@ END_TASK task""", listener.log() )
 		task.do_task( [listener] )
 		self.assertEquals("""\
 BEGIN_TASK task
+BEGIN_CMD ./write_to_stderr_and_stdout.py
 ('./write_to_stderr_and_stdout.py', 'failure', 'ERR OUT\\n', '', {})
+END_CMD ./write_to_stderr_and_stdout.py
 END_TASK task""", listener.log() )
 		
 	def test_results_log__of_two_listeners(self):
@@ -88,11 +96,15 @@ END_TASK task""", listener.log() )
 		task.do_task( [listener1, listener2] )
 		self.assertEquals("""\
 BEGIN_TASK task
+BEGIN_CMD echo hello
 ('echo hello', 'ok', '', '', {})
+END_CMD echo hello
 END_TASK task""", listener1.log() )
 		self.assertEquals("""\
 BEGIN_TASK task
+BEGIN_CMD echo hello
 ('echo hello', 'ok', '', '', {})
+END_CMD echo hello
 END_TASK task""", listener2.log() )
 	
 	def test_command_saves_changed_working_dir(self): #TODO make portable
@@ -114,7 +126,9 @@ END_TASK task""", listener2.log() )
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
+BEGIN_CMD echo hello
 ('echo hello', 'ok', '', 'hello\\n', {})
+END_CMD echo hello
 END_TASK task""", listener.log())
 
 	def test_stats_parser(self):
@@ -124,7 +138,9 @@ END_TASK task""", listener.log())
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
+BEGIN_CMD echo hello
 ('echo hello', 'ok', '', '', {'len': 6})
+END_CMD echo hello
 END_TASK task""", listener.log())
 
 	def test_cd(self):
@@ -135,7 +151,9 @@ END_TASK task""", listener.log())
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
+BEGIN_CMD pwd
 ('pwd', 'ok', '', '/tmp\\n', {})
+END_CMD pwd
 END_TASK task""", listener.log() )
 
 	def test_status_ok(self):
@@ -146,7 +164,9 @@ END_TASK task""", listener.log() )
 		task.do_task([listener])
 		self.assertEquals( """\
 BEGIN_TASK task
+BEGIN_CMD echo error
 ('echo error', 'failure', 'error\\n', '', {})
+END_CMD echo error
 END_TASK task""", listener.log() )
 
 

@@ -106,6 +106,14 @@ class ServerListener:
 		entry = str( ('CMD', command, ok, output, info, stats) ) + ',\n'
 		self.__append_log_entry(entry)
 
+	def listen_begin_command(self, cmd):
+		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
+		self.__append_log_entry(entry)
+	
+	def listen_end_command(self, cmd):
+		entry = "('END_CMD', '%s'),\n" % cmd
+		self.__append_log_entry(entry)
+
 	def listen_begin_task(self, taskname):
 		entry = "('BEGIN_TASK', '%s'),\n" % taskname 
 		self.__append_log_entry(entry)
@@ -135,35 +143,41 @@ class ServerListener:
 		self.__write_idle_info( str( idle_dict ) )
 	
 	def __get_last_task_name(self, log): # TODO: make static | LOG already reversed by listen_stop_repository_gently
+		log.reverse()
 		for entry in log :
 			tag = entry[0]
 			if tag == 'BEGIN_TASK' :
-				return  entry[1]
+				task_name = entry[1]
+				log.reverse()
+				return  task_name
 		assert "BEGIN_TASK not found"
 		
 	def listen_stop_repository_gently(self): #TODO: Refactor 
 		log = eval("[ %s ]" % open( self.logfile ).read() )
 		if log :
-			log.reverse()
-			entry = log[0]
-			if entry[0] == 'CMD' : # TODO What happens when the keyboard interrupts in middle of cmd ?  
+			entry = log[len(log)-1]
+			if entry[0] == 'CMD' or entry[0] == 'BEGIN_CMD': # TODO What happens when the keyboard interrupts in middle of cmd ?  
+				append_entry = "('END_CMD', '%s'),\n" % entry[1]
+				self.__append_log_entry(append_entry)
 				task_name = self.__get_last_task_name(log)
-				log.reverse()
 				append_entry = "('END_TASK', '%s'),\n" % task_name 
 				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) 
+				self.__append_log_entry(append_entry)
+			elif entry[0] == 'END_CMD':
+				task_name = self.__get_last_task_name(log)
+				append_entry = "('END_TASK', '%s'),\n" % task_name 
+				self.__append_log_entry(append_entry)	
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) 
 				self.__append_log_entry(append_entry)
 			elif entry[0] == 'BEGIN_TASK' : # TODO What happens when the keyboard interrupts in middle of task ?  
 				task_name = entry[1]
-				log.reverse()
 				append_entry = "('END_TASK', '%s'),\n" % task_name 
 				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
-				self.__append_log_entry(append_entry)
-			
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time())
+				self.__append_log_entry(append_entry)			
 			elif entry[0] == 'END_TASK' or entry[0] == 'BEGIN_REPOSITORY': 
-				log.reverse()
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) # TODO : new state for interrupted ?
+				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time())
 				self.__append_log_entry(append_entry)	
 			
 
@@ -295,14 +309,20 @@ class TestFarmServer:
 				content.append('<div class="repository"> BEGIN_REPOSITORY "%s" %s' % (entry[1], entry[2]) )
 			elif tag == 'BEGIN_TASK':
 				content.append('<div class="task"> BEGIN_TASK "%s"' % entry[1])
+			elif tag == 'BEGIN_CMD':
+				content.append( '<div class=command>' )
+				content.append( '<p>BEGIN_CMD "%s"<p>' % entry[1])
+				content.append( '<span class="command_string"> %s </span>' % entry[1] )
+			elif tag == 'END_CMD':
+				content.append( '<p>END_CMD "%s"</p>' % entry[1])
+				content.append( '</div>' )
 			elif tag == 'END_TASK':
 				content.append('END_TASK "%s"</div>' % entry[1])
 			elif tag == 'END_REPOSITORY':
 				content.append( 'END_REPOSITORY "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
 			else:
 				assert tag == 'CMD', 'Log Parsing Error. Expected CMD, but was:' + entry
-				content.append( '<div class=command>' )
-				content.append( '<span class="command_string"> %s </span>' % entry[1] )
+
 				if entry[2]:
 					content.append( '<span class="command_ok">[OK]</span>' )
 				else:
@@ -316,7 +336,6 @@ class TestFarmServer:
 					id_info += 1
 				if entry[5] :
 					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
-				content.append( '</div>' )
 
 		return header_details + '\n'.join(content) + footer	
 
