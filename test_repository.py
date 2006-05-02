@@ -96,7 +96,7 @@ END_REPOSITORY repo name""", listener.log() )
 	def test_mandatory_task(self):
 		repo = Repository('repo')	
 		repo.add_task('task1', ["echo task1"])	
-		repo.add_mandatory_task('task2', ["echo something echoed", "lsss gh"])
+		repo.add_task('task2', ["echo something echoed", "lsss gh"], mandatory = True)
 		repo.add_task('task3', ["echo task3"])	
 		listener = DummyResultListener()
 		repo.do_tasks([listener])

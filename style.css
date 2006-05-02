@@ -41,7 +41,7 @@ a:visited {
 	text-align: center;
 	font-size: 0.8em;
 	color: black;
-	background-color: yellow;
+	background-color: #FF9B00;
 	-moz-border-radius: 0.8em; /* mozilla only */
 }
 

@@ -73,7 +73,7 @@ class ServerListener:
 		logs_base_dir = '/tmp/testfarm_tests',
 		repository_name=None
 	) :
-		self.iterations_needs_update = True
+		self.executions_needs_update = True
 		self.client_name = client_name
 		self.repository_name = repository_name
 		self.logs_base_dir = logs_base_dir
@@ -124,16 +124,16 @@ class ServerListener:
 	
 	def listen_begin_repository(self, repository_name):
 		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repository_name, self.current_time())
-		self.iterations_needs_update = True
+		self.executions_needs_update = True
 		self.__append_log_entry(entry)
 
 	def listen_end_repository(self, repository_name, status):
 		entry = "('END_REPOSITORY', '%s', '%s', '%s'),\n" % (repository_name, self.current_time(), status)
 		self.__append_log_entry(entry)
-		self.iterations_needs_update = True
+		self.executions_needs_update = True
 
-	def iterations_updated(self):
-		self.iterations_needs_update = False
+	def executions_updated(self):
+		self.executions_needs_update = False
 	
 	def listen_found_new_commits(self,  new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
@@ -228,19 +228,19 @@ class TestFarmServer:
 				return entry[2]
 		assert "BEGIN_REPOSITORY not found"
 
-	def single_iteration_details(self, client_name, wanted_date):
+	def single_execution_details(self, client_name, wanted_date):
 		log = self.load_client_log(client_name)
 		result = []
-		in_wanted_iteration = False
+		in_wanted_execution = False
 		for entry in log :
 			tag = entry[0]
-			if not in_wanted_iteration :
+			if not in_wanted_execution :
 				if tag == 'BEGIN_REPOSITORY' and entry[2] == wanted_date :
-					in_wanted_iteration = True
-			if in_wanted_iteration :
+					in_wanted_execution = True
+			if in_wanted_execution :
 				result.append(entry)
 				if tag == 'END_REPOSITORY' :
-					in_wanted_iteration = False
+					in_wanted_execution = False
 					break
 		return result
 
@@ -299,11 +299,11 @@ class TestFarmServer:
 			cmd_tuple[5] # stats
 			)	
 
-	def __html_single_iteration_details(self, client_name, wanted_date):
+	def __html_single_execution_details(self, client_name, wanted_date):
 		content = []
 		id_info = 1; # auto-increment id
 		id_output = 1; # auto-increment id
-		for entry in self.single_iteration_details(client_name, wanted_date ):
+		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY':
 				content.append('<div class="repository"> BEGIN_REPOSITORY "%s" %s' % (entry[1], entry[2]) )
@@ -340,15 +340,15 @@ class TestFarmServer:
 		return header_details + '\n'.join(content) + footer	
 
 	#minimal version:
-#	def html_single_iteration_details(self, client_name, wanted_date):
+#	def html_single_execution_details(self, client_name, wanted_date):
 #		content = ["<pre>"]
-#		for entry in self.single_iteration_details(client_name, wanted_date ):
+#		for entry in self.single_execution_details(client_name, wanted_date ):
 #			content.append( "\n".join( map(str, entry) ) )	
 #		content.append("</pre>")
 #		return header_details + "\n".join(content) + footer
 
 	def __write_details_static_html_file(self, client_name, wanted_date):
-		details = self.__html_single_iteration_details(client_name, wanted_date)
+		details = self.__html_single_execution_details(client_name, wanted_date)
 		filename = "%s/%s/details-%s-%s.html" % (
 			self.html_base_dir, 
 			self.repository_name, 
@@ -369,16 +369,16 @@ class TestFarmServer:
 			filenames.append(filename)
 		return filenames
 
-	def __get_client_iterations(self, client_name): #TODO: MS - Refactor
+	def __get_client_executions(self, client_name): #TODO: MS - Refactor
 		log = self.load_client_log(client_name)
-		iterations = []
-		iteration_opened = False
+		executions = []
+		execution_opened = False
 		for entry in  log :
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY' :
 				repo_name = entry[1]
 				begin_time = entry[2]
-				iteration_opened = True
+				execution_opened = True
 			if tag == 'END_REPOSITORY' :
 				end_time = entry[2]
 				status_ok = entry[3]
@@ -388,12 +388,12 @@ class TestFarmServer:
 					status = 'aborted'
 				else :
 					status = 'broken'
-				iterations.append( (begin_time, end_time, repo_name, status) )
-				iteration_opened = False
-		if iteration_opened :
-			iterations.append( (begin_time, '', repo_name, 'inprogress') )
-		iterations.reverse()
-		return iterations
+				executions.append( (begin_time, end_time, repo_name, status) )
+				execution_opened = False
+		if execution_opened :
+			executions.append( (begin_time, '', repo_name, 'inprogress') )
+		executions.reverse()
+		return executions
 
 	def __collect_client_stats(self, client_name):
 		log = self.load_client_log(client_name)
@@ -423,13 +423,13 @@ class TestFarmServer:
 			result[client_name] = idle_entry
 		return result
 
-	def iterations(self):
+	def executions(self):
 		result = {}
 		for client_name in self.client_names():
-			result[client_name] = self.__get_client_iterations(client_name)
+			result[client_name] = self.__get_client_executions(client_name)
 		return result
 
-	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
+	def __html_format_client_executions(self, client_name, client_idle, client_executions):
 		content = []
 		time_tmpl = "%(hour)s:%(min)s:%(sec)s %(D)s/%(M)s"
 		if client_idle and not client_idle['new_commits_found'] :
@@ -441,7 +441,7 @@ class TestFarmServer:
 %(date)s
 <p>Next run after %(next_run_in_seconds)s seconds </p>
 </div>''' % client_idle)
-		for begintime_str, endtime_str, repo_name, status in client_iterations:
+		for begintime_str, endtime_str, repo_name, status in client_executions:
 			name_html = "<p>%s</p>" % repo_name
 			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
 			if endtime_str :					
@@ -457,67 +457,68 @@ class TestFarmServer:
 				status, name_html, begintime_html, endtime_html, details_html) )
 		return content
 
-	def __initialize_clients_in_day_iterations(self, day_iterations, iterations_per_client): #TODO: rename method
+	"""def __initialize_clients_in_day_executions(self, day_executions, executions_per_client): #TODO: rename method
 		# we have to initialize all clients in a day even though they are not present in it 
-		for day in day_iterations :
-			day_clients = day_iterations[day]
-			for client in iterations_per_client.keys():
+		for day in day_executions :
+			day_clients = day_executions[day]
+			for client in executions_per_client.keys():
 				if client not in day_clients:
 					day_clients[client] = []	
-		return day_iterations
+		return day_executions
+	"""
 
-	def day_iterations(self, iterations_per_client):
-		day_iterations = {}
-		# order iterations per day
-		time_tags = ["Y", "M", "D", "hour", "min", "sec"] #TODO move to attribute
-		for client in iterations_per_client.keys():
-			client_iterations = iterations_per_client[client]
-			for begintime_str, endtime_str, repo_name, status in client_iterations:
-				time_dict = dict(zip( time_tags, begintime_str.split("-") ))
-				day = "%s-%s-%s" % (time_dict["Y"], time_dict["M"], time_dict["D"])
-				if day not in day_iterations:
-					day_iterations[day] = {}
-			#	if client not in day_iterations[day]:
-			#		day_iterations[day][client] = []
-				day_iterations = self.__initialize_clients_in_day_iterations(day_iterations, iterations_per_client)
-				day_iterations[day][client].append( (begintime_str, endtime_str, repo_name, status) )
+	def day_executions(self, executions_per_client):
+		day_executions = {}
+		# order executions per day
+		time_tmpl = "%(Y)s-%(M)s-%(D)s"
+		for client in executions_per_client.keys():
+			client_executions = executions_per_client[client]
+			for begintime_str, endtime_str, repo_name, status in client_executions:
+				day = self.__format_datetime(begintime_str, time_tmpl)
+				if day not in day_executions:
+					day_executions[day] = {}
+				if client not in day_executions[day]:
+					day_executions[day][client] = []
+		#		day_executions = self.__initialize_clients_in_day_executions(day_executions, executions_per_client)
+				day_executions[day][client].append( (begintime_str, endtime_str, repo_name, status) )
 		
 	#	print "##################DICTIONARY FORMAT CLIENTS DAY ITERATIONS#######################"
-	#	print day_iterations
+	#	print day_executions
 	#	print "#################################################################################"
 	
-		return day_iterations
+		return day_executions
 
-	def __html_format_clients_day_iterations(self, idle_per_client, iterations_per_day, num_clients): # TODO : MS Finish Implementation
+	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day): # TODO : MS Finish Implementation
 		content = []
-		iterations_per_day_key_sorted = iterations_per_day.keys()
-		iterations_per_day_key_sorted.sort(reverse = True)
-		for day in iterations_per_day_key_sorted :
+		all_clients = self.client_names()
+		executions_per_day_key_sorted = executions_per_day.keys()
+		executions_per_day_key_sorted.sort(reverse = True)
+		for day in executions_per_day_key_sorted :
 			#content.append('<tr>')
-			content.append('<tr><td colspan="%s" align="center"><hr/>%s<hr/></td></tr><tr>' % (num_clients, day)) # insert a brake line
-			day_clients = iterations_per_day[day]
-			for client in day_clients.keys():
+			content.append('<tr><td colspan="%s" align="center"><hr/>%s<hr/></td></tr><tr>' % (len(all_clients), day)) # insert a brake line
+			day_clients = executions_per_day[day]
+			for client in all_clients:
 		#		print "CLIENT_KEY IN DAY CLIENTS = ", client
 				content.append('<td>')
-				client_iterations = day_clients[client]
-		#		print "CLIENT_VALUE IN DAY CLIENTS = ", client_iterations
+				client_executions = day_clients.get(client, []) # if client return client executions , else return empty list
+		#		print "CLIENT_VALUE IN DAY CLIENTS = ", client_executions
 				client_idle = idle_per_client[client]
-				content += self.__html_format_client_iterations(client, client_idle, client_iterations) 
+				content += self.__html_format_client_executions(client, client_idle, client_executions) 
 				content.append('</td>')
 		#	print "CONTENT = ", content
 			content.append('</tr>')
 		return content
 
 	def __html_index(self, clients_with_stats):
-		iterations_per_client = self.iterations()
+		executions_per_client = self.executions()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
-		for client in iterations_per_client.keys():
+		for client in executions_per_client.keys():
 			content.append('<th> Client: %s </th>' % client )
 		content.append('</tr>')
 
 		content.append('<tr>')
-		for client in iterations_per_client.keys():
+		for client in executions_per_client.keys():
 			if client in clients_with_stats:
 				thumb_html = '<a href="%s-stats.html"><img src="%s_1-thumb.png" /></a> <a href="%s-stats.html">more...</a>' % (client, client, client)
 				
@@ -525,8 +526,8 @@ class TestFarmServer:
 				thumb_html = ''
 			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
 		content.append('</tr>')	
-		iterations_per_day = self.day_iterations(iterations_per_client)
-		content += self.__html_format_clients_day_iterations(idle_per_client, iterations_per_day, len(iterations_per_client))
+		executions_per_day = self.day_executions(executions_per_client)
+		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day)
 		content.append('</table>')
 		return header_index % {'repository_name':self.repository_name} + '\n'.join(content) + footer
 		
@@ -565,8 +566,7 @@ class TestFarmServer:
 		for key in keys:
 			assert length == len(stats[key]), "Error found stat with diferent length. key: %s\n%s" %(key, stats)
 
-	def __format_datetime(self, time_str, pattern):
-		time_tags = ["Y", "M", "D", "hour", "min", "sec"] #TODO move to attribute
+	def __format_datetime(self, time_str, pattern, time_tags = ["Y", "M", "D", "hour", "min", "sec"]) :
 		time_dict = dict(zip( time_tags, time_str.split("-") ))
 		return pattern % time_dict 
 

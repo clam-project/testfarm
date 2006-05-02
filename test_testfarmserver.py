@@ -35,7 +35,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener = ServerListener( repository_name='repo' )
 		listener.clean_log_files()
 
-	def test_iterations__one_green_iteration(self):
+	def test_executions__one_green_execution(self):
 		listener = ServerListener( repository_name='repo' )
 		listener.current_time = lambda : "a date"
 		server = TestFarmServer(repository_name='repo')
@@ -44,9 +44,9 @@ class Tests_TestFarmServer(ColoredTestCase):
 		TestFarmClient('a_client', repo, testinglisteners=[listener])
 		self.assertEquals(
 			{'testing_client' : [('a date', 'a date', 'repo', 'stable')]}, 
-			server.iterations() )
+			server.executions() )
 
-	def test_iterations__day_iterations__single_client(self):
+	def test_executions__day_executions__single_client(self):
 		listener = ServerListener( repository_name='repo' )
 		listener.current_time = lambda : "2006-04-29-12-00-00"
 		server = TestFarmServer(repository_name='repo')
@@ -60,9 +60,9 @@ class Tests_TestFarmServer(ColoredTestCase):
 				 {'testing_client': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'repo', 'stable')]},
 			'2006-04-29':
 				{'testing_client': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'repo', 'stable')]}
-			}, server.day_iterations(server.iterations()) )
+			}, server.day_executions(server.executions()) )
 
-	def test_iterations__day_iterations__multiple_clients__first_client_with_last_day_empty(self):
+	def test_executions__day_executions__multiple_clients__first_client_with_last_day_empty(self):
 		listener1 = ServerListener( client_name='a_client', repository_name='repo' )
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
 		listener2 = ServerListener( client_name='a_client2', repository_name='repo' )
@@ -76,16 +76,14 @@ class Tests_TestFarmServer(ColoredTestCase):
 		TestFarmClient('a_client2', repo, testinglisteners=[listener2])
 		self.assertEquals(
 			{'2006-04-30':
-				{'a_client2': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'repo', 'stable')],
-				'a_client': []
-				},
+				{'a_client2': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'repo', 'stable')]},
 			'2006-04-29':
 				{'a_client2': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'repo', 'stable')],
 				'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'repo', 'stable')]
 				}
-			}, server.day_iterations(server.iterations()) )
+			}, server.day_executions(server.executions()) )
 
-	def test_iterations__day_iterations__multiple_clients__last_client_with_first_day_empty(self):
+	def test_executions__day_executions__multiple_clients__last_client_with_first_day_empty(self):
 		listener1 = ServerListener( client_name='a_client', repository_name='repo' )
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
 		server = TestFarmServer(repository_name='repo')
@@ -103,10 +101,8 @@ class Tests_TestFarmServer(ColoredTestCase):
 				'a_client': [('2006-04-30-12-12-00', '2006-04-30-12-12-00', 'repo', 'stable')]
 				},
 			'2006-04-29':
-				{'a_client2': [],
-				'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'repo', 'stable')]
-				}
-			}, server.day_iterations(server.iterations()) )
+				{'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'repo', 'stable')]}
+			}, server.day_executions(server.executions()) )
 
 
 	def test_details(self):
@@ -140,7 +136,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('END_TASK', 'task'),
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
-		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )
+		self.assertEquals( expected, server.single_execution_details('a_client', '1999-99-99-99-99-99') )
 
 	def test_purged_details(self):
 		listener = ServerListener( client_name='a_client', repository_name='repo')
@@ -170,7 +166,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 ('END_REPOSITORY', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
 		server.purge_client_logfile('a_client','1999-99-99-99-99-99')
-		self.assertEquals( expected, server.single_iteration_details('a_client', '1999-99-99-99-99-99') )		
+		self.assertEquals( expected, server.single_execution_details('a_client', '1999-99-99-99-99-99') )		
 
 	def test_two_clients(self):
 		listener1 = ServerListener(
@@ -192,7 +188,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 		self.assertEquals( 
 			{'client 1':[('some date', 'some date', 'repo', 'stable')],
 			 'client 2':[('some other date', 'some other date', 'repo', 'stable')]}, 
-			server.iterations() )
+			server.executions() )
 		listener1.clean_log_files()
 		listener2.clean_log_files()
 

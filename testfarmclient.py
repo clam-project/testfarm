@@ -204,11 +204,10 @@ class Task:
 		if server_to_push:
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
+		temp_file = tempfile.NamedTemporaryFile()
 		for maybe_dict in self.commands :
 			# 1 : Create a temp file to save working directory
-			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
-			#temp_file = "%s/current_dir.temp" % initial_working_dir #TODO multiplatform
-			temp_file = tempfile.NamedTemporaryFile()
+			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)	
 			if sys.platform == 'win32': #TODO multiplatform
 				cmd_with_pwd = cmd + " && cd > %s" % temp_file.name
 			else:
@@ -243,11 +242,11 @@ class Task:
 				os.chdir ( initial_working_dir )
 				return False
 			# 3: End command run 
-			temp_file.close()
 			self.__end_command(cmd, listeners)
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
 		self.__end_task(listeners)
+		temp_file.close()
 		os.chdir ( initial_working_dir )
 		return True
 
@@ -272,13 +271,10 @@ class Repository :
 		self.seconds_idle = minutes_idle * 60
 
 	def add_deployment_task(self, commands): #TODO abort if fails
-		self.add_task("Deployment Task", commands)
+		self.add_task("Deployment Task", commands, mandatory = True)
 
-	def add_task(self, taskname, commands):
-		self.tasks.append(Task(taskname, commands))
-
-	def add_mandatory_task(self, taskname, commands):
-		self.tasks.append(Task(taskname, commands, mandatory = True))
+	def add_task(self, taskname, commands, mandatory = False):
+		self.tasks.append(Task(taskname, commands, mandatory))
 
 	def do_checking_for_new_commits(self, listeners, verbose=False):
 		initial_working_dir = os.path.abspath(os.curdir)
@@ -300,11 +296,11 @@ class Repository :
 			all_ok = all_ok and current_result
 			if not current_result and task.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
 				break 
-			if server_to_push : #TODO remove. this is just provisional. Is it?
+			if server_to_push :
 				server_to_push.update_static_html_files()
 		for listener in listeners:
 			listener.listen_end_repository( self.name, all_ok )
-		if server_to_push : #TODO remove. this is just provisional. Is it?
+		if server_to_push : 
 			server_to_push.update_static_html_files()
 		return all_ok
 
