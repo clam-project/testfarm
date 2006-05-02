@@ -369,7 +369,7 @@ class TestFarmServer:
 			filenames.append(filename)
 		return filenames
 
-	def __get_client_day_iterations(self, client_name): #TODO: MS - Refactor
+	def __get_client_iterations(self, client_name): #TODO: MS - Refactor
 		log = self.load_client_log(client_name)
 		iterations = []
 		iteration_opened = False
@@ -426,7 +426,7 @@ class TestFarmServer:
 	def iterations(self):
 		result = {}
 		for client_name in self.client_names():
-			result[client_name] = self.__get_client_day_iterations(client_name)
+			result[client_name] = self.__get_client_iterations(client_name)
 		return result
 
 	def __html_format_client_iterations(self, client_name, client_idle, client_iterations):
@@ -493,7 +493,8 @@ class TestFarmServer:
 		iterations_per_day_key_sorted = iterations_per_day.keys()
 		iterations_per_day_key_sorted.sort(reverse = True)
 		for day in iterations_per_day_key_sorted :
-			content.append('<tr>')
+			#content.append('<tr>')
+			content.append('<tr><td colspan="%s" align="center"><hr/>%s<hr/></td></tr><tr>' % (num_clients, day)) # insert a brake line
 			day_clients = iterations_per_day[day]
 			for client in day_clients.keys():
 		#		print "CLIENT_KEY IN DAY CLIENTS = ", client
@@ -504,8 +505,6 @@ class TestFarmServer:
 				content += self.__html_format_client_iterations(client, client_idle, client_iterations) 
 				content.append('</td>')
 		#	print "CONTENT = ", content
-			aux = '</tr><tr><td colspan="%s"><hr/></td>' % num_clients
-			content.append(aux) # insert a brake line
 			content.append('</tr>')
 		return content
 
