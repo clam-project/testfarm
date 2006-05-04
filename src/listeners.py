@@ -38,6 +38,8 @@ class NullResultListener : #TODO base class
 		pass
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		pass
+	def listen_end_repository_gently(self):
+		pass 
 
 class DummyResultListener :
 	"helper ResultListener class "
@@ -75,7 +77,8 @@ class DummyResultListener :
 	
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		pass
-
+	def listen_end_repository_gently(self):
+		pass 
 
 class ConsoleResultListener :
 	def __init__(self):
@@ -144,15 +147,18 @@ class ConsoleResultListener :
 		self.pprint('BOLD', "  BEGIN_TASK %s" % taskname )
 
 	def listen_end_task(self, taskname):
-		self.pprint ('BOLD', "  END_TASK %s\n" % taskname )
+		self.pprint('BOLD', "  END_TASK %s\n" % taskname )
 	
 	def listen_begin_repository(self, repositoryname):
-		self.pprint ('BOLD', "BEGIN_REPOSITORY %s\n" % repositoryname )
+		self.pprint('BOLD', "BEGIN_REPOSITORY %s\n" % repositoryname )
 
 	def listen_end_repository(self, repositoryname, status):
-		self.pprint ('BOLD', "END_REPOSITORY %s --> %s" % (repositoryname, status) )
+		self.pprint('BOLD', "END_REPOSITORY %s --> %s" % (repositoryname, status) )
 
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		self.pprint('MAGENTA', 'New commits found, or No checks specified :', new_commits_found)
 		self.pprint('MAGENTA', 'New check in %d seconds.' % seconds_idle)
+
+	def listen_end_repository_gently(self, repository_name):
+		self.pprint('MAGENTA', 'Keyboard Interrupt. Stopping execution gently') 
 

@@ -86,3 +86,6 @@ class ServerListenerProxy:
 		idle_dict['next_run_in_seconds']=next_run_in_seconds
 		self.__write_idle_info( str(idle_dict) )
 
+	def listen_end_repository_gently(self, repository_name):
+		append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (repository_name, self.current_time())
+		self.__append_log_entry(append_entry)	

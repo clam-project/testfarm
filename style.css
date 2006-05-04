@@ -189,6 +189,11 @@ td
 	border: solid 1px #eee;
 }
 
+.about
+{
+	font-size: 0.7em;
+}
+
 .stats
 {
 	white-space: pre;

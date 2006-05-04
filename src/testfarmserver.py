@@ -44,7 +44,9 @@ header_details = """
 """
 
 footer = """
+<div class="about">
 <p>TestFarm is free software. Learn <a href="http://www.iua.upf.es/~parumi/testfarm">about TestFarm</a>.</p>
+</div>
 </body>
 </html>
 """
@@ -152,34 +154,9 @@ class ServerListener:
 				return  task_name
 		assert "BEGIN_TASK not found"
 		
-	def listen_stop_repository_gently(self): #TODO: Refactor 
-		log = eval("[ %s ]" % open( self.logfile ).read() )
-		if log :
-			entry = log[len(log)-1]
-			if entry[0] == 'BEGIN_CMD': # TODO What happens when the keyboard interrupts in middle of cmd ?  
-				#TODO, STATUS MUST BE ABORTED, NOT FALSE
-				append_entry = "('END_CMD', '%s', False, 'command execution aborted by client', '', {}),\n" % entry[1] 
-				self.__append_log_entry(append_entry)
-				task_name = self.__get_last_task_name(log)
-				append_entry = "('END_TASK', '%s'),\n" % task_name 
-				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) 
-				self.__append_log_entry(append_entry)
-			elif entry[0] == 'END_CMD':
-				task_name = self.__get_last_task_name(log)
-				append_entry = "('END_TASK', '%s'),\n" % task_name 
-				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time()) 
-				self.__append_log_entry(append_entry)
-			elif entry[0] == 'BEGIN_TASK' : # TODO What happens when the keyboard interrupts in middle of task ?  
-				task_name = entry[1]
-				append_entry = "('END_TASK', '%s'),\n" % task_name 
-				self.__append_log_entry(append_entry)	
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time())
-				self.__append_log_entry(append_entry)			
-			elif entry[0] == 'END_TASK' or entry[0] == 'BEGIN_REPOSITORY': 
-				append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (self.repository_name, self.current_time())
-				self.__append_log_entry(append_entry)	
+	def listen_end_repository_gently(self, repository_name): #TODO: Refactor 
+		append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (repository_name, self.current_time())
+		self.__append_log_entry(append_entry)	
 			
 
 #
@@ -307,20 +284,32 @@ class TestFarmServer:
 		id_info = 1; # auto-increment id
 		id_output = 1; # auto-increment id
 		opened_cmd = False # check if last command in log is already opened
+		opened_task = False
+		opened_repository = False
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY':
 				content.append('<div class="repository"> BEGIN_REPOSITORY "%s" %s' % (entry[1], entry[2]) )
+				opened_repository = True
 			elif tag == 'BEGIN_TASK':
 				content.append('<div class="task"> BEGIN_TASK "%s"' % entry[1])
+				opened_task = True
 			elif tag == 'BEGIN_CMD':
 				content.append( '<div class=command>' )
 				content.append( '<span class="command_string"> %s</span>' % entry[1] )
 				opened_cmd = True						
 			elif tag == 'END_TASK':
 				content.append('END_TASK "%s"</div>' % entry[1])
+				opened_task = False
 			elif tag == 'END_REPOSITORY':
+				if opened_cmd:
+					content.append( '<span class="command_failure">[FAILURE]</span>' )
+					content.append( '<p class="output"> command execution aborted by the client</p>')
+					content.append('</div>')
+				if opened_task:
+					content.append('</div>')
 				content.append( 'END_REPOSITORY "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
+				return header_details + '\n'.join(content) + footer	
 			else:
 				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was:' + entry
 
@@ -339,8 +328,15 @@ class TestFarmServer:
 					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
 				content.append( '</div>' )
 				opened_cmd = False
+		
 		if opened_cmd :
 			content.append( '<span class="command_inprogress">in progress ...</span>' )
+			content.append( '</div>')
+		if opened_task :
+			content.append( '</div>')
+		if opened_repository :	
+			content.append( '</div>')
+			
 		return header_details + '\n'.join(content) + footer	
 
 	#minimal version:

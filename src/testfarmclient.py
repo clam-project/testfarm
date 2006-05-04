@@ -89,9 +89,7 @@ class TestFarmClient :
 						server_to_push.update_static_html_files()
 					time.sleep( repository.seconds_idle )
 		except KeyboardInterrupt :
-			print "Keyboard Interrupt. Stopping execution gently"
-			if serverlistener :
-				repository.stop_execution_gently([serverlistener], server_to_push = server_to_push)
+			repository.stop_execution_gently(self.listeners, server_to_push = server_to_push)
 		
 
 def get_command_and_parsers(maybe_dict):
@@ -307,7 +305,7 @@ class Repository :
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
 		for listener in listeners:
-			listener.listen_stop_repository_gently()
+			listener.listen_end_repository_gently(self.name)
 		if server_to_push :
 			server_to_push.update_static_html_files()
 		pass 
