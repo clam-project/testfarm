@@ -28,7 +28,7 @@ def create_tarball(version):
 		cmd = 'cd export && cvs export -r HEAD -d testfarm-%(ver)s testfarm' % {'ver':version}
 		print cmd
 		print execute(cmd)
- 		cmd = 'cd export && rm songstamp* essentia*'
+ 		cmd = 'cd export/examples && rm songstamp* essentia*'
 		print execute(cmd)
 		cmd = 'cd export && tar cvf testfarm-%(ver)s.tar.gz testfarm-%(ver)s/ && rm -rf testfarm-%(ver)s/' % {'ver':version}
 		print execute(cmd)
