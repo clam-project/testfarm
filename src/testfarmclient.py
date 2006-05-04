@@ -116,7 +116,7 @@ def get_command_and_parsers(maybe_dict):
 
 def run_command_with_log(command, verbose = True, logfilename = None, write_as_html = False):
 
-	if logfilename:
+	if verbose and logfilename:
 		logFile = open(logfilename, "a")
 		if write_as_html:
 			logFile.write("<hr/>")
@@ -128,31 +128,24 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 			logFile.write("output:\n")
 		logFile.flush()
 	else:
-		logFile = None
-	
-	output = []
-	 
+		logFile = None	
+	output = []	 
 	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-	  
+
 	while True:
-		tmp = pipe.stdout.readline()
-		
+		tmp = pipe.stdout.readline()	
 		output.append( tmp )
-		
 		if tmp:
 			if verbose:
-				print tmp.strip()
-						
-			if logFile:
+				print tmp.strip()				
+			if verbose and logFile:
 				logFile.write(tmp)
-				logFile.flush()
-							
+				logFile.flush()						
 		if pipe.poll() is not None:
-			break
-	
+			break	
 	status = pipe.wait()
 	
-	if logFile:
+	if verbose and logFile:
 		if write_as_html:
 			logFile.write("</pre><p><span style=\"color:red\">status</span>: %d</p>" % status)
 		else:
