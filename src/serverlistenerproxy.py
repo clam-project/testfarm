@@ -50,8 +50,12 @@ class ServerListenerProxy:
 	def current_time(self):
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
-	def listen_result(self, command, ok, output, info, stats):
-		entry = str( ('CMD', command, ok, output, info, stats) ) + ',\n'
+	def listen_end_command(self, command, ok, output, info, stats):
+		entry = str( ('END_CMD', command, ok, output, info, stats) ) + ',\n'
+		self.__append_log_entry(entry)
+
+	def listen_begin_command(self, cmd):
+		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
 		self.__append_log_entry(entry)
 
 	def listen_begin_task(self, taskname):
