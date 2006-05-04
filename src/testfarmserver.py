@@ -493,9 +493,11 @@ class TestFarmServer:
 		# all_clients = self.client_names() DOES NOT WORK PROPERLY
 		executions_per_day_key_sorted = executions_per_day.keys()
 		executions_per_day_key_sorted.sort(reverse = True)
+		html_time_tmpl = "%(D)s/%(M)s/%(Y)s"
 		for day in executions_per_day_key_sorted :
 			#content.append('<tr>')
-			content.append('<tr><td colspan="%s" align="center"><hr/>%s<hr/></td></tr><tr>' % (len(all_clients), day)) # insert a brake line
+			formatted_day = self.__format_datetime(day+'-00-00-00', html_time_tmpl)
+			content.append('<tr><td colspan="%s" align="center">%s</td></tr><tr>' % (len(all_clients), formatted_day)) # insert a brake line
 			day_clients = executions_per_day[day]
 			for client in all_clients:
 			#	print "CLIENT_KEY IN DAY CLIENTS = ", client

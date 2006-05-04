@@ -61,7 +61,7 @@ Done	- how to name different plots? taskname? taskname+#cmd
 
 	- set up a "universal" server for any project (be aware of security issues, spam...)
 	  -> Done but inside MTG
-Done-Refactor	- Stop client "gently"
+Done	- Stop client "gently"
 Done	  -> Propagate "user aborted" to HTML 
 		--> BUG : some times, the index.html is not loaded properly
 Done	- Mandatory / Breaking tasks
@@ -92,7 +92,7 @@ Current	- CLAM in windows
 	- refactoring: remote communication code and (.py) file names
 	- refactoring: init project phase
 	- refactoring: init client phase
-	- organize src directories
+Done	- organize src directories
 	
 
 	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
