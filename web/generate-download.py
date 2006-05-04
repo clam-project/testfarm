@@ -7,7 +7,7 @@ def execute(cmd):
 
 def write_download_page() :
 	html = []
-	for details in execute('ls -lh export/*.tar.gz').split('\n'):
+	for details in execute('ls -lht export/*.tar.gz').split('\n'):
 		separated = details.split()
 		if separated[2] != 'parumi' : continue 
 		size = separated[4] 
