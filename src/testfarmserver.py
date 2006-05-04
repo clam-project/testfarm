@@ -306,6 +306,7 @@ class TestFarmServer:
 		content = []
 		id_info = 1; # auto-increment id
 		id_output = 1; # auto-increment id
+		opened_cmd = False # check if last command in log is already opened
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0]
 			if tag == 'BEGIN_REPOSITORY':
@@ -314,7 +315,8 @@ class TestFarmServer:
 				content.append('<div class="task"> BEGIN_TASK "%s"' % entry[1])
 			elif tag == 'BEGIN_CMD':
 				content.append( '<div class=command>' )
-				content.append( '<span class="command_string"> %s ... </span>' % entry[1] )				
+				content.append( '<span class="command_string"> %s</span>' % entry[1] )
+				opened_cmd = True						
 			elif tag == 'END_TASK':
 				content.append('END_TASK "%s"</div>' % entry[1])
 			elif tag == 'END_REPOSITORY':
@@ -336,6 +338,9 @@ class TestFarmServer:
 				if entry[5] :
 					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
 				content.append( '</div>' )
+				opened_cmd = False
+		if opened_cmd :
+			content.append( '<span class="command_inprogress">in progress ...</span>' )
 		return header_details + '\n'.join(content) + footer	
 
 	#minimal version:

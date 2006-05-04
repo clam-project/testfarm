@@ -157,6 +157,15 @@ td
 	padding-left: 3em;
 }
 
+.command_inprogress
+{
+	color: #A8A837;
+	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
+	padding-left: 3em;
+}
+
 .output
 {
 	white-space: pre;
