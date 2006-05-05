@@ -28,17 +28,17 @@ class NullResultListener : #TODO base class
 		pass
 #	def listen_end_command(self, cmd):
 #		pass
+	def listen_begin_subtask(self, subtaskname):
+		pass	
+	def listen_end_subtask(self, subtaskname):
+		pass	
 	def listen_begin_task(self, taskname):
-		pass	
-	def listen_end_task(self, taskname):
-		pass	
-	def listen_begin_repository(self, repositoryname):
 		pass
-	def listen_end_repository(self, repositoryname, status):
+	def listen_end_task(self, taskname, status):
 		pass
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		pass
-	def listen_end_repository_gently(self):
+	def listen_end_task_gently(self, taskname):
 		pass 
 
 class DummyResultListener :
@@ -63,21 +63,21 @@ class DummyResultListener :
 #	def listen_end_command(self, cmd):
 #		self.results.append("END_CMD %s" % cmd)
 
+	def listen_begin_subtask(self, subtaskname):
+		self.results.append( "BEGIN_SUBTASK %s" % subtaskname )
+
+	def listen_end_subtask(self, subtaskname):
+		self.results.append( "END_SUBTASK %s" % subtaskname )
+	
 	def listen_begin_task(self, taskname):
 		self.results.append( "BEGIN_TASK %s" % taskname )
 
-	def listen_end_task(self, taskname):
+	def listen_end_task(self, taskname, status):
 		self.results.append( "END_TASK %s" % taskname )
-	
-	def listen_begin_repository(self, repositoryname):
-		self.results.append( "BEGIN_REPOSITORY %s" % repositoryname )
-
-	def listen_end_repository(self, repositoryname, status):
-		self.results.append( "END_REPOSITORY %s" % repositoryname )
 	
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		pass
-	def listen_end_repository_gently(self):
+	def listen_end_task_gently(self, taskname):
 		pass 
 
 class ConsoleResultListener :
@@ -143,22 +143,22 @@ class ConsoleResultListener :
 #	def listen_end_command(self, cmd):
 #		self.pprint ('BOLD', "    END_CMD %s\n" % cmd )
 	
-	def listen_begin_task(self, taskname):
-		self.pprint('BOLD', "  BEGIN_TASK %s" % taskname )
+	def listen_begin_subtask(self, subtaskname):
+		self.pprint('BOLD', "  BEGIN_SUBTASK %s" % subtaskname )
 
-	def listen_end_task(self, taskname):
-		self.pprint('BOLD', "  END_TASK %s\n" % taskname )
+	def listen_end_subtask(self, subtaskname):
+		self.pprint('BOLD', "  END_SUBTASK %s\n" % subtaskname )
 	
-	def listen_begin_repository(self, repositoryname):
-		self.pprint('BOLD', "BEGIN_REPOSITORY %s\n" % repositoryname )
+	def listen_begin_task(self, taskname):
+		self.pprint('BOLD', "BEGIN_TASK %s\n" % taskname )
 
-	def listen_end_repository(self, repositoryname, status):
-		self.pprint('BOLD', "END_REPOSITORY %s --> %s" % (repositoryname, status) )
+	def listen_end_task(self, taskname, status):
+		self.pprint('BOLD', "END_TASK %s --> %s" % (taskname, status) )
 
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		self.pprint('MAGENTA', 'New commits found, or No checks specified :', new_commits_found)
 		self.pprint('MAGENTA', 'New check in %d seconds.' % seconds_idle)
 
-	def listen_end_repository_gently(self, repository_name):
+	def listen_end_task_gently(self, taskname):
 		self.pprint('MAGENTA', 'Keyboard Interrupt. Stopping execution gently') 
 

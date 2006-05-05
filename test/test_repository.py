@@ -22,87 +22,88 @@ from testfarmclient import *
 from coloredtest import ColoredTestCase
 from listeners import DummyResultListener
 
-class Tests_Repository(ColoredTestCase):
+class Tests_Task(ColoredTestCase):
 
 	def test_name(self):
-		repository = Repository('reponame') 
-		self.assertEquals('reponame', repository.get_name())
+		task = Task('project name','client name','taskname') 
+		self.assertEquals('taskname', task.get_name())
 		
 	def test_name__default_consructor(self):
-		repository = Repository()
-		self.assertEquals('-- unnamed repository --', repository.get_name())
+		task = Task('project name', 'client name')
+		self.assertEquals('-- unnamed task --', task.get_name())
 
-	def test_num_tasks_default(self):
-		repository = Repository('reponame1')
-		self.assertEquals(0, repository.get_num_tasks())
+	def test_num_subtasks_default(self):
+		task = Task('project name','client name','taskname1')
+		self.assertEquals(0, task.get_num_subtasks())
 	
-	def test_num_tasks_multiple(self):
-		repository = Repository('reponame2')
-		repository.add_task( "taskname1" , [] )
-		repository.add_task( "taskname2" , [] )
+	def test_num_subtasks_multiple(self):
+		task = Task('project name','client name','taskname2')
+		task.add_subtask( "subtaskname1" , [] )
+		task.add_subtask( "subtaskname2" , [] )
 	
-		self.assertEquals(2, repository.get_num_tasks())
+		self.assertEquals(2, task.get_num_subtasks())
 
-	def test_num_tasks_multiple__with_deployment_task(self):
-		repository = Repository()
-		repository.add_deployment_task( [] )
-		repository.add_task( "taskname1" , [] )
-	
-		self.assertEquals(2, repository.get_num_tasks())
+	def test_num_subtasks_multiple__with_deployment_task(self):
+		task = Task('project name','client name')
 
-	def test_do_tasks__single_task_successful(self):
-		repository = Repository()
-		repository.add_task( "taskname" , ["echo hello"] )
+		task.add_deployment( [] )
+		task.add_subtask( "subtaskname1" , [] )
+	
+		self.assertEquals(2, task.get_num_subtasks())
+
+	def test_do_subtasks__single_subtask_successful(self):
+		task = Task('project name','client name')
+		task.add_subtask( "subtaskname" , ["echo hello"] )
 		
-		self.assertEquals(True, repository.do_tasks())
+		self.assertEquals(True, task.do_subtasks())
 	
-	def test_do_tasks__multiple_task_last_fails(self):
-		repository = Repository()
-		repository.add_task( "taskname" , 
+	def test_do_subtasks__multiple_subtask_last_fails(self):
+		task = Task('project name','client name')
+		task.add_subtask( "subtaskname" , 
 			["echo hello", "non-existing-command"] )
 		
-		self.assertEquals(False, repository.do_tasks())
+		self.assertEquals(False, task.do_subtasks())
 
 
 	# Results Tests
-	def test_results_log__repository_default(self):
-		repository = Repository("repo name")
+	def test_results_log__task_default(self):
+		task = Task("project name","client name","task name")
 		listener = DummyResultListener()
-		repository.do_tasks([listener])
+		task.do_subtasks([listener])
 		self.assertEquals( """\
-BEGIN_REPOSITORY repo name
-END_REPOSITORY repo name""", listener.log() )
+BEGIN_TASK task name
+END_TASK task name""", listener.log() )
 
-	def test_results_log__two_tasks_first_fails(self):
-		repository = Repository("repo name")
-		repository.add_task("task1", ["non-existing-command"])
-		repository.add_task("task2", ["echo foo"])
+	def test_results_log__two_subtasks_first_fails(self):
+		task = Task("project name","client name","task name")
+		task.add_subtask("subtask1", ["non-existing-command"])
+		task.add_subtask("subtask2", ["echo foo"])
 		listener = DummyResultListener()
-		repository.do_tasks([listener])
+		task.do_subtasks([listener])
 		self.assertEquals(  """\
-BEGIN_REPOSITORY repo name
-BEGIN_TASK task1
+BEGIN_TASK task name
+BEGIN_SUBTASK subtask1
 ('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
-END_TASK task1
-BEGIN_TASK task2
+END_SUBTASK subtask1
+BEGIN_SUBTASK subtask2
 ('echo foo', 'ok', '', '', {})
-END_TASK task2
-END_REPOSITORY repo name""", listener.log() )
+END_SUBTASK subtask2
+END_TASK task name""", listener.log() )
 
-	def test_mandatory_task(self):
-		repo = Repository('repo')	
-		repo.add_task('task1', ["echo task1"])	
-		repo.add_task('task2', ["echo something echoed", "lsss gh"], mandatory = True)
-		repo.add_task('task3', ["echo task3"])	
+	def test_mandatory_subtask(self):
+		task = Task("project name","client name","task")	
+		task.add_subtask('subtask1', ["echo subtask1"])	
+		task.add_subtask('subtask2', ["echo something echoed", "lsss gh"], mandatory = True)
+		task.add_subtask('subtask3', ["echo subtask3"])	
 		listener = DummyResultListener()
-		repo.do_tasks([listener])
+		task.do_subtasks([listener])
 		self.assertEquals("""\
-BEGIN_REPOSITORY repo
-BEGIN_TASK task1
-('echo task1', 'ok', '', '', {})
-END_TASK task1
-BEGIN_TASK task2
+BEGIN_TASK task
+BEGIN_SUBTASK subtask1
+('echo subtask1', 'ok', '', '', {})
+END_SUBTASK subtask1
+BEGIN_SUBTASK subtask2
 ('echo something echoed', 'ok', '', '', {})
 ('lsss gh', 'failure', '/bin/sh: lsss: command not found\\n', '', {})
-END_TASK task2
-END_REPOSITORY repo""", listener.log() )
+END_SUBTASK subtask2
+END_TASK task""", listener.log() )

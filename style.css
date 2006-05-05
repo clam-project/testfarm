@@ -108,7 +108,7 @@ td
 }
 
 
-.repository
+.task
 {
 	left: 5%;
 	color: #888;
@@ -116,7 +116,7 @@ td
 	border: solid 1px #eee;
 }
 
-.task
+.subtask
 {
 	left: 2%;
 	padding: 1em; 
@@ -216,14 +216,14 @@ td
 	font-size: 11px;
 }
 
-#repository
+#task
 {
 	position: relative;
 	left: 5%;
 	font-weight: bolder; 
 }
 
-#task
+#subtask
 {
 	position: relative;
 	left: 10%;

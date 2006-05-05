@@ -31,21 +31,17 @@ def is_string( data ):
 	except AttributeError:
 		return False
 	
-class TestFarmClient :
+class Runner :
 	def __init__(self, 
-		name,
-		repository,
+		task,
 		continuous=False,
-		html_base_dir = None,
-		logs_base_dir='/tmp/testfarm_logs',
+		local_base_dir = None,	
 		remote_server_url = None,
 		verbose = False,
 		testinglisteners = []
 
 	) :
-		assert is_string(name), '< %s > is not a valid client name (should be a string)' % str(name)
-		self.name = name
-
+		
 		self.listeners = [ ConsoleResultListener() ]
 
 		serverlistener = None # for keyboard interrupt purpose
@@ -54,20 +50,20 @@ class TestFarmClient :
 			listenerproxy = ServerListenerProxy(
 				client_name=name, 
 				service_url=remote_server_url,
-				repository_name=repository.name
+				task_name=task.name
 			)		
 			self.listeners.append( listenerproxy )
-		if html_base_dir :	
+		if local_base_dir :	
 			serverlistener = ServerListener( 
-				client_name=self.name, 
-				logs_base_dir=logs_base_dir,
-				repository_name=repository.name
+				client_name=task.client_name, 
+				logs_base_dir=local_base_dir + "/logs",
+				project_name=task.project_name
 			)
 			self.listeners.append( serverlistener )
 			server_to_push = TestFarmServer( 
-				logs_base_dir=logs_base_dir, 
-				html_base_dir=html_base_dir, 
-				repository_name=repository.name )
+				logs_base_dir=local_base_dir + "/logs", 
+				html_base_dir=local_base_dir + "/html", 
+				project_name=task.project_name )
 
 		else:
 			server_to_push = None
@@ -76,20 +72,20 @@ class TestFarmClient :
 			self.listeners = testinglisteners
 
 		try :
-			#do_tasks at lease one time	
-			repository.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
-			repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+			#do_subtasks at lease one time	
+			task.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
+			task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 
 			while continuous :
-				new_commits_found = repository.do_checking_for_new_commits( self.listeners, verbose=verbose )
+				new_commits_found = task.do_checking_for_new_commits( self.listeners, verbose=verbose )
 				if new_commits_found:
-					repository.do_tasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+					task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 				else:
 					if server_to_push: #update idle time display
 						server_to_push.update_static_html_files()
-					time.sleep( repository.seconds_idle )
+					time.sleep( task.seconds_idle )
 		except KeyboardInterrupt :
-			repository.stop_execution_gently(self.listeners, server_to_push = server_to_push)
+			task.stop_execution_gently(self.listeners, server_to_push = server_to_push)
 		
 
 def get_command_and_parsers(maybe_dict):
@@ -161,19 +157,19 @@ def run_command(command, initial_working_dir, verbose=False):
 	return run_command_with_log(command, verbose=verbose, logfilename=logfile, write_as_html=True)
 
 
-class Task:
+class SubTask:
 	def __init__(self, name, commands, mandatory = False):
 		self.name = name
 		self.commands = commands
 		self.mandatory = mandatory
 
-	def __begin_task(self, listeners):
+	def __begin_subtask(self, listeners):
 		for listener in listeners :
-			listener.listen_begin_task( self.name )
+			listener.listen_begin_subtask( self.name )
 
-	def __end_task(self, listeners):
+	def __end_subtask(self, listeners):
 		for listener in listeners :
-			listener.listen_end_task( self.name )
+			listener.listen_end_subtask( self.name )
 
 	def __begin_command(self, cmd, listeners):
 		for listener in listeners :
@@ -190,8 +186,8 @@ class Task:
 	def is_mandatory(self):
 		return self.mandatory
 
-	def do_task(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False): #TODO : Refactor
-		self.__begin_task(listeners)
+	def do_subtask(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False): #TODO : Refactor
+		self.__begin_subtask(listeners)
 		if server_to_push:
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
@@ -229,7 +225,7 @@ class Task:
 				os.chdir( current_dir )
 			if not status_ok :
 				self.__end_command(listeners, cmd, status_ok, output, info, stats)
-				self.__end_task(listeners)
+				self.__end_subtask(listeners)
 				temp_file.close()
 				os.chdir ( initial_working_dir )
 				return False
@@ -237,36 +233,40 @@ class Task:
 			self.__end_command(listeners, cmd, status_ok, output, info, stats)
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
-		self.__end_task(listeners)
+		self.__end_subtask(listeners)
 		temp_file.close()
 		os.chdir ( initial_working_dir )
 		return True
 
-class Repository :
-	# Attributes : name, tasks[], deployment_task[] 
+class Task :
+	# Attributes : name, subtasks[], deployment[] 
 
-	def __init__(self, name = '-- unnamed repository --'): 
+	def __init__(self, project, client, name = '-- unnamed task --'): 
 		self.name = name;
-		self.tasks = []
-		self.deployment_task = None
+		assert is_string(name), '< %s > is not a valid project name (should be a string)' % str(name)
+		self.project_name = project
+		assert is_string(client), '< %s > is not a valid client name (should be a string)' % str(name)
+		self.client_name = client
+		self.subtasks = []
+		self.deployment = None
 		self.not_idle_checking_cmd = ""
 		self.seconds_idle = 0
 		
 	def get_name(self):
 		return self.name;
 		
-	def get_num_tasks(self): # Note : Deployment task is considered as a separated task
-		return len( self.tasks )
+	def get_num_subtasks(self): # Note : Deployment task is considered as a separated task
+		return len( self.subtasks )
 	
 	def add_checking_for_new_commits(self, checking_cmd, minutes_idle = 5 ):
 		self.not_idle_checking_cmd = checking_cmd
 		self.seconds_idle = minutes_idle * 60
 
-	def add_deployment_task(self, commands): #TODO abort if fails
-		self.add_task("Deployment Task", commands, mandatory = True)
+	def add_deployment(self, commands): #TODO must be unique
+		self.add_subtask("Deployment", commands, mandatory = True)
 
-	def add_task(self, taskname, commands, mandatory = False):
-		self.tasks.append(Task(taskname, commands, mandatory))
+	def add_subtask(self, subtaskname, commands, mandatory = False):
+		self.subtasks.append(SubTask(subtaskname, commands, mandatory))
 
 	def do_checking_for_new_commits(self, listeners, verbose=False):
 		initial_working_dir = os.path.abspath(os.curdir)
@@ -279,26 +279,26 @@ class Repository :
 			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
 		return new_commits_found
 
-	def do_tasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
+	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
 		all_ok = True
 		for listener in listeners:
-			listener.listen_begin_repository( self.name )
-		for task in self.tasks :
-			current_result = task.do_task(listeners, server_to_push, verbose=verbose)
+			listener.listen_begin_task( self.name )
+		for subtask in self.subtasks :
+			current_result = subtask.do_subtask(listeners, server_to_push, verbose=verbose)
 			all_ok = all_ok and current_result
-			if not current_result and task.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
+			if not current_result and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
 				break 
 			if server_to_push :
 				server_to_push.update_static_html_files()
 		for listener in listeners:
-			listener.listen_end_repository( self.name, all_ok )
+			listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
 		return all_ok
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
 		for listener in listeners:
-			listener.listen_end_repository_gently(self.name)
+			listener.listen_end_task_gently(self.name)
 		if server_to_push :
 			server_to_push.update_static_html_files()
 		pass 

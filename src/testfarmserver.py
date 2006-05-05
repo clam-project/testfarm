@@ -26,10 +26,10 @@ header_index = """
 <head>
 <meta http-equiv="refresh" content="120">
 <link href="style.css" rel="stylesheet" type="text/css">
-<title>Tests Farm for project %(repository_name)s </title>
+<title>Tests Farm for project %(project_name)s </title>
 </head>
 <body>
-<h1>testfarm for project %(repository_name)s </h1>
+<h1>testfarm for project %(project_name)s </h1>
 
 """
 
@@ -54,11 +54,11 @@ footer = """
 def remove_path_and_extension( path ):
 	return os.path.splitext( os.path.basename( path ) )[0]
 
-def log_filename(logs_base_dir, repository_name, client_name) :
-	return '%s/%s/%s.testfarmlog' % (logs_base_dir, repository_name, client_name)
+def log_filename(logs_base_dir, project_name, client_name) :
+	return '%s/%s/%s.testfarmlog' % (logs_base_dir, project_name, client_name)
 
-def idle_filename(logs_base_dir, repository_name, client_name) :
-	return '%s/%s/%s.idle' % (logs_base_dir, repository_name, client_name)
+def idle_filename(logs_base_dir, project_name, client_name) :
+	return '%s/%s/%s.idle' % (logs_base_dir, project_name, client_name)
 
 def create_dir_if_needed(dir):
 	if not os.path.isdir( dir ) :
@@ -73,20 +73,20 @@ class ServerListener:
 	def __init__(self, 
 		client_name='testing_client', 
 		logs_base_dir = '/tmp/testfarm_tests',
-		repository_name=None
+		project_name=None # TODO: project_name must not be None
 	) :
 		self.executions_needs_update = True
 		self.client_name = client_name
-		self.repository_name = repository_name
+		self.project_name = project_name
 		self.logs_base_dir = logs_base_dir
 		self.logfile = None
 		self.idle_file = None
 		
-		assert repository_name, "Error, repository_name was expected"
+		assert project_name, "Error, project_name was expected"
 
-		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, repository_name) ) 
-		self.logfile = log_filename( self.logs_base_dir, repository_name, self.client_name )
-		self.idle_file = idle_filename( self.logs_base_dir, repository_name, self.client_name )
+		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, project_name) ) 
+		self.logfile = log_filename( self.logs_base_dir, project_name, self.client_name )
+		self.idle_file = idle_filename( self.logs_base_dir, project_name, self.client_name )
 
 		
 	def __append_log_entry(self, entry) :
@@ -116,21 +116,21 @@ class ServerListener:
 	#	entry = "('END_CMD', '%s'),\n" % cmd
 	#	self.__append_log_entry(entry)
 
-	def listen_begin_task(self, taskname):
-		entry = "('BEGIN_TASK', '%s'),\n" % taskname 
+	def listen_begin_subtask(self, taskname):
+		entry = "('BEGIN_SUBTASK', '%s'),\n" % taskname 
 		self.__append_log_entry(entry)
 
-	def listen_end_task(self, taskname):
-		entry = "('END_TASK', '%s'),\n" % taskname
+	def listen_end_subtask(self, taskname):
+		entry = "('END_SUBTASK', '%s'),\n" % taskname
 		self.__append_log_entry(entry)
 	
-	def listen_begin_repository(self, repository_name):
-		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repository_name, self.current_time())
+	def listen_begin_task(self, task_name):
+		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
 		self.executions_needs_update = True
 		self.__append_log_entry(entry)
 
-	def listen_end_repository(self, repository_name, status):
-		entry = "('END_REPOSITORY', '%s', '%s', '%s'),\n" % (repository_name, self.current_time(), status)
+	def listen_end_task(self, task_name, status):
+		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.executions_needs_update = True
 
@@ -143,19 +143,9 @@ class ServerListener:
 		idle_dict['date'] = self.current_time()
 		idle_dict['next_run_in_seconds']=next_run_in_seconds	
 		self.__write_idle_info( str( idle_dict ) )
-	
-	def __get_last_task_name(self, log): # TODO: make static | LOG already reversed by listen_stop_repository_gently
-		log.reverse()
-		for entry in log :
-			tag = entry[0]
-			if tag == 'BEGIN_TASK' :
-				task_name = entry[1]
-				log.reverse()
-				return  task_name
-		assert "BEGIN_TASK not found"
-		
-	def listen_end_repository_gently(self, repository_name): #TODO: Refactor 
-		append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (repository_name, self.current_time())
+			
+	def listen_end_task_gently(self, task_name): #TODO: Refactor 
+		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, self.current_time())
 		self.__append_log_entry(append_entry)	
 			
 
@@ -166,30 +156,30 @@ class TestFarmServer:
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
 		html_base_dir = '/tmp/testfarm_html',
-		repository_name = None
+		project_name = None
 	) :
 		self.logs_base_dir = logs_base_dir 
 		self.html_base_dir = html_base_dir
 		create_dir_if_needed( html_base_dir )
-		if repository_name: #TODO not very sure of this  (PA)
-			create_dir_if_needed( '%s/%s' % (html_base_dir, repository_name) )
-			self.repository_name = repository_name
+		if project_name: #TODO not very sure of this  (PA)
+			create_dir_if_needed( '%s/%s' % (html_base_dir, project_name) )
+			self.project_name = project_name
 		else:
-			print 'Warning: html dir was not created because Server was not initialized with a repository_name'
+			print 'Warning: html dir was not created because Server was not initialized with a project_name'
 	
 		
 	def client_names(self):
-		assert self.repository_name, "Error, repository_name was expected. But was None"
-		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.repository_name) )
+		assert self.project_name, "Error, project_name was expected. But was None"
+		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.project_name) )
 		result = map( remove_path_and_extension, logfiles)
 		return result
 
 	def load_client_log(self, client_name):
-		filename = log_filename( self.logs_base_dir, self.repository_name, client_name )
+		filename = log_filename( self.logs_base_dir, self.project_name, client_name )
 		return eval("[ %s ]" % open( filename ).read() )
 
 	def load_client_idle(self, client_name):
-		filename = idle_filename( self.logs_base_dir, self.repository_name, client_name )
+		filename = idle_filename( self.logs_base_dir, self.project_name, client_name )
 		try :
 			content = open( filename ).read() 
 		except IOError:
@@ -202,9 +192,9 @@ class TestFarmServer:
 		log.reverse()
 		for entry in log :
 			tag = entry[0]
-			if tag == 'BEGIN_REPOSITORY':
+			if tag == 'BEGIN_TASK':
 				return entry[2]
-		assert "BEGIN_REPOSITORY not found"
+		assert "BEGIN_TASK not found"
 
 	def single_execution_details(self, client_name, wanted_date):
 		log = self.load_client_log(client_name)
@@ -213,11 +203,11 @@ class TestFarmServer:
 		for entry in log :
 			tag = entry[0]
 			if not in_wanted_execution :
-				if tag == 'BEGIN_REPOSITORY' and entry[2] == wanted_date :
+				if tag == 'BEGIN_TASK' and entry[2] == wanted_date :
 					in_wanted_execution = True
 			if in_wanted_execution :
 				result.append(entry)
-				if tag == 'END_REPOSITORY' :
+				if tag == 'END_TASK' :
 					in_wanted_execution = False
 					break
 		return result
@@ -225,12 +215,12 @@ class TestFarmServer:
 	def purge_client_logfile(self, client_name, last_date):
 		log = self.load_client_log(client_name)
 		date = ''
-		prefix = '%s/%s' % (self.logs_base_dir, self.repository_name)
-		logfilename = log_filename( self.logs_base_dir, self.repository_name, client_name )
+		prefix = '%s/%s' % (self.logs_base_dir, self.project_name)
+		logfilename = log_filename( self.logs_base_dir, self.project_name, client_name )
 		f = open(logfilename, 'w') #TODO maybe is dangerous !! (if somebody else is reading at the moment)
 		for entry in log :
 			tag = entry[0]
-			if tag == 'BEGIN_REPOSITORY':
+			if tag == 'BEGIN_TASK':
 				assert entry[2] != date, "Error. found two repos with same date."
 				date = entry[2]
 				count = 1
@@ -288,27 +278,27 @@ class TestFarmServer:
 		opened_repository = False
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0]
-			if tag == 'BEGIN_REPOSITORY':
-				content.append('<div class="repository"> BEGIN_REPOSITORY "%s" %s' % (entry[1], entry[2]) )
+			if tag == 'BEGIN_TASK':
+				content.append('<div class="task"> BEGIN_TASK "%s" %s' % (entry[1], entry[2]) )
 				opened_repository = True
-			elif tag == 'BEGIN_TASK':
-				content.append('<div class="task"> BEGIN_TASK "%s"' % entry[1])
+			elif tag == 'BEGIN_SUBTASK':
+				content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1])
 				opened_task = True
 			elif tag == 'BEGIN_CMD':
 				content.append( '<div class=command>' )
 				content.append( '<span class="command_string"> %s</span>' % entry[1] )
 				opened_cmd = True						
-			elif tag == 'END_TASK':
-				content.append('END_TASK "%s"</div>' % entry[1])
+			elif tag == 'END_SUBTASK':
+				content.append('END_SUBTASK "%s"</div>' % entry[1])
 				opened_task = False
-			elif tag == 'END_REPOSITORY':
+			elif tag == 'END_TASK':
 				if opened_cmd:
 					content.append( '<span class="command_failure">[FAILURE]</span>' )
 					content.append( '<p class="output"> command execution aborted by the client</p>')
 					content.append('</div>')
 				if opened_task:
 					content.append('</div>')
-				content.append( 'END_REPOSITORY "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
+				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
 				return header_details + '\n'.join(content) + footer	
 			else:
 				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was:' + entry
@@ -351,7 +341,7 @@ class TestFarmServer:
 		details = self.__html_single_execution_details(client_name, wanted_date)
 		filename = "%s/%s/details-%s-%s.html" % (
 			self.html_base_dir, 
-			self.repository_name, 
+			self.project_name, 
 			client_name, 
 			wanted_date )
 		f = open( filename, 'w' )
@@ -375,11 +365,11 @@ class TestFarmServer:
 		execution_opened = False
 		for entry in  log :
 			tag = entry[0]
-			if tag == 'BEGIN_REPOSITORY' :
+			if tag == 'BEGIN_TASK' :
 				repo_name = entry[1]
 				begin_time = entry[2]
 				execution_opened = True
-			if tag == 'END_REPOSITORY' :
+			if tag == 'END_TASK' :
 				end_time = entry[2]
 				status_ok = entry[3]
 				if status_ok == 'True' :
@@ -401,9 +391,9 @@ class TestFarmServer:
 		begin_time = ''
 		for entry in log :
 			tag = entry[0]
-			if tag == 'BEGIN_REPOSITORY':
+			if tag == 'BEGIN_TASK':
 				begin_time = entry[2]
-			elif tag == 'BEGIN_TASK':
+			elif tag == 'BEGIN_SUBTASK':
 				current_task = entry[1]
 			elif tag == 'END_CMD' :
 				assert begin_time, "Error. found a stat before a begin_repository"
@@ -530,12 +520,12 @@ class TestFarmServer:
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, executions_per_client.keys())
 		content.append('</table>')
-		return header_index % {'repository_name':self.repository_name} + '\n'.join(content) + footer
+		return header_index % {'project_name':self.project_name} + '\n'.join(content) + footer
 		
 	def __write_html_index(self, clients_with_stats):
 		filename = "%s/%s/index.html" % (	
 			self.html_base_dir, 
-			self.repository_name )
+			self.project_name )
 		f = open( filename, 'w' )
 		f.write( self.__html_index( clients_with_stats ) )
 		f.close()
@@ -550,7 +540,7 @@ class TestFarmServer:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		if self.repository_name == 'CLAM': #TODO the proper way
+		if self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
 #			self.__helper_apache_log('TestFarm: sended: %s \nout: %s ' % (filesstr, str(out)) )
@@ -579,8 +569,8 @@ class TestFarmServer:
 		pngs_thumb = []
 		svgs = []
 		clients_with_stats = []
-		prefix_html = '%s/%s' % (self.html_base_dir, self.repository_name)
-		prefix_logs = '%s/%s' % (self.logs_base_dir, self.repository_name)
+		prefix_html = '%s/%s' % (self.html_base_dir, self.project_name)
+		prefix_logs = '%s/%s' % (self.logs_base_dir, self.project_name)
 		for client in clients:
 			diagram_count = 0
 			alltasks_stats = allclients_stats[ client ]	

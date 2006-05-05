@@ -25,16 +25,16 @@ from testfarmclient import *
 class Tests_TestFarmClient(ColoredTestCase):
 
 	def test_constructor_with_one_task_repository(self):
-		repository = Repository("repo name")
-		repository.add_task( "taskname" , ["echo hello"] )
+		task = Task("project name", "client name", "task name")
+		task.add_subtask( "subtaskname" , ["echo hello"] )
 		dummylistener = DummyResultListener()
-		client = TestFarmClient( 'a client', repository, testinglisteners = [ dummylistener ] )
+		runner = Runner( task, testinglisteners = [ dummylistener ] )
 		self.assertEquals("""\
-BEGIN_REPOSITORY repo name
-BEGIN_TASK taskname
+BEGIN_TASK task name
+BEGIN_SUBTASK subtaskname
 ('echo hello', 'ok', '', '', {})
-END_TASK taskname
-END_REPOSITORY repo name""", dummylistener.log() )
+END_SUBTASK subtaskname
+END_TASK task name""", dummylistener.log() )
 
 
 		

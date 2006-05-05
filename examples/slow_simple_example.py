@@ -4,8 +4,6 @@ import sys
 sys.path.append('../src')
 from testfarmclient import *
 
-for_loop = Repository("slow test")
-
 print_some_info = lambda x: """some info some info some info some info some info some info some info some info some info some info 
 some info some info some info some info some info some info some info some info some info some info some info some info 
 some info some info some info some info some info some info some info some info some info some info some info some info 
@@ -13,16 +11,15 @@ some info some info some info some info some info some info some info some info 
 some info some info some info some info some info some info some info some info some info some info some info some info 
 """ 
 
-for_loop.add_task("echo", ["echo hello"] )
-for_loop.add_task("sleep 5 i 20 seconds", [{CMD:"sleep 5", INFO: print_some_info}, "sleep 20"] )
-for_loop.add_task("correct command", ["ls", "sleep 20"] )
-for_loop.add_task("sleep 3 i 12 seconds", ["sleep 3", "sleep 12"] )
+sleep_loop = Task("slow test", "msordo_linux_breezy", "task sleep loop")
+
+sleep_loop.add_subtask("echo", ["echo hello"] )
+sleep_loop.add_subtask("sleep 5 i 8 seconds", [{CMD:"sleep 5", INFO: print_some_info}, "sleep 8"] )
+sleep_loop.add_subtask("correct command", ["ls", "sleep 8"] )
+sleep_loop.add_subtask("sleep 3 i 12 seconds", ["sleep 3", "sleep 12"] )
 
 
-
-TestFarmClient( "msordo_linux_breezy", 
-		for_loop,
-		continuous = True,
-		html_base_dir = "html2",
-		logs_base_dir = "html2-logs"
+Runner( sleep_loop,
+	continuous = True,
+	local_base_dir = "local_dir"
  )

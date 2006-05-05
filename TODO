@@ -73,6 +73,9 @@ Done	- Send begin command --MS
 Done	- brake index.html columns by days
 	- ardour2 in linux
 	- ardour2 in osx
+	- project setup step when creating a new project
+	- clone tasks, i.e, a task can copy a list of subtasks from another task
+	- rename src files
 
 High Priority
 ----------------
@@ -104,11 +107,11 @@ ___________________
 
 MODEL BIG FACTORING
 ___________________
-	- collapse 2 base dir attr in one -> local_base_dir
-	- rename Repository -> Task
-	- rename Task(Repository) methods
-	- rename Client -> Runner
-	- move repository_name -> project_name
-	- add task_name (imply changing server)
-	- move client_name to task
+Done	- collapse 2 base dir attr in one -> local_base_dir
+Done	- rename Repository -> Task
+Done	- rename Task(Repository) methods
+Done	- rename Client -> Runner
+Done	- move repository_name -> project_name
+Done	- add task_name (imply changing server)
+Done	- move client_name to task
 
