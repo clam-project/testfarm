@@ -439,7 +439,7 @@ class TestFarmServer:
 			content.append('''\
 <div class="idle">
 %(date)s
-<p>Next run after %(next_run_in_seconds)s seconds </p>
+<p>Next check will be in %(next_run_in_seconds)s seconds </p>
 </div>''' % client_idle)
 		for begintime_str, endtime_str, repo_name, status in client_executions:
 			name_html = "<p>%s</p>" % repo_name
