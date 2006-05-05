@@ -100,7 +100,15 @@ Done	- organize src directories
 	  -> find a name for Task concept.
 	  -> Task name in the html 
 	  -> rename repository->project
-	  -> rename client->platform
+___________________
 
-
+MODEL BIG FACTORING
+___________________
+	- collapse 2 base dir attr in one -> local_base_dir
+	- rename Repository -> Task
+	- rename Task(Repository) methods
+	- rename Client -> Runner
+	- move repository_name -> project_name
+	- add task_name (imply changing server)
+	- move client_name to task
 
