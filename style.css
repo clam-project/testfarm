@@ -17,6 +17,17 @@ a:visited {
 }
 
 
+.layer
+{
+	position:absolute;
+	width:250px;
+	left:0;
+	top:0;
+	visibility:hidden;
+	filter: alpha(opacity=90); 
+	opacity: .9;
+}
+
 .inprogress
 {
 	margin-top: 1em;

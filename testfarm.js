@@ -53,7 +53,7 @@ function togglesize(id)
         var newHtml =
         
        // "<span id=\"" + moreID1 + "\">" + moreLink + "</span>" +
-       // "<span style=\"display:none\" id=\"" + hideID1 + "\">" + lessLink +  "</span><br/><br/>" +
+        //"<span style=\"display:none\" id=\"" + hideID1 + "\">" + lessLink +  "</span><br/><br/>" +
         
         html.substring(0,textCutoff) +
         

@@ -27,9 +27,15 @@ header_index = """
 <meta http-equiv="refresh" content="120">
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm for project %(project_name)s </title>
+<script type="text/javascript" language="JavaScript1.2" src="testfarm_info.js"></script>
+<script language="JavaScript1.2">
+document.onmousedown=ddInit;
+document.onclick=hideMe();
+</script>
 </head>
 <body>
-<h1>testfarm for project %(project_name)s </h1>
+<div id="theLayer" class="layer"></div>
+<h1>testfarm for project <a href="javascript:get_info('%(project_name)s')">%(project_name)s</a> </h1>
 
 """
 
@@ -440,9 +446,11 @@ class TestFarmServer:
 				else:
 					endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
 	
+				actual_status = status
 			else:
 				endtime_html = "<p>in progres...</p>"
-			details_html = '<p><a href="details-%s-%s.html">details</a></p>' % (client_name, begintime_str)
+				actual_status = "in progress"
+			details_html = "<p><a href=\"javascript:details_info('%s','details-%s-%s.html')\">details</a></p>" % (actual_status, client_name, begintime_str)
 			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
 				status, name_html, begintime_html, endtime_html, details_html) )
 		return content
@@ -505,7 +513,7 @@ class TestFarmServer:
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
 		for client in executions_per_client.keys():
-			content.append('<th> Client: %s </th>' % client )
+			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a></th> " % (client, client) )
 		content.append('</tr>')
 
 		content.append('<tr>')
