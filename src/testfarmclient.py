@@ -48,9 +48,9 @@ class Runner :
 
 		if remote_server_url:
 			listenerproxy = ServerListenerProxy(
-				client_name=name, 
+				client_name=task.client_name, 
 				service_url=remote_server_url,
-				task_name=task.name
+				project_name=task.project_name
 			)		
 			self.listeners.append( listenerproxy )
 		if local_base_dir :	

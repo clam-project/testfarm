@@ -27,23 +27,23 @@ import datetime
 #
 
 class ServerListenerProxy:
-	def __init__(self, client_name, service_url, repository_name) :
+	def __init__(self, client_name, service_url, project_name) :
 		self.iterations_needs_update = True
 		self.client_name = client_name
 		self.webservice = ServiceProxy(service_url)
-		self.repository_name = repository_name
+		self.project_name = project_name
 		
 	def __append_log_entry(self, entry) :
 		print self.webservice.remote_call(
 			"append_log_entry", 
-			repository_name=self.repository_name, 
+			project_name=self.project_name, 
 			client_name=self.client_name, 
 			entry=entry )
 
 	def __write_idle_info(self, idle_info ):
 		print self.webservice.remote_call(
 			"write_idle_info",
-			repository_name=self.repository_name, 
+			project_name=self.project_name, 
 			client_name=self.client_name, 
 			idle_info=idle_info )
 
@@ -58,21 +58,21 @@ class ServerListenerProxy:
 		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
 		self.__append_log_entry(entry)
 
-	def listen_begin_task(self, taskname):
-		entry = "('BEGIN_TASK', '%s'),\n" % taskname 
+	def listen_begin_subtask(self, subtaskname):
+		entry = "('BEGIN_SUBTASK', '%s'),\n" % subtaskname 
 		self.__append_log_entry(entry)
 
-	def listen_end_task(self, taskname):
-		entry = "('END_TASK', '%s'),\n" % taskname
+	def listen_end_subtask(self, subtaskname):
+		entry = "('END_SUBTASK', '%s'),\n" % subtaskname
 		self.__append_log_entry(entry)
 	
-	def listen_begin_repository(self, repository_name):
-		entry = "\n('BEGIN_REPOSITORY', '%s', '%s'),\n" % (repository_name, self.current_time())
+	def listen_begin_task(self, task_name):
+		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
 
-	def listen_end_repository(self, repository_name, status):
-		entry = "('END_REPOSITORY', '%s', '%s', %s),\n" % (repository_name, self.current_time(), status)
+	def listen_end_task(self, task_name, status):
+		entry = "('END_TASK', '%s', '%s', %s),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
 
@@ -86,6 +86,6 @@ class ServerListenerProxy:
 		idle_dict['next_run_in_seconds']=next_run_in_seconds
 		self.__write_idle_info( str(idle_dict) )
 
-	def listen_end_repository_gently(self, repository_name):
-		append_entry = "('END_REPOSITORY', '%s', '%s', 'Aborted'),\n" % (repository_name, self.current_time())
+	def listen_end_task_gently(self, task_name):
+		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, self.current_time())
 		self.__append_log_entry(append_entry)	

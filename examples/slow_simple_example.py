@@ -21,5 +21,5 @@ sleep_loop.add_subtask("sleep 3 i 12 seconds", ["sleep 3", "sleep 12"] )
 
 Runner( sleep_loop,
 	continuous = True,
-	local_base_dir = "local_dir"
+	remote_server_url = 'http://localhost/testfarm_server'	
  )
