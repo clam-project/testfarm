@@ -12,33 +12,41 @@ def pass_text(text) :
 
 environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 
-songstamp_path = "$HOME/songstamp-sandboxes/clean-songstamp/"
-cd_songstamp = "cd " + songstamp_path
-songstamptest_path = "$HOME/songstamp-sandboxes/clean-songstamp/export/sdk-benchmark/example/"
+root_path = "$HOME/fingerprint-sandboxes/"
+
+install_path = root_path + "testing/"
+cd_install_path = "cd " + install_path
+
+songstamp_library_path = root_path + "clean-fingerprint/songstamp_library/"
+cd_songstamp_library = "cd " + songstamp_library_path
+
+songstamp_app_path = root_path + "clean-fingerprint/songstamp_app/"
+cd_songstamp_app = "cd " + songstamp_app_path
+
+songstamptest_path = root_path + "testing"
 cd_songstamptest = "cd " + songstamptest_path
-testdb_path = "$HOME/songstamp-sandboxes/test-db/"
-fingerprint_path = "$HOME/songstamp-sandboxes/clean-songstamp/export/sdk-benchmark/example/database/"
+
+testdb_path = root_path + "test-db/"
+
+fingerprint_path = root_path + "testing/database/"
 cd_fingerprint_path = "cd " + fingerprint_path
 
-songstamp_update = 'svn update clean-songstamp'
-
-#songstampcheckout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/fingerprint/songstamp/ clean-songstamp/'
-songstamp_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/fingerprint/songstamp/ clean-songstamp/'
-
+songstamp_update = 'svn update clean-fingerprint'
+songstamp_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint/'
 
 songstamp = Repository("songstamp")
 
 #songstamp.add_task("TODO fix bug: update html at begin time ", [] )
 
 songstamp.add_checking_for_new_commits( 
-	checking_cmd='cd $HOME/songstamp-sandboxes && svn status -u clean-songstamp/ | grep \*', 
+	checking_cmd='cd $HOME/fingerprint-sandboxes && svn status -u clean-fingerprint/ | grep \*', 
 	minutes_idle=5
 )
 
 songstamp.add_deployment_task([
 	"cd $HOME/",
-	"mkdir -p songstamp-sandboxes",
-	"cd songstamp-sandboxes",
+	"mkdir -p fingerprint-sandboxes",
+	"cd fingerprint-sandboxes",
 #	"rm -rf clean-songstamp",
 #
 	songstamp_update,
@@ -47,9 +55,16 @@ songstamp.add_deployment_task([
 #	{CMD : songstamp_checkout, INFO : pass_text },
 ] )
 
-songstamp.add_task("build core library", [
-	cd_songstamp,
-	"scons static=1 benchmark=1",
+
+songstamp.add_task("build SongStamp core library", [
+	cd_songstamp_library,
+	"scons benchmark=1 prefix=" + install_path,
+	
+	
+songstamp.add_task("build SongStamp application", [
+	cd_songstamp_app,
+	"scons benchmark=1 prefix=" + install_path,	
+	
 ] )
 
 
@@ -61,22 +76,14 @@ elif sys.platform == "darwin":
         machine = "testing_machine_osx_tiger"
 
 
-# do test of the exported sonsstamp library
-
-songstamp.add_task("copy core files to export directory", [
-	cd_songstamp,
-	"cp src/libsongstamp/songstamp_api/SongStampDemo.h export/sdk-benchmark/include",
-	"cp lib/libsongstamp.a export/sdk-benchmark/lib",
-	"cp /usr/lib/libsndfile.a export/sdk-benchmark/lib",
-	"cp data/settings.bin export/sdk-benchmark/example/data",
-	"cp doc/BMAT-SongStamp-Demo-SDK-Documentation.pdf export/sdk-benchmark/doc",
+songstamp.add_task("copy data files to install path", [
+	"cd_install_path",
+	"mkdir data",
+	"mkdir database",	
+	"cd_root_path",
+	"cp data/aida4-models/model.bin testing/data/",
 ] )
 
-
-songstamp.add_task("build executables linked to the exported core library", [
-	cd_songstamptest,
-	"scons",
-] )
 
 songstamp.add_task("clean-up database", [
 	cd_fingerprint_path,
@@ -84,16 +91,16 @@ songstamp.add_task("clean-up database", [
 	"rm -f *.lst",
 ] )
 
+
 songstamp.add_task("SongStamp Extractor functional test ->  benchmark data", [
 	cd_songstamptest,
-	#"bin/songstamp_extractor data/settings.bin testdb_path/reference reference_audio.lst database interactive",
-	"bin/songstamp_extractor data/settings.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
+	"bin/songstamp_app_extractor_benchmark data/settings.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
 ] )
 
 
 songstamp.add_task("SongStamp Identifier functional test -> benchmark data", [
 	cd_songstamptest,
-	"bin/songstamp_identifier data/settings.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
+	"bin/songstamp_app_identifier_benchmark data/settings.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
 ] )
 
 
