@@ -2,15 +2,26 @@
 
 import sys
 sys.path.append('../src')
-from os import environ
-
 from testfarmclient import *
+import os, time
+
+start_time = -1
+def start_timer(output):
+	global start_time
+	start_time = time.time()
+def exectime_unittests(output):
+	global start_time
+	return {'exectime_unittests' : time.time() - start_time}
+def exectime_functests(output):
+	global start_time
+	return {'exectime_functests' : time.time() - start_time}
+
 
 def pass_text(text) :
 	return text
 
 
-environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
+os.environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % os.environ['HOME']
 
 root_path = "$HOME/fingerprint-sandboxes/"
 
@@ -34,7 +45,8 @@ cd_fingerprint_path = "cd " + fingerprint_path
 songstamp_update = 'svn update clean-fingerprint'
 songstamp_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint/'
 
-songstamp = Repository("songstamp")
+
+songstamp = Repository("SongStamp")
 
 #songstamp.add_task("TODO fix bug: update html at begin time ", [] )
 
@@ -59,7 +71,7 @@ songstamp.add_deployment_task([
 songstamp.add_task("build SongStamp core library", [
 	cd_songstamp_library,
 	"scons benchmark=1 prefix=" + install_path,
-	
+] )	
 	
 songstamp.add_task("build SongStamp application", [
 	cd_songstamp_app,
@@ -108,7 +120,7 @@ TestFarmClient(
 	'testing-machine_linux_breezy', 
 	songstamp,  
 #	html_base_dir='./html',
-#	logs_base_dir='%s/songstamp-sandboxes/testfarm_logs' % environ['HOME'], #TODO can use $HOME ?
+#	logs_base_dir='%s/songstamp-sandboxes/testfarm_logs' % os.environ['HOME'], #TODO can use $HOME ?
 	remote_server_url='http://10.55.0.66/testfarm_server',
 	continuous=True 
 )
