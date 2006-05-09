@@ -36,12 +36,12 @@ cd_songstamp_library = "cd " + songstamp_library_path
 songstamp_app_path = root_path + "clean-fingerprint/songstamp_app/trunk/"
 cd_songstamp_app = "cd " + songstamp_app_path
 
-songstamptest_path = root_path + "testing/"
+songstamptest_path = root_path + "local/"
 cd_songstamptest = "cd " + songstamptest_path
 
 testdb_path = root_path + "test-db/"
 
-fingerprint_path = root_path + "testing/database/"
+fingerprint_path = root_path + "local/database/"
 cd_fingerprint_path = "cd " + fingerprint_path
 
 songstamp_update = 'svn update clean-fingerprint'
@@ -96,8 +96,8 @@ songstamp.add_subtask("copy data files to install path", [
 	"mkdir -p data",
 	"mkdir -p database",	
 	cd_root_path,
-	{CMD:"pwd && cd clean-fingerprint/", INFO: pass_text },
-	"cp data/aida4-models/model.bin testing/data/",
+#	{CMD:"pwd && cd clean-fingerprint/", INFO: pass_text },
+	"cp clean-fingerprint/data/aida4-models/model.bin local/data/",
 ] )
 
 
@@ -110,13 +110,13 @@ songstamp.add_subtask("clean-up database", [
 
 songstamp.add_subtask("SongStamp Extractor functional test ->  benchmark data", [
 	cd_songstamptest,
-	"bin/songstamp_app_extractor_benchmark data/settings.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
+	"bin/songstamp_app_extractor_benchmark data/model.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
 ] )
 
 
 songstamp.add_subtask("SongStamp Identifier functional test -> benchmark data", [
 	cd_songstamptest,
-	"bin/songstamp_app_identifier_benchmark data/settings.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
+	"bin/songstamp_app_identifier_benchmark data/model.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
 ] )
 
 
