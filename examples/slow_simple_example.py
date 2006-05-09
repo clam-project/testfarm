@@ -2,7 +2,8 @@
 
 import sys
 sys.path.append('../src')
-from testfarmclient import *
+from task import *
+from runner import Runner
 
 print_some_info = lambda x: """some info some info some info some info some info some info some info some info some info some info 
 some info some info some info some info some info some info some info some info some info some info some info some info 
@@ -21,5 +22,5 @@ sleep_loop.add_subtask("sleep 3 i 12 seconds", ["sleep 3", "sleep 12"] )
 
 Runner( sleep_loop,
 	continuous = True,
-	remote_server_url = 'http://localhost/testfarm_server'	
+	local_base_dir = 'local_dir'	
  )

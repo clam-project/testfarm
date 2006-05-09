@@ -1,4 +1,4 @@
-#! /usr/bin/python
+ #! /usr/bin/python
 
 #
 #  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
@@ -19,17 +19,20 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
 #
-import sys
-sys.path.append('../src')
-import unittest
-from test_subtask import Tests_SubTask
-from test_task import Tests_Task
-from test_runner import Tests_Runner
-from test_server import Tests_Server, Tests_ServerListener	
 
-def main():
-	unittest.main()
+import os
 
-if __name__ == '__main__':
-	main()
+def remove_path_and_extension( path ):
+	return os.path.splitext( os.path.basename( path ) )[0]
 
+
+def log_filename(logs_base_dir, project_name, client_name) :
+	return '%s/%s/%s.testfarmlog' % (logs_base_dir, project_name, client_name)
+
+def idle_filename(logs_base_dir, project_name, client_name) :
+	return '%s/%s/%s.idle' % (logs_base_dir, project_name, client_name)
+
+def create_dir_if_needed(dir):
+	if not os.path.isdir( dir ) :
+#		sys.stderr.write("\nWarning: directory '%s' is not available. Creating it." % dir)
+		os.makedirs(dir)

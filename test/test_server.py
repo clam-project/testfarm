@@ -22,10 +22,12 @@ import unittest
 import datetime
 from coloredtest import ColoredTestCase
 from listeners import *
-from testfarmclient import *
-from testfarmserver import *
+from task import * # TODO : is necessary ? 
+from runner import *
+from server import Server
+from serverlistener import ServerListener
 
-class Tests_TestFarmServer(ColoredTestCase):
+class Tests_Server(ColoredTestCase):
 
 	def tearDown(self):
 		listener = ServerListener( project_name='repo' )
@@ -38,7 +40,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_executions__one_green_execution(self):
 		listener = ServerListener( project_name='repo' )
 		listener.current_time = lambda : "a date"
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		task = Task('project name','client name','task')	
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener])
@@ -49,7 +51,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_executions__day_executions__single_client(self):
 		listener = ServerListener( project_name='repo' )
 		listener.current_time = lambda : "2006-04-29-12-00-00"
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		task = Task('project name','client name','task')	
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener])	
@@ -67,7 +69,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
 		listener2 = ServerListener( client_name='a_client2', project_name='repo' )
 		listener2.current_time = lambda : "2006-04-29-12-00-00"
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		task = Task('project name','a_client','task')	
 		task.add_subtask('subtask1', [])
 		Runner(task, testinglisteners=[listener1])
@@ -88,7 +90,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_executions__day_executions__multiple_clients__last_client_with_first_day_empty(self):
 		listener1 = ServerListener( client_name='a_client', project_name='repo' )
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		task = Task('project name','a_client','task')	
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener1])
@@ -111,7 +113,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 
 	def test_details(self):
 		listener = ServerListener( client_name='a_client', project_name='repo')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_task("not wanted")
 		listener.listen_begin_subtask("subtask")
@@ -142,7 +144,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 
 	def test_purged_details(self):
 		listener = ServerListener( client_name='a_client', project_name='repo')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		listener.current_time = lambda : "1999-99-99-99-99-99"
 		listener.listen_begin_task("we want this one")
 		listener.listen_begin_subtask("subtask")
@@ -177,7 +179,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 			project_name='repo')
 		listener1.current_time = lambda : "some date"
 		listener2.current_time = lambda : "some other date"
-		server = TestFarmServer(logs_base_dir='/tmp/clients_testdir', project_name='repo')
+		server = Server(logs_base_dir='/tmp/clients_testdir', project_name='repo')
 		task = Task('project name','client 1','task')
 		task.add_subtask('subtask1', [])
 
@@ -195,7 +197,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_idles(self):
 		listener = ServerListener(project_name='repo', client_name='a_client')
 		listener.current_time = lambda : "a date"
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 		task = Task('project name','a_client','task')	
 		task.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
 		Runner(task, testinglisteners=[listener])
@@ -210,7 +212,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 
 	def test_stats_single_client_single_key(self):
 		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task('project name','a_client','task')	
@@ -235,7 +237,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 
 	def test_no_stats(self):
 		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task('project name','a_client','task')	
@@ -246,7 +248,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 
 	def test_stats_single_client_multiple_key(self):
 		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task('project name','a_client','task')	
@@ -274,7 +276,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_stats_multiple_client_single_key(self):
 		listener1 = ServerListener(project_name='repo', client_name='client1')
 		listener2 = ServerListener(project_name='repo', client_name='client2')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 
 		listener1.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task('project name','client1','task')	
@@ -313,7 +315,7 @@ class Tests_TestFarmServer(ColoredTestCase):
 	def test_plot_data_file(self):
 		listener1 = ServerListener(project_name='repo', client_name='client1')
 		listener2 = ServerListener(project_name='repo', client_name='client2')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 
 		listener1.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task('project name','client1','task')	
@@ -353,7 +355,7 @@ time	clau_1	clau_2
 
 	def test_plotdata_no_stats(self):
 		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = TestFarmServer(project_name='repo')
+		server = Server(project_name='repo')
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task('project name','a_client','task')	

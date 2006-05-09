@@ -95,6 +95,7 @@ Current	- CLAM in windows
 	- refactoring: remote communication code and (.py) file names
 	- refactoring: init project phase
 	- refactoring: init client phase
+	  -> copy (or link) css and js files
 Done	- organize src directories
 	
 

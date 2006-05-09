@@ -1,3 +1,9 @@
+Testfarm dependencies
+----------------------
+
+- python >= 2.4
+- libapache2-mod-python >= 3.1
+- ploticus
 
 How To Install a TestFarm Server ?
 ---------------------------------------
@@ -9,18 +15,15 @@ How To Install a TestFarm Server ?
 - $ sudo ln -s /your/path/to/testfarm/mod_python_testfarm.conf
 
 - edit mod_python_testfarm.conf 
-  change the Alias /testfarm_server to point to  /your/path/to/testfarm/server_side.py
-  change DirectoryMatch to point to /you/path/to/testfarm
+  change the Alias /testfarm_server to point to  /your/path/to/testfarm/src/server_side.py
+  change DirectoryMatch to point to /your/path/to/testfarm/src/
 
-- check that the testfarm/server_side.py file is accessible by a different
-  user. Tip check this: 
+- check that the testfarm/src/server_side.py file and its parent directories are
+  accessible by a different user. Tip check this: 
     $ sudo su nobody
-    $ ls -l /you/paht/co/testfarm/server_side.py
+    $ ls -l /you/path/to/testfarm/server_side.py
 
 - $ sudo /etc/init.d/apache2 restart
-
-- give permissions to the logs and html directory. TODO explain
-
 
 
 

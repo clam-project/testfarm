@@ -18,135 +18,92 @@
 #
 #
 
-from testfarmclient import *
-from listeners import *
+from task import *
 from coloredtest import ColoredTestCase
-import os, os.path
+from listeners import DummyResultListener
 
+class Tests_Task(ColoredTestCase):
 
-def helperCurrentDir() :
-	return os.path.abspath(os.curdir)
-
-class Tests_SubTask(ColoredTestCase):
-	def test_do_subtask__single_command_successful(self):
-		subtask = SubTask("subtask", ["echo hello"])
-		self.assertEquals(True, subtask.do_subtask())
-	
-	def test_do_subtask__multiple_command_successful(self):
-		subtask = SubTask("subtask", ["echo hello", "ls"])
-		self.assertEquals(True, subtask.do_subtask())
+	def test_name(self):
+		task = Task('project name','client name','taskname') 
+		self.assertEquals('taskname', task.get_name())
 		
-	def test_do_subtask__single_command_fails(self):
-		subtask = SubTask("subtask", ["ls non-existing-file"])
-		self.assertEquals(False, subtask.do_subtask())
-		
-	def test_do_subtask__multiple_command__one_fails(self):
-		subtask = SubTask("subtask", ["ls", "ls non-existing-file", "echo hello"])
-		self.assertEquals(False, subtask.do_subtask())
+	def test_name__default_consructor(self):
+		task = Task('project name', 'client name')
+		self.assertEquals('-- unnamed task --', task.get_name())
 
-	## Results test
-	def test_results_log__with_no_commands(self):
-		subtask = SubTask("subtask name", [])
-		listener = DummyResultListener()
-		subtask.do_subtask( [listener] )
-		self.assertEquals("""\
-BEGIN_SUBTASK subtask name
-END_SUBTASK subtask name""" , listener.log() )
+	def test_num_subtasks_default(self):
+		task = Task('project name','client name','taskname1')
+		self.assertEquals(0, task.get_num_subtasks())
 	
-	def test_results_log__single_command_ok(self):
-		subtask = SubTask("subtask", ["echo hello"])
-		listener = DummyResultListener()
-		subtask.do_subtask( [listener] )
-		self.assertEquals("""\
-BEGIN_SUBTASK subtask
-('echo hello', 'ok', '', '', {})
-END_SUBTASK subtask""", listener.log() )
+	def test_num_subtasks_multiple(self):
+		task = Task('project name','client name','taskname2')
+		task.add_subtask( "subtaskname1" , [] )
+		task.add_subtask( "subtaskname2" , [] )
 	
-	def test_results_log__second_command_fails_so_exit(self):
-		subtask = SubTask("subtask", ["echo hello", "non-existing-command", "ls"])
+		self.assertEquals(2, task.get_num_subtasks())
+
+	def test_num_subtasks_multiple__with_deployment_task(self):
+		task = Task('project name','client name')
+
+		task.add_deployment( [] )
+		task.add_subtask( "subtaskname1" , [] )
+	
+		self.assertEquals(2, task.get_num_subtasks())
+
+	def test_do_subtasks__single_subtask_successful(self):
+		task = Task('project name','client name')
+		task.add_subtask( "subtaskname" , ["echo hello"] )
+		
+		self.assertEquals(True, task.do_subtasks())
+	
+	def test_do_subtasks__multiple_subtask_last_fails(self):
+		task = Task('project name','client name')
+		task.add_subtask( "subtaskname" , 
+			["echo hello", "non-existing-command"] )
+		
+		self.assertEquals(False, task.do_subtasks())
+
+
+	# Results Tests
+	def test_results_log__task_default(self):
+		task = Task("project name","client name","task name")
 		listener = DummyResultListener()
-		subtask.do_subtask( [listener] )
-		self.assertEquals("""\
-BEGIN_SUBTASK subtask
-('echo hello', 'ok', '', '', {})
+		task.do_subtasks([listener])
+		self.assertEquals( """\
+BEGIN_TASK task name
+END_TASK task name""", listener.log() )
+
+	def test_results_log__two_subtasks_first_fails(self):
+		task = Task("project name","client name","task name")
+		task.add_subtask("subtask1", ["non-existing-command"])
+		task.add_subtask("subtask2", ["echo foo"])
+		listener = DummyResultListener()
+		task.do_subtasks([listener])
+		self.assertEquals(  """\
+BEGIN_TASK task name
+BEGIN_SUBTASK subtask1
 ('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
-END_SUBTASK subtask""", listener.log() )
-	
-	def test_results_log__command_fails_with_stderr_and_stdout(self):
-		subtask = SubTask("subtask", ["./write_to_stderr_and_stdout.py"])
+END_SUBTASK subtask1
+BEGIN_SUBTASK subtask2
+('echo foo', 'ok', '', '', {})
+END_SUBTASK subtask2
+END_TASK task name""", listener.log() )
+
+	def test_mandatory_subtask(self):
+		task = Task("project name","client name","task")	
+		task.add_subtask('subtask1', ["echo subtask1"])	
+		task.add_subtask('subtask2', ["echo something echoed", "lsss gh"], mandatory = True)
+		task.add_subtask('subtask3', ["echo subtask3"])	
 		listener = DummyResultListener()
-		subtask.do_subtask( [listener] )
+		task.do_subtasks([listener])
 		self.assertEquals("""\
-BEGIN_SUBTASK subtask
-('./write_to_stderr_and_stdout.py', 'failure', 'ERR OUT\\n', '', {})
-END_SUBTASK subtask""", listener.log() )
-		
-	def test_results_log__of_two_listeners(self):
-		subtask = SubTask("subtask", ["echo hello"])
-		listener1 = DummyResultListener()
-		listener2 = DummyResultListener()
-		subtask.do_subtask( [listener1, listener2] )
-		self.assertEquals("""\
-BEGIN_SUBTASK subtask
-('echo hello', 'ok', '', '', {})
-END_SUBTASK subtask""", listener1.log() )
-		self.assertEquals("""\
-BEGIN_SUBTASK subtask
-('echo hello', 'ok', '', '', {})
-END_SUBTASK subtask""", listener2.log() )
-	
-	def test_command_saves_changed_working_dir(self): #TODO make portable
-		subtask = SubTask("subtaskcd", ["cd /tmp", "pwd > /tmp/foo"])
-		subtask.do_subtask()
-		self.assertEquals( "/tmp", open("/tmp/foo").read().strip() )
-	
-	def test_new_task_with_default_working_dir(self): #TODO make portable
-		initial_directory = helperCurrentDir()
-		subtask = SubTask("subtaskcd", ["cd /tmpXX"])
-		subtask.do_subtask()
-		self.assertEquals( initial_directory, helperCurrentDir() )
-	
-	# command map
-	def test_info_parser(self):
-		id = lambda text: text
-		subtask = SubTask("subtask", [{CMD: "echo hello", INFO: id}])
-		listener = DummyResultListener()
-		subtask.do_subtask([listener])
-		self.assertEquals( """\
-BEGIN_SUBTASK subtask
-('echo hello', 'ok', '', 'hello\\n', {})
-END_SUBTASK subtask""", listener.log())
-
-	def test_stats_parser(self):
-		outlen = lambda text: {'len': len(text)} 
-		subtask = SubTask("subtask", [{CMD: "echo hello", STATS: outlen}])
-		listener = DummyResultListener()
-		subtask.do_subtask([listener])
-		self.assertEquals( """\
-BEGIN_SUBTASK subtask
-('echo hello', 'ok', '', '', {'len': 6})
-END_SUBTASK subtask""", listener.log())
-
-	def test_cd(self):
-		id = lambda text: text
-		previousdir= helperCurrentDir() 
-		subtask = SubTask("subtask", [{CMD: 'pwd', INFO: id, CD: '/tmp'}])
-		listener = DummyResultListener()
-		subtask.do_subtask([listener])
-		self.assertEquals( """\
-BEGIN_SUBTASK subtask
-('pwd', 'ok', '', '/tmp\\n', {})
-END_SUBTASK subtask""", listener.log() )
-
-	def test_status_ok(self):
-		parseError = lambda text: not ('error' in text)
-		previousdir= helperCurrentDir() 
-		subtask = SubTask("subtask", [{CMD: 'echo error', STATUS_OK: parseError}])
-		listener = DummyResultListener()
-		subtask.do_subtask([listener])
-		self.assertEquals( """\
-BEGIN_SUBTASK subtask
-('echo error', 'failure', 'error\\n', '', {})
-END_SUBTASK subtask""", listener.log() )
-
-
+BEGIN_TASK task
+BEGIN_SUBTASK subtask1
+('echo subtask1', 'ok', '', '', {})
+END_SUBTASK subtask1
+BEGIN_SUBTASK subtask2
+('echo something echoed', 'ok', '', '', {})
+('lsss gh', 'failure', '/bin/sh: lsss: command not found\\n', '', {})
+END_SUBTASK subtask2
+END_TASK task""", listener.log() )

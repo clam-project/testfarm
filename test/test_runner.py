@@ -20,9 +20,9 @@
 
 from coloredtest import ColoredTestCase
 from listeners import *
-from testfarmclient import *
+from runner import *
 
-class Tests_TestFarmClient(ColoredTestCase):
+class Tests_Runner(ColoredTestCase):
 
 	def test_constructor_with_one_task_repository(self):
 		task = Task("project name", "client name", "task name")
