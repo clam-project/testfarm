@@ -1,7 +1,6 @@
 #! /usr/bin/python
 
-import sys, os
-from time import time
+import sys, os, time
 
 sys.path.append('../src')
 from task import *
@@ -13,7 +12,7 @@ def start_timer(output):
 	start_time = time.time()
 
 HOME = os.environ['HOME']
-os.environ['LD_LIBRARY_PATH']='%s/clam-sandboxes/tlocal/lib:/usr/local/lib' % HOME
+os.environ['LD_LIBRARY_PATH']='%s/local/lib:/usr/local/lib' % HOME
 
 
 ardour2 = Task(
@@ -21,19 +20,20 @@ ardour2 = Task(
 	client_name="parumi_home_pc-linux_breezy",
 	task_name="wget snapshot and compile"
 	)
+
 ardour2.add_deployment( [
-	"cd",
+	"cd %s" % HOME,
 	"cd src",
 	{CMD:"pwd", INFO: lambda x:x},
 	"rm ardour2-cvs*.bz2",
 	"wget http://ardour.org/files/releases/ardour2-cvs.tar.bz2",
 	"tar xjvf ardour2-cvs.tar.bz2",
 	{INFO : start_timer}, 
-	"scons PREFIX=../local", 
-	{STATS : {'compile_time': time()-start_time} }, 
-	"scons install"
-	])
+	"cd ardour2",
+	"scons PREFIX=%s/local" % HOME, 
+	{STATS : {'compile_time': time.time()-start_time } }, 
+	'scons install' ])
 
 Runner( ardour2,
-	local_base_dir = 'ardour_testfarm_files'
+	local_base_dir = '%s/src/ardour_testfarm_files' % HOME
 )
