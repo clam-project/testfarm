@@ -2,7 +2,8 @@
 
 import sys
 sys.path.append('../src')
-from testfarmclient import *
+from task import *
+from runner import Runner
 import os, time
 
 start_time = -1
@@ -53,9 +54,9 @@ os.environ['LD_LIBRARY_PATH']='%s/fingerprint-sandboxes/tlocal/lib:/usr/local/li
 
 
 songstamp = Task(
-	project="SongStamp", 
-	client="testing_machine-linux_breezy", 
-	name="with svn update" 
+	project_name="SongStamp", 
+	client_name="testing_machine-linux_breezy", 
+	task_name="with svn update" 
 	)
 
 
@@ -67,7 +68,7 @@ songstamp.add_checking_for_new_commits(
 songstamp.add_deployment([
 	"cd $HOME/",
 	"mkdir -p fingerprint-sandboxes",
-	"cd fingerprint-sandboxes",
+	{CMD:"pwd && cd fingerprint-sandboxes", INFO:pass_text},
 #	"rm -rf clean-songstamp",
 #
 	songstamp_update,

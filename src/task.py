@@ -178,7 +178,6 @@ class SubTask:
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			if current_dir:
-				print "changing to cmd current dir:", current_dir
 				os.chdir( current_dir )
 		os.chdir ( initial_working_dir )
 		self.__end_subtask(listeners)
