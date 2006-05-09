@@ -28,9 +28,9 @@ def filter_cvs_update( text ):
 
 
 clam = Task(
-	project="CLAM", 
-	client="testing_machine-linux_breezy", 
-	name="with cvs update" 
+	project_name="CLAM", 
+	client_name="testing_machine-linux_breezy", 
+	task_name="with cvs update" 
 	)
 
 clam.add_checking_for_new_commits( 
