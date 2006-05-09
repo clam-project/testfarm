@@ -24,17 +24,18 @@ def pass_text(text) :
 os.environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % os.environ['HOME']
 
 root_path = "$HOME/fingerprint-sandboxes/"
+cd_root_path = "cd " + root_path
 
-install_path = root_path + "testing/"
+install_path = root_path + "local/"
 cd_install_path = "cd " + install_path
 
-songstamp_library_path = root_path + "clean-fingerprint/songstamp_library/"
+songstamp_library_path = root_path + "clean-fingerprint/songstamp_library/trunk/"
 cd_songstamp_library = "cd " + songstamp_library_path
 
-songstamp_app_path = root_path + "clean-fingerprint/songstamp_app/"
+songstamp_app_path = root_path + "clean-fingerprint/songstamp_app/trunk/"
 cd_songstamp_app = "cd " + songstamp_app_path
 
-songstamptest_path = root_path + "testing"
+songstamptest_path = root_path + "testing/"
 cd_songstamptest = "cd " + songstamptest_path
 
 testdb_path = root_path + "test-db/"
@@ -48,7 +49,7 @@ songstamp_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/fingerpr
 
 
 HOME = os.environ['HOME']
-os.environ['LD_LIBRARY_PATH']='%s/clam-sandboxes/tlocal/lib:/usr/local/lib' % HOME
+os.environ['LD_LIBRARY_PATH']='%s/fingerprint-sandboxes/tlocal/lib:/usr/local/lib' % HOME
 
 
 songstamp = Task(
@@ -88,19 +89,13 @@ songstamp.add_subtask("build SongStamp application", [
 ] )
 
 
-if sys.platform == "linux2":
-        lib_path = "LD_LIBRARY_PATH"
-        machine = "testing-machine_linux_breezy"
-elif sys.platform == "darwin":
-        lib_path = "DYLD_LIBRARY_PATH"
-        machine = "testing_machine_osx_tiger"
-
 
 songstamp.add_subtask("copy data files to install path", [
-	"cd_install_path",
-	"mkdir data",
-	"mkdir database",	
-	"cd_root_path",
+	cd_install_path,
+	"mkdir -p data",
+	"mkdir -p database",	
+	cd_root_path,
+	{CMD:"pwd && cd clean-fingerprint/", INFO: pass_text },
 	"cp data/aida4-models/model.bin testing/data/",
 ] )
 
