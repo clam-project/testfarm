@@ -90,7 +90,6 @@ songstamp.add_subtask("build SongStamp application", [
 ] )
 
 
-
 songstamp.add_subtask("copy data files to install path", [
 	cd_install_path,
 	"mkdir -p data",
@@ -118,7 +117,6 @@ songstamp.add_subtask("SongStamp Identifier functional test -> benchmark data", 
 	cd_songstamptest,
 	"bin/songstamp_app_identifier_benchmark data/model.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
 ] )
-
 
 Runner( songstamp, 
 	continuous = True,
