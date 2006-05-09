@@ -2,42 +2,40 @@
 
 import sys
 sys.path.append('../src')
-from testfarmclient import * 
+from task import *
+from runner import Runner 
 
+example = Task(	project_name = "example project",
+		client_name = "an_example_client",
+		task_name = "this_is_just_a_test"
+)
 
-example = Repository("this_is_just_a_test")
-
-example.add_deployment_task( [
+example.add_deployment( [
 	{CMD: "echo lalala", INFO: lambda x : x},
 	{CMD: "ls", INFO: lambda x : x}
 ] )
 
 #example.add_checking_for_new_commits( "cvs -nq up -dP | grep ^[UP]" )
 
-example.add_task("teeesting", [
-	#"./lalala fafaf",
+example.add_subtask("teeesting", [
 	"echo Should not write this!"
 ] )
-example.add_task("just a CD", [
-	{CD:"/tmp"}
-] )
+example.add_subtask("just a CD", ["cd /tmp"] )
 
+local = True
 
-
-if 1 :
-	TestFarmClient( 
-		"an_example_client", 
-		example, 
-		html_base_dir='./html-example', 
-		logs_base_dir='/tmp/testfarm_example_logs',
-		continuous=False 
+if local :
+	Runner( example,
+		continuous = False,
+		local_base_dir = 'local_dir'
 	)
 
 else :	
-	TestFarmClient( 
-		"pau_computer", 
-		example, 
-		remote_server_url="http://10.55.0.66/testfarm_server", #TODO check if url accessible, or responds
+
+	Runner( example,
+		remote_server_url="http://10.55.0.66/testfarm_server",
 		continuous=False
 	)
+
+
 

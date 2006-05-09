@@ -41,7 +41,7 @@ def get_command_and_parsers(maybe_dict):
 			info_parser = maybe_dict[INFO]
 		if maybe_dict.has_key(STATS) :
 			stats_parser = maybe_dict[STATS]
-		if maybe_dict.has_key(CD) :
+		if maybe_dict.has_key(CD) : # TODO : maybe remove
 			destination_dir = maybe_dict[CD]
 			os.chdir( destination_dir )
 		if maybe_dict.has_key(STATUS_OK) :
@@ -162,21 +162,22 @@ class SubTask:
 			#self.__send_result(listeners, cmd, status_ok, output, info, stats)
 						
 			current_dir = temp_file.read().strip()
-			if current_dir:
-				os.chdir( current_dir )
 			if not status_ok :
+				os.chdir ( initial_working_dir )
 				self.__end_command(listeners, cmd, status_ok, output, info, stats)
 				self.__end_subtask(listeners)
 				temp_file.close()
-				os.chdir ( initial_working_dir )
 				return False
 			# 3: End command run 
+			os.chdir ( initial_working_dir )
 			self.__end_command(listeners, cmd, status_ok, output, info, stats)
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
+			if current_dir:
+				os.chdir( current_dir )
+		os.chdir ( initial_working_dir )
 		self.__end_subtask(listeners)
 		temp_file.close()
-		os.chdir ( initial_working_dir )
 		return True
 
 class Task :
@@ -189,7 +190,7 @@ class Task :
 		assert is_string(client_name), '< %s > is not a valid client name (should be a string)' % str(client_name)
 		self.client_name = client_name
 		self.subtasks = []
-		self.deployment = None
+		self.deployment = None #TODO : use this as unique development task
 		self.not_idle_checking_cmd = ""
 		self.seconds_idle = 0
 		
