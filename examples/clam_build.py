@@ -2,7 +2,8 @@
 
 import sys
 sys.path.append('../src')
-from testfarmclient import *
+from task import *
+from runner import Runner
 import os, time
 
 start_time = -1
@@ -82,7 +83,7 @@ clam.add_subtask("Deploy OLD (srcdeps) build system", [
 	"cd $HOME/clam-sandboxes/testing-clam/build/srcdeps",
 	"make",
 	"cd ..",
-	{CMD:"pwd && autoconf", INFO: lambda x: x},
+	"pwd && autoconf",
 	"./configure"
 	
 ])

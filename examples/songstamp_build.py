@@ -68,7 +68,7 @@ songstamp.add_checking_for_new_commits(
 songstamp.add_deployment([
 	"cd $HOME/",
 	"mkdir -p fingerprint-sandboxes",
-	{CMD:"pwd && cd fingerprint-sandboxes", INFO:pass_text},
+	"cd fingerprint-sandboxes",
 #	"rm -rf clean-songstamp",
 #
 	songstamp_update,
