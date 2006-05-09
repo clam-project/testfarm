@@ -24,13 +24,21 @@ def filter_cvs_update( text ):
 	dont_start_interr = lambda line : not line or not line[0]=='?'
 	result = filter(dont_start_interr, text.split('\n') )	
 	return '\n'.join(result)
-clam = Repository("CLAM")
-clam.add_task("starting clam", ["echo foo"])
+
+
+
+clam = Task(
+	project="CLAM", 
+	client="testing_machine-linux_breezy", 
+	name="with cvs update" 
+	)
+
 clam.add_checking_for_new_commits( 
 	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
 	minutes_idle=5
 )
-clam.add_deployment_task( [
+
+clam.add_deployment( [
 	"cd $HOME/clam-sandboxes",
 	"cvs co -d testing-clam CLAM",
 #	{ CMD: "cd testing-clam && cvs -q up -dP", INFO: filter_cvs_update },
@@ -40,7 +48,7 @@ clam.add_deployment_task( [
 	"scons install",
 ] )
 
-clam.add_task("SMSTools installation", [
+clam.add_subtask("SMSTools installation", [
 	"cd $HOME/clam-sandboxes",
 	"cvs co -d testing-smstools CLAM_SMSTools",
 #	"cd testing-smstools && cvs up -dP",
@@ -48,13 +56,13 @@ clam.add_task("SMSTools installation", [
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
 '''
-clam.add_task("execute QTSMStools", [
+clam.add_subtask("execute QTSMStools", [
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"./QtSMSTools" #TODO run a while
 ] )
 '''
 
-clam.add_task("NetworkEditor installation", [
+clam.add_subtask("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-neteditor CLAM_NetworkEditor",
 	"cd testing-neteditor && cvs up -dP",
@@ -62,12 +70,12 @@ clam.add_task("NetworkEditor installation", [
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
 '''
-clam.add_task("execute NetworkEditor", [
+clam.add_subtask("execute NetworkEditor", [
 	"cd $HOME/clam-sandboxes/testing-neteditor/scons",
 	"./NetworkEditor" #TODO run a while
 ] )
 '''
-clam.add_task("Deploy OLD (srcdeps) build system", [
+clam.add_subtask("Deploy OLD (srcdeps) build system", [
 	"cd $HOME/clam-sandboxes/testing-clam/build/srcdeps",
 	"make",
 	"cd ..",
@@ -75,7 +83,7 @@ clam.add_task("Deploy OLD (srcdeps) build system", [
 	"./configure"
 	
 ])
-clam.add_task("Unit Tests (with srcdeps)", [
+clam.add_subtask("Unit Tests (with srcdeps)", [
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd build/Tests/UnitTests",
 	"make depend",
@@ -85,7 +93,7 @@ clam.add_task("Unit Tests (with srcdeps)", [
 	{STATS : exectime_unittests}
 
 ] )
-clam.add_task("Functional Tests (with srcdeps)", [
+clam.add_subtask("Functional Tests (with srcdeps)", [
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd build/Tests/FunctionalTests",
 	"make depend",
@@ -95,13 +103,13 @@ clam.add_task("Functional Tests (with srcdeps)", [
 	{STATS : exectime_functests}
 ] )
 
-clam.add_task("Deploy SMSTools srcdeps branch for SMSBase tests", [
+clam.add_subtask("Deploy SMSTools srcdeps branch for SMSBase tests", [
 	"cd $HOME/clam-sandboxes",
 	"rm -rf testing-smstools-srcdeps",
 	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
 	'echo "CLAM_PATH=$HOME/clam-sandboxes/testing-clam/" > testing-smstools-srcdeps/build/clam-location.cfg'
 ] )
-clam.add_task("Testing SMSTransformations (using SMSTools srcdeps branch)", [
+clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"cd $HOME/clam-sandboxes",
 	"cd testing-smstools-srcdeps/build/FunctionalTests",
 	"make depend",
@@ -109,10 +117,8 @@ clam.add_task("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	{CMD: "./SMSToolsTests", INFO: lambda x : x}
 ] )
 
-TestFarmClient( 
-	"testing_machine_linux_breezy", 
-	clam, 
-	remote_server_url = 'http://10.55.0.66/testfarm_server',	
-	continuous=True
+Runner( clam, 
+	continuous = True,
+	remote_server_url = 'http://10.55.0.66/testfarm_server'
 )
 
