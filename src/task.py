@@ -133,13 +133,14 @@ class SubTask:
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		temp_file = tempfile.NamedTemporaryFile()
+		temp_file_name = temp_file.name
 		for maybe_dict in self.commands :
 			# 1 : Create a temp file to save working directory
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)	
 			if sys.platform == 'win32': #TODO multiplatform
-				cmd_with_pwd = cmd + " && cd > %s" % temp_file.name
+				cmd_with_pwd = cmd + " && cd > %s" % temp_file_name
 			else:
-				cmd_with_pwd = cmd + " && pwd > %s" % temp_file.name	
+				cmd_with_pwd = cmd + " && pwd > %s" % temp_file_name	
 			# 2 : Begin command run 
 			self.__begin_command(cmd, listeners)
 			if server_to_push: #TODO
@@ -161,7 +162,10 @@ class SubTask:
 				output = ''
 			#self.__send_result(listeners, cmd, status_ok, output, info, stats)
 						
-			current_dir = temp_file.read().strip()
+			f = open( temp_file_name )
+			current_dir = f.read().strip()
+			f.close()
+
 			if not status_ok :
 				os.chdir ( initial_working_dir )
 				self.__end_command(listeners, cmd, status_ok, output, info, stats)
@@ -174,6 +178,7 @@ class SubTask:
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			if current_dir:
+				print "changing to cmd current dir:", current_dir
 				os.chdir( current_dir )
 		os.chdir ( initial_working_dir )
 		self.__end_subtask(listeners)
