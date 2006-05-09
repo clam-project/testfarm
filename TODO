@@ -73,9 +73,13 @@ Done	- Send begin command --MS
 Done	- brake index.html columns by days
 	- ardour2 in linux
 	- ardour2 in osx
+	- eye candy: project logo and client logos/photos
 	- project setup step when creating a new project
 	- clone tasks, i.e, a task can copy a list of subtasks from another task
 	- rename src files
+	- IMPORTANT: support for "constant release"
+	 -> server service that returns "currenty stable"
+	 -> decide: always upload? or ask to the server?
 
 High Priority
 ----------------
