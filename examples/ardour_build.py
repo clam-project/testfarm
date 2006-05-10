@@ -10,6 +10,8 @@ start_time = -1
 def start_timer(output):
 	global start_time
 	start_time = time.time()
+def compile_time(output):
+	return {'compile_time': time.time()-start_time }
 
 HOME = os.environ['HOME']
 os.environ['LD_LIBRARY_PATH']='%s/local/lib:/usr/local/lib' % HOME
@@ -31,7 +33,7 @@ ardour2.add_deployment( [
 	{INFO : start_timer}, 
 	"cd ardour2",
 	"scons PREFIX=%s/local" % HOME, 
-	{STATS : {'compile_time': time.time()-start_time } }, 
+	{STATS : compile_time  }, 
 	'scons install' ])
 
 Runner( ardour2,
