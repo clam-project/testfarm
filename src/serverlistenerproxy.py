@@ -72,7 +72,7 @@ class ServerListenerProxy:
 		self.iterations_needs_update = True
 
 	def listen_end_task(self, task_name, status):
-		entry = "('END_TASK', '%s', '%s', %s),\n" % (task_name, self.current_time(), status)
+		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
 

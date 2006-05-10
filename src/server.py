@@ -282,7 +282,7 @@ class Server:
 			if tag == 'END_TASK' :
 				end_time = entry[2]
 				status_ok = entry[3]
-				if status_ok == 'True' : #TODO Fix!!@!
+				if status_ok == 'True' : #TODO change to "Success"
 					status = 'stable'
 				elif status_ok == 'Aborted' :
 					status = 'aborted'
