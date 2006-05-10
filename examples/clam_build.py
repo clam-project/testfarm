@@ -38,7 +38,6 @@ clam.add_checking_for_new_commits(
 	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
 	minutes_idle=5
 )
-'''
 clam.add_deployment( [
 	"cd $HOME/clam-sandboxes",
 	"cvs co -d testing-clam CLAM",
@@ -48,8 +47,6 @@ clam.add_deployment( [
 	"scons install",
 	"scons install",
 ] )
-'''
-'''
 clam.add_subtask("SMSTools installation", [
 	"cd $HOME/clam-sandboxes",
 	"cvs co -d testing-smstools CLAM_SMSTools",
@@ -57,14 +54,10 @@ clam.add_subtask("SMSTools installation", [
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
-'''
-'''
 clam.add_subtask("execute QTSMStools", [
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"./QtSMSTools" #TODO run a while
 ] )
-'''
-'''
 clam.add_subtask("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-neteditor CLAM_NetworkEditor",
@@ -72,13 +65,10 @@ clam.add_subtask("NetworkEditor installation", [
 	"cd scons",
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
-'''
-'''
 clam.add_subtask("execute NetworkEditor", [
 	"cd $HOME/clam-sandboxes/testing-neteditor/scons",
 	"./NetworkEditor" #TODO run a while
 ] )
-'''
 clam.add_subtask("Deploy OLD (srcdeps) build system", [
 	"cd $HOME/clam-sandboxes/testing-clam/build/srcdeps",
 	"make",
