@@ -288,9 +288,11 @@ class Server:
 					status = 'aborted'
 				else :
 					status = 'broken'
+				assert begin_time, "Error in log file. Non matching END_TASK"
 				executions.append( (begin_time, end_time, repo_name, status) )
 				execution_opened = False
 		if execution_opened :
+			assert begin_time, "Error in log file. End of log without any BEGIN_TASK"
 			executions.append( (begin_time, '', repo_name, 'inprogress') )
 		executions.reverse()
 		return executions
@@ -323,7 +325,7 @@ class Server:
 			result[client_name] = idle_entry
 		return result
 
-	def executions(self):
+	def get_executions(self):
 		result = {}
 		for client_name in self.client_names():
 			result[client_name] = self.__get_client_executions(client_name)
@@ -413,7 +415,7 @@ class Server:
 		return content
 
 	def __html_index(self, clients_with_stats):
-		executions_per_client = self.executions()
+		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
 		for client in executions_per_client.keys():
