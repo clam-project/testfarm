@@ -19,6 +19,8 @@ function ddInit(e){
 	myLayer=isIE ? document.all.theLayer : document.getElementById("theLayer");
 	layerLeft=isIE ? event.clientX : e.clientX;
 	layerTop=isIE ? event.clientY : e.clientY;
+	layerLeft += document.body.scrollLeft;
+	layerTop += document.body.scrollTop;
 	if(!inLayerArea(layerLeft, layerTop))
 		hideMe();
 }

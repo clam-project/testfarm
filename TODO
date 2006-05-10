@@ -36,6 +36,25 @@ Done	- stats diagrams in a rough way
 Done	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
 	 => solution should be more generalizable
 
+Version 0.8
+------------
+
+Done	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
+Done	  -> find a name for Task concept.
+Done	  -> Task name in the html 
+Done	  -> rename repository->project
+___________________
+
+MODEL BIG FACTORING
+___________________
+Done	- collapse 2 base dir attr in one -> local_base_dir
+Done	- rename Repository -> Task
+Done	- rename Task(Repository) methods
+Done	- rename Client -> Runner
+Done	- move repository_name -> project_name
+Done	- add task_name (imply changing server)
+Done	- move client_name to task
+
 Low Priority
 ----------------
 	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
@@ -103,20 +122,5 @@ Current	- CLAM in windows
 Done	- organize src directories
 	
 
-	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
-	  -> no client, only project object
-	  -> find a name for Task concept.
-	  -> Task name in the html 
-	  -> rename repository->project
-___________________
 
-MODEL BIG FACTORING
-___________________
-Done	- collapse 2 base dir attr in one -> local_base_dir
-Done	- rename Repository -> Task
-Done	- rename Task(Repository) methods
-Done	- rename Client -> Runner
-Done	- move repository_name -> project_name
-Done	- add task_name (imply changing server)
-Done	- move client_name to task
 
