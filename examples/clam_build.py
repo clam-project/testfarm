@@ -54,10 +54,12 @@ clam.add_subtask("SMSTools installation", [
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
+'''
 clam.add_subtask("execute QTSMStools", [
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"./QtSMSTools" #TODO run a while
 ] )
+'''
 clam.add_subtask("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-neteditor CLAM_NetworkEditor",
@@ -65,10 +67,12 @@ clam.add_subtask("NetworkEditor installation", [
 	"cd scons",
 	"scons clam_prefix=$HOME/clam-sandboxes/tlocal"
 ] )
+'''
 clam.add_subtask("execute NetworkEditor", [
 	"cd $HOME/clam-sandboxes/testing-neteditor/scons",
 	"./NetworkEditor" #TODO run a while
 ] )
+'''
 clam.add_subtask("Deploy OLD (srcdeps) build system", [
 	"cd $HOME/clam-sandboxes/testing-clam/build/srcdeps",
 	"make",
@@ -103,6 +107,7 @@ clam.add_subtask("Deploy SMSTools srcdeps branch for SMSBase tests", [
 	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
 	'echo "CLAM_PATH=$HOME/clam-sandboxes/testing-clam/" > testing-smstools-srcdeps/build/clam-location.cfg'
 ] )
+'''
 clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"cd $HOME/clam-sandboxes",
 	"cd testing-smstools-srcdeps/build/FunctionalTests",
@@ -110,7 +115,7 @@ clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"CONFIG=debug make", #release doesn't work
 	{CMD: "./SMSToolsTests", INFO: lambda x : x}
 ] )
-
+'''
 Runner( clam, 
 	continuous = True,
 	remote_server_url = 'http://10.55.0.66/testfarm_server'

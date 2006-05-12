@@ -80,18 +80,21 @@ songstamp.add_deployment([
 
 songstamp.add_subtask("build SongStamp core library", [
 	cd_songstamp_library,
-	"scons benchmark=1 prefix=" + install_path,
+#	"scons benchmark=1 prefix=" + install_path,
+	"scons benchmark=1 prefix=" + root_path + "songstamp-app-install",
 ] )	
 	
 songstamp.add_subtask("build SongStamp application", [
 	cd_songstamp_app,
-	"scons benchmark=1 prefix=" + install_path,	
+#	"scons benchmark=1 prefix=" + install_path,	
+	"scons benchmark=1 prefix=" + root_path + "songstamp-app-install",	
 	
 ] )
 
 
 songstamp.add_subtask("copy data files to install path", [
-	cd_install_path,
+#	cd_install_path,
+	"cd " + root_path + "songstamp-app",
 	"mkdir -p data",
 	"mkdir -p database",	
 	cd_root_path,
@@ -107,16 +110,28 @@ songstamp.add_subtask("clean-up database", [
 ] )
 
 
-songstamp.add_subtask("SongStamp Extractor functional test ->  benchmark data", [
-	cd_songstamptest,
-	"bin/songstamp_app_extractor_benchmark data/model.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
-] )
+#songstamp.add_subtask("SongStamp Extractor functional test ->  benchmark data", [
+#	cd_songstamptest,
+#	"bin/songstamp_app_extractor_benchmark data/model.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
+#] )
 
 
-songstamp.add_subtask("SongStamp Identifier functional test -> benchmark data", [
-	cd_songstamptest,
-	"bin/songstamp_app_identifier_benchmark data/model.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
+#songstamp.add_subtask("SongStamp Identifier functional test -> benchmark data", [
+#	cd_songstamptest,
+#	"bin/songstamp_app_identifier_benchmark data/model.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
+#] )
+
+
+songstamp.add_subtask("build SongStamp core library for mobile gsm", [
+	cd_songstamp_library,
+	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon",
+] )	
+
+songstamp.add_subtask("build SongStamp daemon", [
+	"cd " + root_path + "clean-fingerprint/songstamp_daemon/trunk/",
+	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon",	
 ] )
+
 
 Runner( songstamp, 
 	continuous = True,
