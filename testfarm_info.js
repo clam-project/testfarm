@@ -8,7 +8,7 @@ isNN=!document.all&&document.getElementById;
 isN4=document.layers;
 isHot=false;
 isShown=false;
-header_info = "<table style=\"width: 100%; border:solid 1px; background-color: #eee;\">\n"
+header_info = "<table style=\"width: 100%; font-size:0.9em; border:solid 1px; background-color: #eee;\">\n"
 		+"<tr>\n"
 		+"<td>\n"
 footer_info = "</td>\n"
@@ -79,7 +79,8 @@ function showMe(){
 
 function get_info(info){
 	var log_info =  header_info
-		+"<p width=\"100%\" bgcolor=\"#FFFFFF\" style=\"padding:0px\"><a href = \"index2.html\">" +info+"</a></p>\n"
+		//+"<p width=\"100%\" bgcolor=\"#FFFFFF\" style=\"padding:0px\"><a href = \"index2.html\">" +info+"</a></p>\n"
+		+info
 		+footer_info;
 	if(!isShown) {
     		setPosition();

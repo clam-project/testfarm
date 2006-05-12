@@ -21,44 +21,59 @@
 from task import *
 from coloredtest import ColoredTestCase
 from listeners import DummyResultListener
+from client import Client
+from project import Project
 
 class Tests_Task(ColoredTestCase):
 
 	def test_name(self):
-		task = Task('project name','client name','taskname') 
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client,'taskname') 
 		self.assertEquals('taskname', task.get_name())
 		
 	def test_name__default_consructor(self):
-		task = Task('project name', 'client name')
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client) 
 		self.assertEquals('-- unnamed task --', task.get_name())
 
 	def test_num_subtasks_default(self):
-		task = Task('project name','client name','taskname1')
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client,'taskname1') 
 		self.assertEquals(0, task.get_num_subtasks())
 	
 	def test_num_subtasks_multiple(self):
-		task = Task('project name','client name','taskname2')
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client,'taskname2') 
 		task.add_subtask( "subtaskname1" , [] )
 		task.add_subtask( "subtaskname2" , [] )
 	
 		self.assertEquals(2, task.get_num_subtasks())
 
 	def test_num_subtasks_multiple__with_deployment_task(self):
-		task = Task('project name','client name')
-
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client) 
 		task.add_deployment( [] )
 		task.add_subtask( "subtaskname1" , [] )
 	
 		self.assertEquals(2, task.get_num_subtasks())
 
 	def test_do_subtasks__single_subtask_successful(self):
-		task = Task('project name','client name')
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client) 
 		task.add_subtask( "subtaskname" , ["echo hello"] )
 		
 		self.assertEquals(True, task.do_subtasks())
 	
 	def test_do_subtasks__multiple_subtask_last_fails(self):
-		task = Task('project name','client name')
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client) 
 		task.add_subtask( "subtaskname" , 
 			["echo hello", "non-existing-command"] )
 		
@@ -67,7 +82,9 @@ class Tests_Task(ColoredTestCase):
 
 	# Results Tests
 	def test_results_log__task_default(self):
-		task = Task("project name","client name","task name")
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client,'task name') 
 		listener = DummyResultListener()
 		task.do_subtasks([listener])
 		self.assertEquals( """\
@@ -75,7 +92,9 @@ BEGIN_TASK task name
 END_TASK task name""", listener.log() )
 
 	def test_results_log__two_subtasks_first_fails(self):
-		task = Task("project name","client name","task name")
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client,'task name') 
 		task.add_subtask("subtask1", ["non-existing-command"])
 		task.add_subtask("subtask2", ["echo foo"])
 		listener = DummyResultListener()
@@ -91,7 +110,9 @@ END_SUBTASK subtask2
 END_TASK task name""", listener.log() )
 
 	def test_mandatory_subtask(self):
-		task = Task("project name","client name","task")	
+		a_project = Project('project name')
+		a_client = Client('client name')
+		task = Task(a_project, a_client,'task') 
 		task.add_subtask('subtask1', ["echo subtask1"])	
 		task.add_subtask('subtask2', ["echo something echoed", "lsss gh"], mandatory = True)
 		task.add_subtask('subtask3', ["echo subtask3"])	
@@ -107,3 +128,5 @@ BEGIN_SUBTASK subtask2
 ('lsss gh', 'failure', '/bin/sh: lsss: command not found\\n', '', {})
 END_SUBTASK subtask2
 END_TASK task""", listener.log() )
+
+

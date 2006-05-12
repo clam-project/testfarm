@@ -41,22 +41,22 @@ class Runner :
 
 		if remote_server_url:
 			listenerproxy = ServerListenerProxy(
-				client_name=task.client_name, 
+				client=task.client, 
 				service_url=remote_server_url,
-				project_name=task.project_name
+				project=task.project
 			)		
 			self.listeners.append( listenerproxy )
 		if local_base_dir :	
 			serverlistener = ServerListener( 
-				client_name=task.client_name, 
+				client=task.client, 
 				logs_base_dir=local_base_dir + "/logs",
-				project_name=task.project_name
+				project=task.project
 			)
 			self.listeners.append( serverlistener )
 			server_to_push = Server( 
 				logs_base_dir=local_base_dir + "/logs", 
 				html_base_dir=local_base_dir + "/html", 
-				project_name=task.project_name )
+				project_name=task.project.name )
 
 		else:
 			server_to_push = None

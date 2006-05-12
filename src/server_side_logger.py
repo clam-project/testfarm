@@ -20,19 +20,10 @@
  
 from mod_python import apache
 from server import Server
+from client import Client
+from project import Project
+from dirhelpers import *
 import os, sys
-
-
-def _log_filename(logs_base_dir, project_name, client_name) :
-	return '%s/%s/%s.testfarmlog' % (logs_base_dir, project_name, client_name)
-
-def _idle_filename(logs_base_dir, project_name, client_name) :
-	return '%s/%s/%s.idle' % (logs_base_dir, project_name, client_name)
-
-def _create_dir_if_needed(dir):
-	if not os.path.isdir( dir ) :
-		sys.stderr.write("Warning: directory '%s' is not available. Creating it." % dir)
-		os.makedirs(dir)
 
 
 _logs_base_dir = '/var/www/testfarm_logs'
@@ -43,12 +34,17 @@ server = Server(
 	html_base_dir = _html_base_dir
 )
 
-_create_dir_if_needed(_logs_base_dir)
-_create_dir_if_needed(_html_base_dir)
+create_dir_if_needed(_logs_base_dir)
+create_dir_if_needed(_html_base_dir)
+
+def create_dirs(req, project_name):
+	create_dir_if_needed('%s/%s/' % (_logs_base_dir, project_name) ) #TODO is there a better way?
+	create_dir_if_needed('%s/%s/' % (_html_base_dir, project_name) )
+	return "remote dirs Ok"
 
 def append_log_entry(req, project_name, client_name, entry):
 	server.project_name = project_name
-	filename = _log_filename(_logs_base_dir, project_name, client_name)
+	filename = log_filename(_logs_base_dir, project_name, client_name)
 	f = open( filename, 'a+')
 	f.write(entry)
 	f.close()
@@ -58,14 +54,29 @@ def append_log_entry(req, project_name, client_name, entry):
 
 def write_idle_info( req, project_name, client_name, idle_info ) :
 	server.project_name = project_name
-	_create_dir_if_needed('%s/%s/' % (_logs_base_dir, project_name) ) #TODO is there a better way?
-	_create_dir_if_needed('%s/%s/' % (_html_base_dir, project_name) )
-	filename = _idle_filename(_logs_base_dir, project_name, client_name)
+	filename = idle_filename(_logs_base_dir, project_name, client_name)
 	f = open( filename, 'w')
 	f.write(idle_info)
 	f.close()
 	server.update_static_html_files()
 	return "remote Ok"
 	return apache.OK
+
+def write_client_info(req, client_name, project_name, client_info): 
+	filename = client_info_filename(_logs_base_dir, project_name, client_name)
+	f = open(filename, 'w')
+	f.write( client_info )
+	return "remote client Ok"
+
+
+def write_project_info(req, project_name, project_info):# TODO : remove CODE DUPLICATION 
+	filename = project_info_filename(_logs_base_dir, project_name)
+	f = open(filename, 'w')
+	f.write( project_info )
+	f.close()
+	return "remote project Ok"
+
+
+
 	
 

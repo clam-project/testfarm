@@ -36,7 +36,7 @@ document.onclick=hideMe();
 </head>
 <body>
 <div id="theLayer" class="layer"></div>
-<h1>testfarm for project <a href="javascript:get_info('%(project_name)s')">%(project_name)s</a> </h1>
+<h1>testfarm for project <a href="javascript:get_info('%(project_info)s')">%(project_name)s</a> </h1>
 
 """
 
@@ -98,6 +98,14 @@ class Server:
 			return {}
 		return eval( content )
 
+	def load_client_info(self, client_name):
+		filename = client_info_filename( self.logs_base_dir, self.project_name, client_name )
+		return eval("[ %s ]" % open( filename ).read() )
+
+	def load_project_info(self):
+		filename = project_info_filename( self.logs_base_dir, self.project_name)
+		return eval("[ %s ]" % open( filename ).read() )	
+	
 	def last_date(self, log):
 		log.reverse()
 		for entry in log :
@@ -414,12 +422,30 @@ class Server:
 			content.append('</tr>')
 		return content
 
+	def __html_project_info(self):
+		project_info = ""
+		for entry in self.load_project_info() :
+			name = entry[0]
+			value = entry[1]
+			project_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
+		return project_info
+	
+	def __html_client_info(self, client_name):
+		client_info = ""
+		for entry in self.load_client_info(client_name) :
+			name = entry[0]
+			value = entry[1]
+			client_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
+		return client_info
+
 	def __html_index(self, clients_with_stats):
+		project_info = self.__html_project_info()
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
 		for client in executions_per_client.keys():
-			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a></th> " % (client, client) )
+			client_info = self.__html_client_info(client)
+			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a></th> " % (client_info, client) )
 		content.append('</tr>')
 
 		content.append('<tr>')
@@ -434,7 +460,7 @@ class Server:
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, executions_per_client.keys())
 		content.append('</table>')
-		return header_index % {'project_name':self.project_name} + '\n'.join(content) + footer
+		return header_index % {'project_name':self.project_name, 'project_info':project_info} + '\n'.join(content) + footer
 		
 	def __write_html_index(self, clients_with_stats):
 		filename = "%s/%s/index.html" % (	

@@ -20,37 +20,77 @@
 
 import subprocess, datetime
 from dirhelpers import *
+from client import Client
+from project import Project
 
 
 class ServerListener:
 	def __init__(self, 
-		client_name='testing_client', 
+		client= Client('testing_client'), 
 		logs_base_dir = '/tmp/testfarm_tests',
-		project_name=None # TODO: project_name must not be None
+		project=None # TODO: project_name must not be None
 	) :
 		self.executions_needs_update = True
-		self.client_name = client_name
-		self.project_name = project_name
+		self.client = client
+		self.project = project
 		self.logs_base_dir = logs_base_dir
 		self.logfile = None
 		self.idle_file = None
 		
-		assert project_name, "Error, project_name was expected"
+		assert project.name, "Error, project name was expected"
 
-		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, project_name) ) 
-		self.logfile = log_filename( self.logs_base_dir, project_name, self.client_name )
-		self.idle_file = idle_filename( self.logs_base_dir, project_name, self.client_name )
+		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, project.name) ) 
+		self.logfile = log_filename( self.logs_base_dir, project.name, self.client.name )
+		self.idle_file = idle_filename( self.logs_base_dir, project.name, self.client.name )
+		self.client_info_file = client_info_filename(self.logs_base_dir, project.name, self.client.name )
+		self.project_info_file = project_info_filename(self.logs_base_dir, project.name)
+		self.__write_client_info(client)
+		self.__write_project_info(project)
+
 
 		
 	def __append_log_entry(self, entry) :
 		f = open(self.logfile, 'a+')
 		f.write( entry )
 		f.close()
+		
 	def __write_idle_info(self, idle_info) :
 		f = open(self.idle_file, 'w')
 		f.write( idle_info )
 		f.close()
+		
+	def __write_client_info(self, client): 
+		f = open(self.client_info_file, 'w')
+		entry = "('Client name', '%s'),\n" % client.name
+		f.write( entry )
+		entry = "('Brief description', '%s'),\n" % client.brief_description
+		f.write( entry )
+		entry = "('Long description', '%s'),\n" % client.long_description	
+		f.write( entry )
+		attributes_sorted = client.attributes.keys()
+		attributes_sorted.sort()
+		for attribute_name in attributes_sorted:
+			attribute_value = client.attributes[attribute_name] 
+			entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
+			f.write( entry )
+		f.close()
 
+	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION 
+		f = open(self.project_info_file, 'w')
+		entry = "('Project name', '%s'),\n" % project.name
+		f.write( entry )
+		entry = "('Brief description', '%s'),\n" % project.brief_description
+		f.write( entry )
+		entry = "('Long description', '%s'),\n" % project.long_description	
+		f.write( entry )
+		attributes_sorted = project.attributes.keys()
+		attributes_sorted.sort()
+		for attribute_name in attributes_sorted:
+			attribute_value = project.attributes[attribute_name] 
+			entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
+			f.write( entry )
+		f.close()
+	
 	def clean_log_files(self):
 		subprocess.call('rm -rf %s' % self.logs_base_dir, shell=True)
 

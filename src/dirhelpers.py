@@ -32,6 +32,12 @@ def log_filename(logs_base_dir, project_name, client_name) :
 def idle_filename(logs_base_dir, project_name, client_name) :
 	return '%s/%s/%s.idle' % (logs_base_dir, project_name, client_name)
 
+def client_info_filename(logs_base_dir, project_name, client_name) :
+	return '%s/%s/%s.info' % (logs_base_dir, project_name, client_name)
+
+def project_info_filename(logs_base_dir, project_name) :
+	return '%s/%s/%s.info' % (logs_base_dir, project_name, project_name)
+
 def create_dir_if_needed(dir):
 	if not os.path.isdir( dir ) :
 #		sys.stderr.write("\nWarning: directory '%s' is not available. Creating it." % dir)

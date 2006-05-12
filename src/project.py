@@ -1,4 +1,4 @@
-#
+  #
 #  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
 #  and Universitat Pompeu Fabra
 # 
@@ -18,31 +18,14 @@
 #
 #
 
-from coloredtest import ColoredTestCase
-from listeners import *
-from runner import Runner
-from client import Client
-from project import Project
-from task import *
+class Project :
 
+	def __init__(self, project_name) :
+		self.name = project_name	
+		self.brief_description = "no brief description given"
+		self.long_description = "no long description given"
+		self.attributes = {}
 
-class Tests_Runner(ColoredTestCase):
-
-	def test_constructor_with_one_task_repository(self):
-		a_project = Project("project name")
-		a_client = Client("client name")
-		task = Task(a_project, a_client, "task name")
-		task.add_subtask( "subtaskname" , ["echo hello"] )
-		dummylistener = DummyResultListener()
-		runner = Runner( task, testinglisteners = [ dummylistener ] )
-		self.assertEquals("""\
-BEGIN_TASK task name
-BEGIN_SUBTASK subtaskname
-('echo hello', 'ok', '', '', {})
-END_SUBTASK subtaskname
-END_TASK task name""", dummylistener.log() )
-
-
-		
-
+	def set_attribute(self, attribute_name, attribute_value):
+		self.attributes[attribute_name] = attribute_value
 

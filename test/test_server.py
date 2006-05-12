@@ -24,35 +24,44 @@ from coloredtest import ColoredTestCase
 from listeners import *
 from task import * # TODO : is necessary ? 
 from runner import *
+from client import Client
+from project import Project
 from server import Server
 from serverlistener import ServerListener
 
 class Tests_Server(ColoredTestCase):
 
 	def tearDown(self):
-		listener = ServerListener( project_name='repo' )
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project)
 		listener.clean_log_files()
 
 	def setUp(self):
-		listener = ServerListener( project_name='repo' )
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project)
 		listener.clean_log_files()
 
 	def test_executions__one_green_execution(self):
-		listener = ServerListener( project_name='repo' )
-		listener.current_time = lambda : "a date"
-		server = Server(project_name='repo')
-		task = Task('project name','client name','task')	
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project)
+		listener.current_time = lambda : "a date"	
+		server = Server(project_name= a_project.name)
+		a_client = Client('client name')
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener])
 		self.assertEquals(
 			{'testing_client' : [('a date', 'a date', 'task', 'stable')]}, 
-			server.executions() )
+			server.get_executions() )
 
 	def test_executions__day_executions__single_client(self):
-		listener = ServerListener( project_name='repo' )
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project)
 		listener.current_time = lambda : "2006-04-29-12-00-00"
-		server = Server(project_name='repo')
-		task = Task('project name','client name','task')	
+		a_project = Project('project name')
+		server = Server(project_name= a_project.name)
+		a_client = Client('client name')
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener])	
 		listener.current_time = lambda : "2006-04-30-12-00-00"	
@@ -62,18 +71,21 @@ class Tests_Server(ColoredTestCase):
 				 {'testing_client': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'task', 'stable')]},
 			'2006-04-29':
 				{'testing_client': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'task', 'stable')]}
-			}, server.day_executions(server.executions()) )
+			}, server.day_executions(server.get_executions()) )
 
 	def test_executions__day_executions__multiple_clients__first_client_with_last_day_empty(self):
-		listener1 = ServerListener( client_name='a_client', project_name='repo' )
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		a_client2 = Client('a_client2')
+		listener1 = ServerListener( client=a_client, project=a_project )
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
-		listener2 = ServerListener( client_name='a_client2', project_name='repo' )
+		listener2 = ServerListener( client=a_client2, project=a_project )
 		listener2.current_time = lambda : "2006-04-29-12-00-00"
-		server = Server(project_name='repo')
-		task = Task('project name','a_client','task')	
+		server = Server(project_name= a_project.name)
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])
 		Runner(task, testinglisteners=[listener1])
-		task = Task('project name','a_client2','task')	
+		task = Task(a_project, a_client2, 'task')	
 		task.add_subtask('subtask1', [])
 		Runner(task, testinglisteners=[listener2])
 		listener2.current_time = lambda : "2006-04-30-12-00-00"	
@@ -85,20 +97,23 @@ class Tests_Server(ColoredTestCase):
 				{'a_client2': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'task', 'stable')],
 				'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'task', 'stable')]
 				}
-			}, server.day_executions(server.executions()) )
+			}, server.day_executions(server.get_executions()) )
 
 	def test_executions__day_executions__multiple_clients__last_client_with_first_day_empty(self):
-		listener1 = ServerListener( client_name='a_client', project_name='repo' )
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		a_client2 = Client('a_client2')
+		listener1 = ServerListener( client=a_client, project=a_project )
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
-		server = Server(project_name='repo')
-		task = Task('project name','a_client','task')	
+		server = Server(project_name= a_project.name)
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener1])
 		listener1.current_time = lambda : "2006-04-30-12-12-00"
-		listener2 = ServerListener( client_name='a_client2', project_name='repo' )
+		listener2 = ServerListener( client=a_client2, project=a_project )
 		listener2.current_time = lambda : "2006-04-30-12-00-00"	
 		Runner(task, testinglisteners=[listener1])
-		task = Task('project name','a_client2','task')	
+		task = Task(a_project, a_client2, 'task')	
 		task.add_subtask('subtask1', [])		
 		Runner(task, testinglisteners=[listener2])
 		self.assertEquals(
@@ -108,12 +123,14 @@ class Tests_Server(ColoredTestCase):
 				},
 			'2006-04-29':
 				{'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'task', 'stable')]}
-			}, server.day_executions(server.executions()) )
+			}, server.day_executions(server.get_executions()) )
 
 
 	def test_details(self):
-		listener = ServerListener( client_name='a_client', project_name='repo')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
+		server = Server(project_name= a_project.name)
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_task("not wanted")
 		listener.listen_begin_subtask("subtask")
@@ -143,8 +160,10 @@ class Tests_Server(ColoredTestCase):
 		self.assertEquals( expected, server.single_execution_details('a_client', '1999-99-99-99-99-99') )
 
 	def test_purged_details(self):
-		listener = ServerListener( client_name='a_client', project_name='repo')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
+		server = Server(project_name= a_project.name)
 		listener.current_time = lambda : "1999-99-99-99-99-99"
 		listener.listen_begin_task("we want this one")
 		listener.listen_begin_subtask("subtask")
@@ -169,36 +188,41 @@ class Tests_Server(ColoredTestCase):
 		self.assertEquals( expected, server.single_execution_details('a_client', '1999-99-99-99-99-99') )		
 
 	def test_two_clients(self):
+		a_project = Project('project name')
+		a_client = Client('client 1')
+		a_client2 = Client('client 2')
 		listener1 = ServerListener(
-			client_name='client 1', 
+			client=a_client, 
 			logs_base_dir='/tmp/clients_testdir', 
-			project_name='repo')
+			project=a_project)
 		listener2 = ServerListener(
-			client_name='client 2', 
+			client=a_client2, 
 			logs_base_dir='/tmp/clients_testdir', 
-			project_name='repo')
+			project=a_project)
 		listener1.current_time = lambda : "some date"
 		listener2.current_time = lambda : "some other date"
-		server = Server(logs_base_dir='/tmp/clients_testdir', project_name='repo')
-		task = Task('project name','client 1','task')
+		server = Server(logs_base_dir='/tmp/clients_testdir', project_name= a_project.name)	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask('subtask1', [])
 
 		Runner(task, testinglisteners=[listener1])
-		task = Task('project name','client 2','task')
+		task = Task(a_project, a_client2, 'task')
 		task.add_subtask('subtask1', [])
 		Runner(task, testinglisteners=[listener2])
 		self.assertEquals( 
 			{'client 1':[('some date', 'some date', 'task', 'stable')],
 			 'client 2':[('some other date', 'some other date', 'task', 'stable')]}, 
-			server.executions() )
+			server.get_executions() )
 		listener1.clean_log_files()
 		listener2.clean_log_files()
 
 	def test_idles(self):
-		listener = ServerListener(project_name='repo', client_name='a_client')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
 		listener.current_time = lambda : "a date"
-		server = Server(project_name='repo')
-		task = Task('project name','a_client','task')	
+		server = Server(project_name= a_project.name)
+		task = Task(a_project, a_client, 'task')
 		task.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
 		Runner(task, testinglisteners=[listener])
 		self.assertEquals(
@@ -211,16 +235,18 @@ class Tests_Server(ColoredTestCase):
 			server.idle() )
 
 	def test_stats_single_client_single_key(self):
-		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
+		server = Server(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
-		task = Task('project name','a_client','task')	
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':5} }] )
 		Runner(task, testinglisteners=[listener])
 		
 		listener.current_time = lambda : "2006-04-05-00-00-00"
-		task = Task('project name','a_client','task')	
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':1} }] )
 		Runner(task, testinglisteners=[listener])
 		
@@ -236,27 +262,31 @@ class Tests_Server(ColoredTestCase):
 			}, server.collect_stats() )
 
 	def test_no_stats(self):
-		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
+		server = Server(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
-		task = Task('project name','a_client','task')	
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask("subtask", ["echo no stats"] )
 		Runner(task, testinglisteners=[listener])
 		
 		self.assertEquals( {'a_client': {} }, server.collect_stats() )
 
 	def test_stats_single_client_multiple_key(self):
-		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
+		server = Server(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
-		task = Task('project name','a_client','task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'key1':5, 'key2':0} }] )
 		Runner(task, testinglisteners=[listener])
 		
 		listener.current_time = lambda : "2006-04-05-00-00-00"
-		task = Task('project name','a_client','task')	
+		task = Task(a_project, a_client, 'task')		
 		task.add_subtask("subtask", [{STATS:lambda x: {'key1':-1, 'key2':4} }] )
 		Runner(task, testinglisteners=[listener])
 		
@@ -274,22 +304,25 @@ class Tests_Server(ColoredTestCase):
 
 
 	def test_stats_multiple_client_single_key(self):
-		listener1 = ServerListener(project_name='repo', client_name='client1')
-		listener2 = ServerListener(project_name='repo', client_name='client2')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('client1')
+		a_client2 = Client('client2')
+		listener1 = ServerListener( client=a_client, project=a_project )
+		listener2 = ServerListener( client=a_client2, project=a_project )
+		server = Server(project_name= a_project.name)
 
 		listener1.current_time = lambda : "2006-04-04-00-00-00"
-		task = Task('project name','client1','task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':5} }] )
 		Runner(task, testinglisteners=[listener1])
 		
 		listener1.current_time = lambda : "2006-04-05-00-00-00"
-		task = Task('project name','client1','task')	
+		task = Task(a_client,a_project,'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':1} }] )
 		Runner(task, testinglisteners=[listener1])
 		
 		listener2.current_time = lambda : "1000-00-00-00-00-00"
-		task = Task('project name','client2','task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'clau':0} }] )
 		Runner(task, testinglisteners=[listener2])
 
@@ -313,22 +346,25 @@ class Tests_Server(ColoredTestCase):
 			}, server.collect_stats() )
 
 	def test_plot_data_file(self):
-		listener1 = ServerListener(project_name='repo', client_name='client1')
-		listener2 = ServerListener(project_name='repo', client_name='client2')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('client1')
+		a_client2 = Client('client2')
+		listener1 = ServerListener( client=a_client, project=a_project )
+		listener2 = ServerListener( client=a_client2, project=a_project )
+		server = Server(project_name= a_project.name)
 
 		listener1.current_time = lambda : "2006-04-04-00-00-00"
-		task = Task('project name','client1','task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':5} }] )
 		Runner(task, testinglisteners=[listener1])
 		
 		listener1.current_time = lambda : "2006-04-05-00-00-00"
-		task = Task('project name','client1','task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'kk':3} }, {STATS:lambda x: {'key':1, 'key2':2} }] )
 		Runner(task, testinglisteners=[listener1])
 		
 		listener2.current_time = lambda : "2000-01-01-12-54-00"
-		task = Task('project name','client1','task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'clau 1':0, 'clau 2':10} }] )
 		task.add_subtask("another subtask", [{STATS:lambda x: {'clau 1':2, 'clau 2':13} }] )
 		Runner(task, testinglisteners=[listener2])
@@ -354,11 +390,14 @@ time	clau_1	clau_2
 
 
 	def test_plotdata_no_stats(self):
-		listener = ServerListener(project_name='repo', client_name='a_client')
-		server = Server(project_name='repo')
+		a_project = Project('project name')
+		a_client = Client('a_client')
+		listener = ServerListener( client=a_client, project=a_project )
+		server = Server(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
-		task = Task('project name','a_client','task')	
+		a_client = Client('a_client')
+		task = Task(a_project, a_client, 'task')		
 		task.add_subtask("subtask", ["echo no stats"] )
 		Runner(task, testinglisteners=[listener])
 		
@@ -369,21 +408,25 @@ time	clau_1	clau_2
 class Tests_ServerListener(ColoredTestCase):
 
 	def tearDown(self):
-		listener = ServerListener( project_name='repo' )
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project )
 		listener.clean_log_files()
 
 	def setUp(self):
-		listener = ServerListener( project_name='repo' )
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project )
 		listener.clean_log_files()
 
 	def test_multiple_repositories_multiple_tasks(self):
+		a_project = Project('project name')
 		id = lambda txt : txt
-		listener1 = ServerListener( project_name='repo')
-		listener2 = ServerListener( project_name='repo')
+		listener1 = ServerListener( project=a_project)
+		listener2 = ServerListener( project=a_project)
 		listener1.current_time = lambda : "2006-03-17-13-26-20"
 		listener2.current_time = lambda : "2006-03-17-13-26-20"
-		task1 = Task('project name','a_client','task')	
-		task2 = Task('project name','a_client','task')	
+		a_client = Client('a_client')
+		task1 = Task(a_project, a_client, 'task')	
+		task2 = Task(a_project, a_client, 'task')	
 		task1.add_subtask('subtask1', ["echo subtask1"])	
 		task1.add_subtask('subtask2', [{CMD:"echo something echoed", INFO:id}, "./lalala gh"])
 		task2.add_subtask('subtask1', [])
@@ -416,12 +459,66 @@ class Tests_ServerListener(ColoredTestCase):
 """, open( listener2.logfile ).read() )
 	
 	def test_idle_state(self):
-		listener = ServerListener( project_name='repo' )
+		a_project = Project('project name')
+		listener = ServerListener( project = a_project )
 		listener.current_time = lambda : "1000-10-10-10-10-10"
 		listener.listen_found_new_commits(True, next_run_in_seconds=60)
 		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 
 			open(listener.idle_file).read())
 
+	def test_client_info__only_name(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		listener = ServerListener( client = a_client, project = a_project)
+		self.assertEquals("""\
+('Client name', 'client name'),
+('Brief description', 'no brief description given'),
+('Long description', 'no long description given'),
+""", open( listener.client_info_file ).read());
+
+	
+	def test_client_info__more_info(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		a_client.brief_description = "a brief description"
+		a_client.long_description = "a long description"
+		a_client.set_attribute('one more attribute', 'one_more_value')
+		a_client.set_attribute('another_attribute', 'another value')
+		listener = ServerListener( client = a_client, project = a_project)
+		self.assertEquals("""\
+('Client name', 'client name'),
+('Brief description', 'a brief description'),
+('Long description', 'a long description'),
+('another_attribute', 'another value'),
+('one more attribute', 'one_more_value'),
+""", open( listener.client_info_file ).read());
+
+	def test_project_info__only_name(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		listener = ServerListener( client = a_client, project = a_project)
+		self.assertEquals("""\
+('Project name', 'project name'),
+('Brief description', 'no brief description given'),
+('Long description', 'no long description given'),
+""", open( listener.project_info_file ).read());
+
+	
+	def test_project_info__more_info(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		a_project.brief_description = "a brief description"
+		a_project.long_description = "a long description"
+		a_project.set_attribute('one more attribute', 'one_more_value')
+		a_project.set_attribute('another_attribute', 'another value')
+		listener = ServerListener( client = a_client, project = a_project)
+		self.assertEquals("""\
+('Project name', 'project name'),
+('Brief description', 'a brief description'),
+('Long description', 'a long description'),
+('another_attribute', 'another value'),
+('one more attribute', 'one_more_value'),
+""", open( listener.project_info_file ).read());
 
 
 			

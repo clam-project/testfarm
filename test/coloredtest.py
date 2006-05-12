@@ -33,12 +33,21 @@ class ColoredTestCase(unittest.TestCase):
 		yellow = "\x1b[33;01m" # unreadable on white backgrounds
 		cyan = "\x1b[36;01m"
 		normal = "\x1b[0m"
+		
+		if len(expectedstr) < len(resultstr) :
+			str_range = len(expectedstr)
+		else:
+			str_range = len(resultstr)	
 
 		index_diff = 0
-		for i in range(len(resultstr)):
+		
+		for i in range(str_range):
 			if expectedstr[i]!=resultstr[i]:
 				index_diff = i
 				break
+
+		if i == len(expectedstr)-1 or i == len(resultstr)-1 :
+			index_diff = i		
 		
 		msg = "\n<expected>\n%s%s%s%s%s\n</expected>\n" % (cyan, expectedstr[:index_diff], green, expectedstr[index_diff:], normal)
 		msg += "\n<but was>\n%s%s%s%s%s\n</but was>" % (cyan, resultstr[:index_diff], red, resultstr[index_diff:], normal)

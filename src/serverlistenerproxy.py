@@ -27,25 +27,64 @@ import datetime
 #
 
 class ServerListenerProxy:
-	def __init__(self, client_name, service_url, project_name) :
+	def __init__(self, client, service_url, project) : # TODO: control project and client if None
 		self.iterations_needs_update = True
-		self.client_name = client_name
+		self.client = client
 		self.webservice = ServiceProxy(service_url)
-		self.project_name = project_name
-		
+		self.project = project
+		self.__create_dirs()
+		self.__write_project_info(self.project)
+		self.__write_client_info(self.client)
+	
+	def __create_dirs(self):
+		print self.webservice.remote_call(
+			"create_dirs", 
+			project_name=self.project.name) 
+			
 	def __append_log_entry(self, entry) :
 		print self.webservice.remote_call(
 			"append_log_entry", 
-			project_name=self.project_name, 
-			client_name=self.client_name, 
+			project_name=self.project.name, 
+			client_name=self.client.name, 
 			entry=entry )
 
 	def __write_idle_info(self, idle_info ):
 		print self.webservice.remote_call(
 			"write_idle_info",
-			project_name=self.project_name, 
-			client_name=self.client_name, 
+			project_name=self.project.name, 
+			client_name=self.client.name, 
 			idle_info=idle_info )
+
+	def __write_client_info(self, client):
+		entries = "('Client name', '%s'),\n" % client.name
+		entries += "('Brief description', '%s'),\n" % client.brief_description
+		entries += "('Long description', '%s'),\n" % client.long_description	
+		attributes_sorted = client.attributes.keys()
+		attributes_sorted.sort()
+		for attribute_name in attributes_sorted:
+			attribute_value = client.attributes[attribute_name] 
+			entries += "('%s', '%s'),\n" % (attribute_name,attribute_value)
+			
+		print self.webservice.remote_call(
+			"write_client_info",
+			client_name=self.client.name,
+			project_name=self.project.name,
+			client_info = entries) 
+
+	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION 
+		entries = "('Project name', '%s'),\n" % project.name
+		entries += "('Brief description', '%s'),\n" % project.brief_description
+		entries += "('Long description', '%s'),\n" % project.long_description	
+		attributes_sorted = project.attributes.keys()
+		attributes_sorted.sort()
+		for attribute_name in attributes_sorted:
+			attribute_value = project.attributes[attribute_name] 
+			entries += "('%s', '%s'),\n" % (attribute_name,attribute_value)
+
+		print self.webservice.remote_call(
+			"write_project_info",
+			project_name=self.project.name,
+			project_info=entries) 
 
 	def current_time(self):
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")

@@ -187,12 +187,12 @@ class SubTask:
 class Task :
 	# Attributes : name, subtasks[], deployment[] 
 
-	def __init__(self, project_name, client_name, task_name = '-- unnamed task --'): 
+	def __init__(self, project, client, task_name = '-- unnamed task --'): 
 		self.name = task_name;
-		assert is_string(project_name), '< %s > is not a valid project name (should be a string)' % str(project_name)
-		self.project_name = project_name
-		assert is_string(client_name), '< %s > is not a valid client name (should be a string)' % str(client_name)
-		self.client_name = client_name
+		assert is_string(project.name), '< %s > is not a valid project name (should be a string)' % str(project_name)
+		self.project = project
+		assert is_string(client.name), '< %s > is not a valid client name (should be a string)' % str(client_name)
+		self.client = client
 		self.subtasks = []
 		self.deployment = None #TODO : use this as unique development task
 		self.not_idle_checking_cmd = ""

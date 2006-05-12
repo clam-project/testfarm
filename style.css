@@ -16,11 +16,15 @@ a:visited {
 	color: blue;
 }
 
+.name{
+	font-weight: bold;
+}
 
 .layer
 {
 	position:absolute;
-	width:250px;
+	width:350px;
+	font-size: 0.8em;
 	left:0;
 	top:0;
 	visibility:hidden;
