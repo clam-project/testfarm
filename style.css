@@ -114,14 +114,19 @@ th
 	border: solid 1px #ddd; 
 	background-color: #fff;
 	padding: 1em;
+	width : 250px;
 }
 td 
 { 
 	border: solid 1px #ddd; 
 	vertical-align: top;
 	background-color: #eee;
+	width : 250px;
 }
 
+.description{
+	font-size: 0.5em;
+}
 
 .task
 {

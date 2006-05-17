@@ -26,8 +26,8 @@ function ddInit(e){
 }
 
 function setPosition(){
-	myLayer.style.left = layerLeft;
-	myLayer.left = layerLeft;
+	myLayer.style.left = layerLeft - 50;
+	myLayer.left = layerLeft - 50;
 	myLayer.style.top = layerTop - 30;	
 	myLayer.top = layerTop - 30;
 }
@@ -105,4 +105,10 @@ function details_info(theStatus, theLink){
 	else {
 		hideMe(); 
 	}
+}
+
+function column_width(columnId){
+	var column = document.getElementById(columnId);
+	window.alert("WIDTH = " + column.offsetWidth);
+	return  column.offsetWidth;
 }

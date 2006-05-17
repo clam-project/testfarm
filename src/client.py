@@ -20,10 +20,11 @@
 
 class Client :
 
-	def __init__(self, client_name) :
-		self.name = client_name	
-		self.brief_description = "no brief description given"
-		self.long_description = "no long description given"
+	def __init__(self, client_name, brief_description = None, long_description= None) :
+		assert client_name, "Error, client name was expected"
+		self.name = client_name
+		self.brief_description = brief_description
+		self.long_description = long_description
 		self.attributes = {}
 	
 	def set_attribute(self, attribute_name, attribute_value):

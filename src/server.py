@@ -36,7 +36,9 @@ document.onclick=hideMe();
 </head>
 <body>
 <div id="theLayer" class="layer"></div>
-<h1>testfarm for project <a href="javascript:get_info('%(project_info)s')">%(project_name)s</a> </h1>
+<h1>testfarm for project <a href="javascript:get_info('%(project_info)s')">%(project_name)s</a>
+<span class="description">%(project_brief_description)s</span>
+</h1>
 
 """
 
@@ -100,11 +102,20 @@ class Server:
 
 	def load_client_info(self, client_name):
 		filename = client_info_filename( self.logs_base_dir, self.project_name, client_name )
-		return eval("[ %s ]" % open( filename ).read() )
+		try :
+			client_info = eval("[ %s ]" % open( filename ).read() )
+			return client_info
+		except IOError:
+			return None
 
 	def load_project_info(self):
 		filename = project_info_filename( self.logs_base_dir, self.project_name)
-		return eval("[ %s ]" % open( filename ).read() )	
+		try :
+			project_info = eval("[ %s ]" % open( filename ).read() )
+			return project_info
+		except IOError:
+			return None
+
 	
 	def last_date(self, log):
 		log.reverse()
@@ -424,28 +435,50 @@ class Server:
 
 	def __html_project_info(self):
 		project_info = ""
-		for entry in self.load_project_info() :
-			name = entry[0]
-			value = entry[1]
-			project_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
-		return project_info
+		brief_description = " "
+		long_description_given = False
+		project_info_log = self.load_project_info()
+		if project_info_log :
+			for entry in project_info_log :
+				name = entry[0]
+				value = entry[1]
+				if name ==  "Long description" : long_description_given = True # a long description was given
+				if name == "Brief description" : # put the brief description aside
+					brief_description = value
+				else:
+					project_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
+		if not long_description_given :
+			project_info += '<p><span class=\\\'name\\\'>Long description:</span> no long description given</p>' 
 	
-	def __html_client_info(self, client_name):
+		return project_info, brief_description
+	
+	def __html_client_info(self, client_name): #TODO : remove code duplication
 		client_info = ""
-		for entry in self.load_client_info(client_name) :
-			name = entry[0]
-			value = entry[1]
-			client_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
-		return client_info
+		brief_description = ""
+		long_description_given = False
+		client_info_log = self.load_client_info(client_name)
+		if client_info_log :
+			for entry in client_info_log :
+				name = entry[0]
+				value = entry[1]
+				if name ==  "Long description" : long_description_given = True # a long description was given
+				if name == "Brief description" : # put the brief description aside
+					brief_description = value
+				else:
+					client_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
+		if not long_description_given :
+			client_info += '<p><span class=\\\'name\\\'>Long description:</span> no long description given</p>' 
+	
+		return client_info, brief_description
 
 	def __html_index(self, clients_with_stats):
-		project_info = self.__html_project_info()
+		project_info, project_brief_description = self.__html_project_info()
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
 		for client in executions_per_client.keys():
-			client_info = self.__html_client_info(client)
-			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a></th> " % (client_info, client) )
+			client_info, client_brief_description = self.__html_client_info(client)
+			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
 		content.append('</tr>')
 
 		content.append('<tr>')
@@ -460,7 +493,10 @@ class Server:
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, executions_per_client.keys())
 		content.append('</table>')
-		return header_index % {'project_name':self.project_name, 'project_info':project_info} + '\n'.join(content) + footer
+		return header_index % {'project_name':self.project_name+":", 
+					'project_info':project_info,
+					'project_brief_description':project_brief_description
+					} + '\n'.join(content) + footer
 		
 	def __write_html_index(self, clients_with_stats):
 		filename = "%s/%s/index.html" % (	

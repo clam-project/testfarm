@@ -15,8 +15,14 @@ some info some info some info some info some info some info some info some info 
 """ 
 
 linux_etch = Client("msordo_linux_etch")
+linux_etch.brief_description = "linux etch brief description bla bla bla bla bla bla bla"
 slow_test = Project("slow test")
-slow_test.brief_description = "a simple project with stupid slow tasks"
+logo = """\
+<p> C++ library for audio and music: \
+<a href="http://clam.iua.upf.edu">\
+<img src="http://clam.iua.upf.edu/images/clamlogo.jpg"/>\
+</a> project. </p>"""
+slow_test.brief_description = logo
 
 sleep_loop = Task(project = slow_test, client = linux_etch , task_name = "sleep loop")
 

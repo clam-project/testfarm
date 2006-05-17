@@ -388,7 +388,6 @@ time	clau_1	clau_2
 ''', open("%s/%s/client2_2.plot" % (server.logs_base_dir, server.project_name)).read() )
 
 
-
 	def test_plotdata_no_stats(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
@@ -402,6 +401,53 @@ time	clau_1	clau_2
 		Runner(task, testinglisteners=[listener])
 		
 		server.plot_stats()
+
+	def test_client_info__only_name(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		listener = ServerListener( client = a_client, project = a_project)
+		server = Server(project_name = a_project.name)
+		self.assertEquals(None, server.load_client_info(a_client.name))
+
+	def test_client_info__more_info(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		a_client.brief_description = "a brief description"
+		a_client.long_description = "a long description"
+		a_client.set_attribute('one more attribute', 'one_more_value')
+		a_client.set_attribute('another_attribute', 'another value')
+		listener = ServerListener( client = a_client, project = a_project)
+		server = Server(project_name = a_project.name)
+		self.assertEquals( 
+[('Brief description', 'a brief description'),
+('Long description', 'a long description'),
+('another_attribute', 'another value'),
+('one more attribute', 'one_more_value')]
+, server.load_client_info(a_client.name))
+
+	def test_project_info__only_name(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		listener = ServerListener( client = a_client, project = a_project)
+		server = Server(project_name = a_project.name)
+		self.assertEquals(None, server.load_project_info())
+	
+	def test_project_info__more_info(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		a_project.brief_description = "a brief description"
+		a_project.set_attribute('one more attribute', 'one_more_value')
+		a_project.set_attribute('another_attribute', 'another value')
+		listener = ServerListener( client = a_client, project = a_project)
+		server = Server(project_name = a_project.name)
+		self.assertEquals(
+[('Brief description', 'a brief description'),
+('another_attribute', 'another value'),
+('one more attribute', 'one_more_value')]
+, server.load_project_info())
+
+
+
 #
 # Tests ServerListener
 #
@@ -466,59 +512,7 @@ class Tests_ServerListener(ColoredTestCase):
 		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 
 			open(listener.idle_file).read())
 
-	def test_client_info__only_name(self):
-		a_project = Project('project name')
-		a_client = Client('client name')
-		listener = ServerListener( client = a_client, project = a_project)
-		self.assertEquals("""\
-('Client name', 'client name'),
-('Brief description', 'no brief description given'),
-('Long description', 'no long description given'),
-""", open( listener.client_info_file ).read());
 
-	
-	def test_client_info__more_info(self):
-		a_project = Project('project name')
-		a_client = Client('client name')
-		a_client.brief_description = "a brief description"
-		a_client.long_description = "a long description"
-		a_client.set_attribute('one more attribute', 'one_more_value')
-		a_client.set_attribute('another_attribute', 'another value')
-		listener = ServerListener( client = a_client, project = a_project)
-		self.assertEquals("""\
-('Client name', 'client name'),
-('Brief description', 'a brief description'),
-('Long description', 'a long description'),
-('another_attribute', 'another value'),
-('one more attribute', 'one_more_value'),
-""", open( listener.client_info_file ).read());
-
-	def test_project_info__only_name(self):
-		a_project = Project('project name')
-		a_client = Client('client name')
-		listener = ServerListener( client = a_client, project = a_project)
-		self.assertEquals("""\
-('Project name', 'project name'),
-('Brief description', 'no brief description given'),
-('Long description', 'no long description given'),
-""", open( listener.project_info_file ).read());
-
-	
-	def test_project_info__more_info(self):
-		a_project = Project('project name')
-		a_client = Client('client name')
-		a_project.brief_description = "a brief description"
-		a_project.long_description = "a long description"
-		a_project.set_attribute('one more attribute', 'one_more_value')
-		a_project.set_attribute('another_attribute', 'another value')
-		listener = ServerListener( client = a_client, project = a_project)
-		self.assertEquals("""\
-('Project name', 'project name'),
-('Brief description', 'a brief description'),
-('Long description', 'a long description'),
-('another_attribute', 'another value'),
-('one more attribute', 'one_more_value'),
-""", open( listener.project_info_file ).read());
 
 
 			

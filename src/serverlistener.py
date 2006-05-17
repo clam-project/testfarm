@@ -59,37 +59,39 @@ class ServerListener:
 		f.write( idle_info )
 		f.close()
 		
-	def __write_client_info(self, client): 
-		f = open(self.client_info_file, 'w')
-		entry = "('Client name', '%s'),\n" % client.name
-		f.write( entry )
-		entry = "('Brief description', '%s'),\n" % client.brief_description
-		f.write( entry )
-		entry = "('Long description', '%s'),\n" % client.long_description	
-		f.write( entry )
-		attributes_sorted = client.attributes.keys()
-		attributes_sorted.sort()
-		for attribute_name in attributes_sorted:
-			attribute_value = client.attributes[attribute_name] 
-			entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
-			f.write( entry )
-		f.close()
+	def __write_client_info(self, client): # TODO what if a client needs to delete the descriptions from info file in another execution?
+		if client.brief_description or client.long_description :
+			f = open(self.client_info_file, 'w')
+			if client.brief_description :
+				entry = "('Brief description', '%s'),\n" % client.brief_description
+				f.write( entry )
+			if client.long_description :
+				entry = "('Long description', '%s'),\n" % client.long_description	
+				f.write( entry )
+			attributes_sorted = client.attributes.keys()
+			attributes_sorted.sort()
+			for attribute_name in attributes_sorted:
+				attribute_value = client.attributes[attribute_name] 
+				entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
+				f.write( entry )
+			f.close()
 
 	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION 
-		f = open(self.project_info_file, 'w')
-		entry = "('Project name', '%s'),\n" % project.name
-		f.write( entry )
-		entry = "('Brief description', '%s'),\n" % project.brief_description
-		f.write( entry )
-		entry = "('Long description', '%s'),\n" % project.long_description	
-		f.write( entry )
-		attributes_sorted = project.attributes.keys()
-		attributes_sorted.sort()
-		for attribute_name in attributes_sorted:
-			attribute_value = project.attributes[attribute_name] 
-			entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
-			f.write( entry )
-		f.close()
+		if project.brief_description or project.long_description :
+			f = open(self.project_info_file, 'w')
+			if project.brief_description :
+				entry = "('Brief description', '%s'),\n" % project.brief_description
+				f.write( entry )
+			if project.long_description :
+				entry = "('Long description', '%s'),\n" % project.long_description	
+				f.write( entry )
+			attributes_sorted = project.attributes.keys()
+			attributes_sorted.sort()
+			for attribute_name in attributes_sorted:
+				attribute_value = project.attributes[attribute_name] 
+				entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
+				f.write( entry )
+			f.close()
 	
 	def clean_log_files(self):
 		subprocess.call('rm -rf %s' % self.logs_base_dir, shell=True)
