@@ -42,7 +42,6 @@ class ServerListenerProxy:
 			project_name=self.project.name) 
 			
 	def __append_log_entry(self, entry) :
-		print '>>>>>>>>>>>>>>>>>>>> ', entry
 		print self.webservice.remote_call(
 			"append_log_entry", 
 			project_name=self.project.name, 
