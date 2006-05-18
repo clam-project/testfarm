@@ -97,24 +97,24 @@ class ServerListenerProxy:
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 	def listen_end_command(self, command, ok, output, info, stats):
-		entry = str( ('\t\tEND_CMD', command, ok, output, info, stats) ) + ',\n'
-		self.__append_log_entry(entry)
+		entry = str( ('END_CMD', command, ok, output, info, stats) ) + ',\n'
+		self.__append_log_entry('\t\t' + entry)
 
 	def listen_begin_command(self, cmd):
-		entry = "\t\t('BEGIN_CMD', '%s'),\n" % cmd 
-		self.__append_log_entry(entry)
+		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
+		self.__append_log_entry('\t\t' + entry)
 
 	def listen_begin_subtask(self, subtaskname):
-		entry = "\t('BEGIN_SUBTASK', '%s'),\n" % subtaskname 
-		self.__append_log_entry(entry)
+		entry = "('BEGIN_SUBTASK', '%s'),\n" % subtaskname 
+		self.__append_log_entry('\t' + entry)
 
 	def listen_end_subtask(self, subtaskname):
 		entry = "('END_SUBTASK', '%s'),\n" % subtaskname
 		self.__append_log_entry(entry)
 	
 	def listen_begin_task(self, task_name):
-		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
-		self.__append_log_entry(entry)
+		entry = "('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
+		self.__append_log_entry('\n' + entry)
 		self.iterations_needs_update = True
 
 	def listen_end_task(self, task_name, status):

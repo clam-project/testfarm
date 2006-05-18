@@ -146,7 +146,7 @@ class Server:
 
 
 
-#!!!!!!!!!!!!!1
+		'''
 		log = self.load_client_log(client_name)
 		date = ''
 		prefix = '%s/%s' % (self.logs_base_dir, self.project_name)
@@ -173,9 +173,9 @@ class Server:
 		#     actually, another client might be reading it through the serverproxy / server_side_logger
 		#     a solution seems to be blocking the file access
 		f = open(logfilename, 'w') 	
-		f.write_lines( updated_log.append )
+		f.writelines( updated_log.append )
 		f.close()
-		
+		'''		
 	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, prefix, postfix ):
 		extracted_note = '[SAVED TO FILE]'
 		output = cmd_tuple[3]
@@ -216,7 +216,7 @@ class Server:
 		opened_subtask = False
 		opened_cmd = False 
 		for entry in self.single_execution_details(client_name, wanted_date ):
-			tag = entry[0]
+			tag = entry[0].strip()
 			if tag == 'BEGIN_TASK':
 				assert not opened_task
 				assert not opened_subtask
@@ -256,10 +256,10 @@ class Server:
 				#exiting, so no need to make opened_task=False
 				return header_details + '\n'.join(content) + footer	
 			else:
-				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was:' + entry
+				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was: "%s"' % tag
 				assert opened_task
 				assert opened_subtask
-				assert opened_command
+				assert opened_cmd
 				if entry[2]:
 					content.append( '<span class="command_ok">[OK]</span>' )
 				else:
