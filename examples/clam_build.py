@@ -3,6 +3,8 @@
 import sys
 sys.path.append('../src')
 from task import *
+from project import Project
+from client import Client
 from runner import Runner
 import os, time
 
@@ -29,8 +31,8 @@ def filter_cvs_update( text ):
 
 
 clam = Task(
-	project_name="CLAM", 
-	client_name="testing_machine-linux_breezy", 
+	project = Project("CLAM"), 
+	client = Client("testing_machine-linux_breezy"), 
 	task_name="with cvs update" 
 	)
 

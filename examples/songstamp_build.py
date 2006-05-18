@@ -77,6 +77,11 @@ songstamp.add_deployment([
 #	{CMD : songstamp_checkout, INFO : pass_text },
 ] )
 
+songstamp.add_subtask("make install directory", [
+	cd_root_path,
+	"mkdir -p songstamp-app-install",
+] )
+
 
 songstamp.add_subtask("build SongStamp core library", [
 	cd_songstamp_library,
@@ -94,7 +99,8 @@ songstamp.add_subtask("build SongStamp application", [
 
 songstamp.add_subtask("copy data files to install path", [
 #	cd_install_path,
-	"cd " + root_path + "songstamp-app",
+	cd_root_path,
+	"cd songstamp-app-install",
 	"mkdir -p data",
 	"mkdir -p database",	
 	cd_root_path,
@@ -110,30 +116,35 @@ songstamp.add_subtask("clean-up database", [
 ] )
 
 
-#songstamp.add_subtask("SongStamp Extractor functional test ->  benchmark data", [
-#	cd_songstamptest,
-#	"bin/songstamp_app_extractor_benchmark data/model.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
-#] )
+songstamp.add_subtask("SongStamp Extractor functional test ->  benchmark data", [
+	cd_songstamptest,
+	"bin/songstamp_app_extractor_benchmark data/model.bin " + testdb_path + "reference reference_audio_simple.lst database rebuild",
+] )
 
 
-#songstamp.add_subtask("SongStamp Identifier functional test -> benchmark data", [
-#	cd_songstamptest,
-#	"bin/songstamp_app_identifier_benchmark data/model.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
-#] )
+songstamp.add_subtask("SongStamp Identifier functional test -> benchmark data", [
+	cd_songstamptest,
+	"bin/songstamp_app_identifier_benchmark data/model.bin database database_index.lst " + testdb_path + "user/dummy_22kHz_16bit_mono_simple.wav playlist.lst",
+] )
 
+songstamp.add_subtask("make subdir for songstamp daemon install", [
+	cd_root_path,
+	"mkdir -p songstamp-daemon-install",
+] )
 
 songstamp.add_subtask("build SongStamp core library for mobile gsm", [
 	cd_songstamp_library,
-	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon",
+	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon-install",
 ] )	
 
 songstamp.add_subtask("build SongStamp daemon", [
 	"cd " + root_path + "clean-fingerprint/songstamp_daemon/trunk/",
-	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon",	
+	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon-install",	
 ] )
 
 
 Runner( songstamp, 
 	continuous = True,
-	remote_server_url = 'http://10.55.0.66/testfarm_server'
+#	remote_server_url = 'http://10.55.0.66/testfarm_server'
+	local_base_dir = '/home/testfarmclient/fingerprint-sandboxes' 
 )
