@@ -61,7 +61,7 @@ clam.add_subtask('unit tests', [
 	'cd testing-clam\\scons\\tests',
 	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=f:\\clam-sandboxes\\local cppunit_prefix=f:\\clam-external-libs\cppunit test_data_path=f:\\clam-sandboxes\\CLAM-TestData release=1 double=1 unit_tests',
 	'cd unit_tests',
-	{CMD: 'UnitTests.exe', INFO: pass_text, STATUS_OK: force_ok },
+	{CMD: 'UnitTests.exe', INFO: lambda x:x, STATUS_OK: force_ok },
 	])
 
 clam.add_subtask('functional test', [
@@ -69,7 +69,7 @@ clam.add_subtask('functional test', [
 	'cd testing-clam\\scons\\tests',
 	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=f:\\clam-sandboxes\\local cppunit_prefix=f:\\clam-external-libs\cppunit test_data_path=f:\\clam-sandboxes\\CLAM-TestData release=1 double=1 functional_tests',
 	'cd functional_tests',
-	{CMD: 'FunctionalTests.exe', INFO: pass_text, STATUS_OK: force_ok },
+	{CMD: 'FunctionalTests.exe', INFO: lambda x:x, STATUS_OK: force_ok },
 	])
 
 clam.add_subtask('clam examples compilation', [
