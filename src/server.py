@@ -399,7 +399,8 @@ class Server:
 			else:
 				endtime_html = "<p>in progres...</p>"
 				actual_status = "in progress"
-			details_html = "<p><a href=\"javascript:details_info('%s','details-%s-%s.html')\">details</a></p>" % (actual_status, client_name, begintime_str)
+			details_filename = 'details-%s-%s.html' % (client_name, begintime_str)
+			details_html = '<p><a href="javascript:details_info(\'%s\',\'%s\')">info</a> | <a href="%s">execution log</a></p>' % (actual_status, details_filename, details_filename)
 			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
 				status, name_html, begintime_html, endtime_html, details_html) )
 		return content
