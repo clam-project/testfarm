@@ -42,6 +42,7 @@ class ServerListenerProxy:
 			project_name=self.project.name) 
 			
 	def __append_log_entry(self, entry) :
+		print '>>>>>>>>>>>>>>>>>>>> ', entry
 		print self.webservice.remote_call(
 			"append_log_entry", 
 			project_name=self.project.name, 
@@ -96,15 +97,15 @@ class ServerListenerProxy:
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 	def listen_end_command(self, command, ok, output, info, stats):
-		entry = str( ('END_CMD', command, ok, output, info, stats) ) + ',\n'
+		entry = str( ('\t\tEND_CMD', command, ok, output, info, stats) ) + ',\n'
 		self.__append_log_entry(entry)
 
 	def listen_begin_command(self, cmd):
-		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
+		entry = "\t\t('BEGIN_CMD', '%s'),\n" % cmd 
 		self.__append_log_entry(entry)
 
 	def listen_begin_subtask(self, subtaskname):
-		entry = "('BEGIN_SUBTASK', '%s'),\n" % subtaskname 
+		entry = "\t('BEGIN_SUBTASK', '%s'),\n" % subtaskname 
 		self.__append_log_entry(entry)
 
 	def listen_end_subtask(self, subtaskname):
