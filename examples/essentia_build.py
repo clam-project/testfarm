@@ -5,6 +5,8 @@ sys.path.append('../src')
 from os import environ
 
 from task import *
+from client import Client
+from project import Project
 from runner import Runner
 
 def pass_text(text) :
@@ -28,8 +30,8 @@ elif sys.platform == "darwin":
 
 
 essentia = Task(
-		project_name = "essentia_trunk",
-		client_name = machine,
+		project = Project("essentia_trunk"),
+		client = Client(machine),
 		task_name = "doing a chechout" 
 		)
 

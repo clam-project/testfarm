@@ -3,6 +3,8 @@
 import sys
 sys.path.append('../src')
 from task import *
+from project import Project
+from client import Client
 from runner import Runner
 import os, time
 
@@ -54,9 +56,9 @@ os.environ['LD_LIBRARY_PATH']='%s/fingerprint-sandboxes/tlocal/lib:/usr/local/li
 
 
 songstamp = Task(
-	project_name="SongStamp", 
-	client_name="testing_machine-linux_breezy", 
-	task_name="with svn update" 
+	project = Project("SongStamp"), 
+	client = Client("testing_machine-linux_breezy"), 
+	task_name = "with svn update" 
 	)
 
 
@@ -145,6 +147,6 @@ songstamp.add_subtask("build SongStamp daemon", [
 
 Runner( songstamp, 
 	continuous = True,
-#	remote_server_url = 'http://10.55.0.66/testfarm_server'
-	local_base_dir = '/home/testfarmclient/fingerprint-sandboxes' 
+	remote_server_url = 'http://10.55.0.66/testfarm_server'
+#	local_base_dir = '/home/testfarmclient/fingerprint-sandboxes' 
 )
