@@ -142,11 +142,6 @@ class Server:
 		return result
 
 	def purge_client_logfile(self, client_name, last_date):
-		pass 
-
-
-
-		'''
 		log = self.load_client_log(client_name)
 		date = ''
 		prefix = '%s/%s' % (self.logs_base_dir, self.project_name)
@@ -173,9 +168,9 @@ class Server:
 		#     actually, another client might be reading it through the serverproxy / server_side_logger
 		#     a solution seems to be blocking the file access
 		f = open(logfilename, 'w') 	
-		f.writelines( updated_log.append )
+		f.writelines( updated_log )
 		f.close()
-		'''		
+				
 	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, prefix, postfix ):
 		extracted_note = '[SAVED TO FILE]'
 		output = cmd_tuple[3]
