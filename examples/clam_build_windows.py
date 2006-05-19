@@ -26,8 +26,8 @@ def filter_cvs_update( text ):
 	result = filter(dont_start_interr, text.split('\n') )	
 	return '\n'.join(result)
 
-def set_qtdir_to_qt4(x) : environ['QTDIR']='f:\\Qt4.1.1\\'
-def set_qtdir_to_qt3(x) : environ['QTDIR']='f:\\clam-external-libs\\qt3\\'
+def set_qtdir_to_qt4(x) : os.environ['QTDIR']='f:\\Qt4.1.1\\'
+def set_qtdir_to_qt3(x) : os.environ['QTDIR']='f:\\clam-external-libs\\qt\\'
 
 cd_clam = 'cd f:\\clam-sandboxes'
 
@@ -49,7 +49,7 @@ clam.add_deployment([
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	cd_clam,
 	'cd testing-clam\\scons\\libs',
-	{INFO: set_qtdir_to_qt3},
+	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 'scons configure prefix=f:\\clam-sandboxes\\local sandbox_path=f:\\clam-external-libs  qt_includes=f:\\clam-external-libs\\qt\\include qt_libs=f:\\clam-external-libs\\qt\\lib release=1 double=1',
 	'scons',
 	'scons install',
