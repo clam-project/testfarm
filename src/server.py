@@ -213,48 +213,48 @@ class Server:
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0].strip()
 			if tag == 'BEGIN_TASK':
-				assert not opened_task
-				assert not opened_subtask
-				assert not opened_cmd
+				#assert not opened_task
+				#assert not opened_subtask
+				#assert not opened_cmd
 				content.append('<div class="task"> BEGIN_TASK "%s" %s' % (entry[1], entry[2]) )
 				opened_task = True
 			elif tag == 'BEGIN_SUBTASK':
-				assert opened_task
-				assert not opened_subtask
-				assert not opened_cmd
+				#assert opened_task
+				#assert not opened_subtask
+				#assert not opened_cmd
 				content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1])
 				opened_subtask = True
 			elif tag == 'BEGIN_CMD':
-				assert opened_task
-				assert opened_subtask
-				assert not opened_cmd
+				#assert opened_task
+				#assert opened_subtask
+				#assert not opened_cmd
 				content.append( '<div class=command>' )
 				content.append( '<span class="command_string"> %s</span>' % entry[1] )
 				opened_cmd = True						
 			elif tag == 'END_SUBTASK':
-				assert opened_task
-				assert opened_subtask
-				assert not opened_cmd
+				#assert opened_task
+				#assert opened_subtask
+				#assert not opened_cmd
 				content.append('END_SUBTASK "%s"</div>' % entry[1])
 				opened_subtask = False
 			elif tag == 'END_TASK':
 				if opened_cmd:
-					assert opened_task
-					assert opened_subtask
+					#assert opened_task
+					#assert opened_subtask
 					content.append( '<span class="command_failure">[FAILURE]</span>' )
 					content.append( '<p class="output"> command execution aborted by the client</p>')
 					content.append('</div>')
 				if opened_subtask:
-					assert opened_task
+					#assert opened_task
 					content.append('</div>')
 				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
 				#exiting, so no need to make opened_task=False
 				return header_details + '\n'.join(content) + footer	
 			else:
 				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was: "%s"' % tag
-				assert opened_task
-				assert opened_subtask
-				assert opened_cmd
+				#assert opened_task
+				#assert opened_subtask
+				#assert opened_cmd
 				if entry[2]:
 					content.append( '<span class="command_ok">[OK]</span>' )
 				else:
@@ -307,7 +307,7 @@ class Server:
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
- 			self.purge_client_logfile(client, last_date) #TODO
+# 			self.purge_client_logfile(client, last_date) #TODO
 			filenames.append(filename)
 		return filenames
 
@@ -348,10 +348,12 @@ class Server:
 			if tag == 'BEGIN_TASK':
 				begin_time = entry[2]
 			elif tag == 'BEGIN_SUBTASK':
-				assert begin_time, "Error: found BEGIN_SUBTASK before BEGIN_TASK"
+				if not begin_time : # "found BEGIN_SUBTASK before BEGIN_TASK"
+					continue
 				current_task = entry[1]
 			elif tag == 'END_CMD' :
-				assert begin_time, "Error: found END_CMD before BEGIN_TASK"
+				if not begin_time: # "found END_CMD before BEGIN_TASK"
+					continue
 				stats_entry = entry[5]
 				if not stats_entry:
 					continue
@@ -377,15 +379,24 @@ class Server:
 	def __html_format_client_executions(self, client_name, client_idle, client_executions):
 		content = []
 		time_tmpl = "%(hour)s:%(min)s:%(sec)s %(D)s/%(M)s"
-		if client_idle and not client_idle['new_commits_found'] :
+		new_commits_found = client_idle['new_commits_found']
+		self.__helper_apache_log('>>>>>>>>>>>>>>>')
+		if client_idle:
+			self.__helper_apache_log('client: %s, commits found? %s ' % (client_name, new_commits_found) )
+		self.__helper_apache_log('>>>>>>>>>>>>>>>')
+		if client_idle and not new_commits_found :
 			idlechecktime_str = client_idle['date']
-			client_idle['date'] = "<p>Last check done at : %s" % self.__format_datetime(
+			self.__helper_apache_log( '......... idle ' + str(client_idle) )
+			self.__helper_apache_log( '..........timestr ' + idlechecktime_str )
+			content_dict = {}
+			content_dict['date'] = "<p>Last check done at : %s" % self.__format_datetime(
 				idlechecktime_str, time_tmpl )
+			content_dict['next_run_in_seconds'] = client_idle['next_run_in_seconds']
 			content.append('''\
 <div class="idle">
 %(date)s
 <p>Next check will be in %(next_run_in_seconds)s seconds </p>
-</div>''' % client_idle)
+</div>''' % content_dict)
 		for begintime_str, endtime_str, repo_name, status in client_executions:
 			name_html = "<p>%s</p>" % repo_name
 			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
