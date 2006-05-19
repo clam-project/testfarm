@@ -3,7 +3,11 @@
 import sys
 sys.path.append('../src')
 from os import environ
-from testfarmclient import *
+
+from task import *
+from client import Client
+from project import Project
+from runner import Runner
 
 def pass_text(text) :
 	return text
@@ -11,66 +15,57 @@ def pass_text(text) :
 def force_ok(text):
 	return True
 
-def minicppunit_parser(text):
-	result = []
-	in_summary = False
-	for line in text.split('\n'):
-		if not in_summary and 'Summary:' in line:
-			in_summary = True
-			result.append( line )
-		if in_summary :
-			result.append( line )
-		return "\n".join(result)
+cd_essentia = "cd g:\\sandbox\\essentia-sandbox\\clean-essentia\\trunk"
+essentia_update = '"c:\\program files\\svn\\svn" update svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia\\trunk'
+essentia_checkout = '"c:\\program files\\svn\\svn" checkout svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia\\trunk'
 
-cd_essentia = "cd g:\\sandbox\\essentia-sandbox\\clean-essentia\\trunk\\"
-essentia_update = '"c:\\program files\\svn\\svn" update svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
-essentia_checkout = '"c:\\program files\\svn\\svn" checkout svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
-
-essentia = Repository("essentia_trunk")
-
-'''essentia.add_checking_for_new_commits( 
-	checking_cmd='cd g:\\sandbox\\essentia-sandbox\\ && "c:\\program files\\svn\\svn" status -u clean-essentia/trunk | grep \*', 
+essentia = Task(
+			project = Project("essentia_trunk"),
+			client = Client("windows"),
+			task_name = "doing a chechout" 
+		)
+		
+'''
+essentia.add_checking_for_new_commits( 
+	checking_cmd='cd g:\\sandbox\\essentia-sandbox && "c:\\program files\\svn\\svn" status -u clean-essentia\\trunk | grep \*', 
 	minutes_idle=5
-)'''
+)
+'''
 
-essentia.add_deployment_task([
-	"cd g:\\sandbox\\",
+essentia.add_deployment([
+	"cd g:\\sandbox",
 	{CMD : "mkdir essentia-sandbox", STATUS_OK : force_ok},
 	"cd essentia-sandbox",
-	{CMD : "rmdir /S /Q C:\\usr\\include\\essentia", STATUS_OK : force_ok },
-	{CMD : "del /Q C:\\usr\\lib\\essentia*", STATUS_OK : force_ok},
-	{CMD : "rmdir /S /Q clean-essentia/trunk/build", STATUS_OK : force_ok},
-	{CMD : "rmdir /S /Q clean-essentia/trunk/algorithms", STATUS_OK : force_ok},
-	{CMD : "rmdir /S /Q clean-essentia/trunk/test/build", STATUS_OK : force_ok},
-	#{CMD : '"c:/program files/svn/svn" diff --revision HEAD clean-essentia/trunk', INFO: pass_text},
+	{CMD : "rmdir \\S \\Q C:\\usr\\include\\essentia", STATUS_OK : force_ok },
+	{CMD : "del \\Q C:\\usr\\lib\\essentia*", STATUS_OK : force_ok},
+	{CMD : "rmdir \\S \\Q clean-essentia\\trunk\\build", STATUS_OK : force_ok},
+	{CMD : "rmdir \\S \\Q clean-essentia\\trunk\\algorithms", STATUS_OK : force_ok},
+	{CMD : "rmdir \\S \\Q clean-essentia\\trunk\\test\\build", STATUS_OK : force_ok},
 	{CMD : essentia_checkout, INFO : pass_text },
-] )
+])
 
-essentia.add_task("build core libs", [
+essentia.add_subtask("build core libs", [
 	cd_essentia,
 	"scons base mode=debug",
 	"scons install base mode=debug",
-] )
+])
 
-essentia.add_task("build plugin libs", [
+essentia.add_subtask("build plugin libs", [
 	cd_essentia,
 	"scons mode=debug",
 	"scons install mode=debug",
-] )
+])
 
-essentia.add_task("automatic tests", [
+essentia.add_subtask("automatic tests", [
 	cd_essentia,
 	"cd test",
 	"scons",
-	"cd build/unittests/descriptortests/",
+	"cd build\\unittests\\descriptortests",
 	{CMD : "test.exe", INFO : pass_text},
-] )
+])
 
-TestFarmClient( 
-	'testing-machine_windows', 
+Runner ( 
 	essentia,  
-	#generated_html_path='./html',
-	#logs_path='g:\\sandbox\\essentia-sandbox\\testfarm_logs',
-	remote_server_url="http://10.55.0.66/testfarm_server",
+	remote_server_url='http://10.55.0.66/testfarm_server',
 	continuous=False 
 )

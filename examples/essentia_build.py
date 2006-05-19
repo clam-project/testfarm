@@ -18,7 +18,6 @@ environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 cd_essentia = "cd $HOME/essentia-sandboxes/clean-essentia/trunk"
 
 essentia_update = 'svn update clean-essentia/trunk/'
-
 essentia_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
 
 if sys.platform == "linux2":
@@ -50,8 +49,8 @@ essentia.add_deployment([
 	#"rm -fr clean-essentia/trunk/build",
 	#"rm -fr clean-essentia/trunk/algorithms",
 	#"rm -fr clean-essentia/trunk/test/build",
-	{CMD : "svn diff --revision HEAD clean-essentia/trunk", INFO: pass_text},
-	{CMD : essentia_checkout, INFO : pass_text },
+	#{CMD : "svn diff --revision HEAD clean-essentia/trunk", INFO: pass_text},
+	{CMD : essentia_update, INFO : pass_text },
 ] )
 
 essentia.add_subtask("build core libs", [
