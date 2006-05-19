@@ -380,14 +380,8 @@ class Server:
 		content = []
 		time_tmpl = "%(hour)s:%(min)s:%(sec)s %(D)s/%(M)s"
 		new_commits_found = client_idle['new_commits_found']
-		self.__helper_apache_log('>>>>>>>>>>>>>>>')
-		if client_idle:
-			self.__helper_apache_log('client: %s, commits found? %s ' % (client_name, new_commits_found) )
-		self.__helper_apache_log('>>>>>>>>>>>>>>>')
 		if client_idle and not new_commits_found :
 			idlechecktime_str = client_idle['date']
-			self.__helper_apache_log( '......... idle ' + str(client_idle) )
-			self.__helper_apache_log( '..........timestr ' + idlechecktime_str )
 			content_dict = {}
 			content_dict['date'] = "<p>Last check done at : %s" % self.__format_datetime(
 				idlechecktime_str, time_tmpl )
