@@ -570,14 +570,14 @@ class Server:
 	def plot_stats(self): # TODO refactor extract methods
 		allclients_stats = self.collect_stats()
 		clients = allclients_stats.keys()
-		images = []
-		pngs = []
-		pngs_thumb = []
-		svgs = []
 		clients_with_stats = []
 		prefix_html = '%s/%s' % (self.html_base_dir, self.project_name)
 		prefix_logs = '%s/%s' % (self.logs_base_dir, self.project_name)
 		for client in clients:
+			images = []
+			pngs = []
+			pngs_thumb = []
+			svgs = []
 			diagram_count = 0
 			alltasks_stats = allclients_stats[ client ]	
 			for task in alltasks_stats.keys():
@@ -629,7 +629,7 @@ class Server:
 				#maybe use: 'xrange="2006/04/04.22:00 2006/04/05.12:00"'
 				ploticus_cmd_tmpl = '''\
 ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
-datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime\
+datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime xrange="2006/05/19.21:15 2006/05/19.22:30" \
 title="some statistics (still experimental)" -o %s %s''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
 
 				cmd = ploticus_cmd_tmpl % ("-png", plotfilename, columns, png_filename, '')

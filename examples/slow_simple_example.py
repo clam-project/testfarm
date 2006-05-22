@@ -14,6 +14,9 @@ some info some info some info some info some info some info some info some info 
 some info some info some info some info some info some info some info some info some info some info some info some info 
 """ 
 linux_breezy = Client("msordo_linux_breezy")
+logo = '<p><img src="http://upload.wikimedia.org/wikipedia/uk/3/33/Linux-logo.jpg" width="36" height="36"/></p>'
+linux_breezy.brief_description = logo
+
 slow_test = Project("slow test")
 logo = """\
 <p> C++ library for audio and music: \
