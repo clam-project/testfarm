@@ -39,66 +39,87 @@ clam = Task(
 	client = Client("testing_machine-linux_breezy"), 
 	task_name="with cvs update" 
 	)
+repositories = [
+	"testing-clam",
+	"testing-neteditor",
+	"testing-smstools",
+	"testing-annotator",
+]
 
-clam.add_checking_for_new_commits( 
-	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up -dP | grep ^[UP]",  
-	minutes_idle=5
+for repository in repositories :
+	clam.add_checking_for_new_commits( 
+		checking_cmd="cd $HOME/clam-sandboxes/%s && cvs -nq up -dP | grep ^[UP]"%repository,  
+		minutes_idle=5
 )
-"""
 clam.add_deployment( [
-	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes",
-	"cvs co -d testing-clam CLAM",
-#	{ CMD: "cd testing-clam && cvs -q up -dP", INFO: filter_cvs_update },
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	"cd $HOME/clam-sandboxes/testing-clam",
+	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
 	"scons install",
-	"scons install",
 ] )
-"""
+clam.add_subtask("Unit Tests (with scons)", [
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd scons/tests",
+	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
+	{INFO : start_timer}, 
+	{CMD:"unit_tests/UnitTests", INFO: lambda x : x},
+	{STATS : exectime_unittests},
+] )
+clam.add_subtask("Functional Tests (with scons)", [
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd scons/tests",
+	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
+	{INFO : start_timer}, 
+	{CMD:"functional_tests/FunctionalTests", INFO: lambda x : x},
+	{STATS : exectime_functests},
+] )
+clam.add_subtask("CLAM Examples (with scons)", [
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd scons/examples",
+	"scons clam_prefix=$HOME/clam-sandboxes/tlocal",
+] )
 clam.add_subtask("SMSTools installation", [
-	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes",
-	"cvs co -d testing-smstools CLAM_SMSTools",
-#	"cd testing-smstools && cvs up -dP",
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clam-sandboxes/testing-smstools",
+	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
 	"scons install",
 ] )
 '''
 clam.add_subtask("execute QTSMStools", [
 	"cd $HOME/clam-sandboxes/testing-smstools",
-	"./QtSMSTools" #TODO run a while
+	"./QtSMSTools", #TODO run a while
 ] )
 '''
 clam.add_subtask("NetworkEditor installation", [
-	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes",
-#	"cvs co -d testing-neteditor CLAM_NetworkEditor",
-	"cd testing-neteditor && cvs up -dP",
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	"cd $HOME/clam-sandboxes/testing-neteditor",
+	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
 ] )
 '''
 clam.add_subtask("execute NetworkEditor", [
 	"cd $HOME/clam-sandboxes/testing-neteditor",
-	"./NetworkEditor" #TODO run a while
+	"./NetworkEditor", #TODO run a while
 ] )
 '''
 clam.add_subtask('vmqt compilation and examples', [
-	"cd $HOME/clam-sandboxes",
-	"cd testing-annotator",
-	'cd vmqt',
-	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	{ INFO: set_qtdir_to_qt4 },
-	'scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal release=1 double=1'
+	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
+	"cd $HOME/clam-sandboxes/testing-annotator/vmqt",
+	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
+	'scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal release=1 double=1',
 	'scons examples',
 ] )
 
 clam.add_subtask("Annotator installation", [
-	{CMD: "echo seting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
-	"cd $HOME/clam-sandboxes",
-#	"cvs co -d testing-annotator CLAM_Annotator",
-	"cd testing-annotator && cvs up -dP",
+	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
+	"cd $HOME/clam-sandboxes/testing-annotator",
+	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_vmqt4_path=vmqt clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
 	"scons install",
 ] )
@@ -117,7 +138,7 @@ clam.add_subtask("Deploy OLD (srcdeps) build system", [
 	
 ])
 clam.add_subtask("Unit Tests (with srcdeps)", [
-	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd build/Tests/UnitTests",
 	"make depend",
@@ -128,7 +149,7 @@ clam.add_subtask("Unit Tests (with srcdeps)", [
 
 ] )
 clam.add_subtask("Functional Tests (with srcdeps)", [
-	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd build/Tests/FunctionalTests",
 	"make depend",
