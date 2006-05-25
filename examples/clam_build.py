@@ -36,9 +36,12 @@ def set_qtdir_to_qt4(x) :
 def set_qtdir_to_qt3(x) :
 	os.environ['QTDIR']='/usr/'
 
+breezy = Client("linux_ubuntu_breezy"), 
+breezy.brief_description = '<img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
+
 clam = Task(
 	project = Project("CLAM"), 
-	client = Client("testing_machine-linux_breezy"), 
+	client = breezy), 
 	task_name="with cvs update" 
 	)
 repositories = [

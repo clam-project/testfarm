@@ -31,7 +31,7 @@ elif sys.platform == "darwin":
 essentia = Task(
 		project = Project("essentia_trunk"),
 		client = Client(machine),
-		task_name = "doing a chechout" 
+		task_name = "" 
 		)
 
 essentia.add_subtask("TODO fix bug: update html at begin time ", [] )

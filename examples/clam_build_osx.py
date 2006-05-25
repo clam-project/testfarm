@@ -27,7 +27,7 @@ def exectime_functests(output):
 	return {'exectime_functests' : time.time() - start_time}
 	
 osx = Client("osx_tiger")
-fedora.brief_description = '<img src="http://clam.iua.upf.es/images/apple_icon.png"/>'
+osx.brief_description = '<img src="http://clam.iua.upf.es/images/apple_icon.png"/>'
 
 clam = Task(
 	project = Project("CLAM"),
