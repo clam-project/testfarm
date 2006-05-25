@@ -31,9 +31,12 @@ def set_qtdir_to_qt3(x) : os.environ['QTDIR']='f:\\clam-external-libs\\qt\\'
 
 cd_clam = 'cd f:\\clam-sandboxes'
 
+windows = Client("testing_machine-windows")
+windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows_icon.png"/>'
+
 clam = Task(
 	project = Project("CLAM"), 
-	client = Client("testing_machine-windows"), 
+	client = windows, 
 	task_name="with cvs update" 
 	)
 

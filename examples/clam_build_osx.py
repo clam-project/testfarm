@@ -26,9 +26,12 @@ def exectime_functests(output):
 	global start_time
 	return {'exectime_functests' : time.time() - start_time}
 	
+osx = Client("osx_tiger")
+fedora.brief_description = '<img src="http://clam.iua.upf.es/images/apple_icon.png"/>'
+
 clam = Task(
 	project = Project("CLAM"),
-	client = Client("testing-machine_osx-tiger"),
+	client = osx,
 	task_name = "updating the cvs"
 	)
 
