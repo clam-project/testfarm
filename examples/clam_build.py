@@ -37,7 +37,8 @@ def set_qtdir_to_qt3(x) :
 	os.environ['QTDIR']='/usr/'
 
 breezy = Client("linux_ubuntu_breezy")
-breezy.brief_description = '<img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
+breezy.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
+	
 
 clam = Task(
 	project = Project("CLAM"), 
