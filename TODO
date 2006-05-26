@@ -120,7 +120,7 @@ Current	- CLAM in windows
 	- refactoring: init client phase
 	  -> copy (or link) css and js files
 Done	- organize src directories
-	
+Done	- API change: add_checking... -> set_check... (only one check is allowed)
 
 
 
