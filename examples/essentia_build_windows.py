@@ -26,7 +26,7 @@ essentia = Task(
 		)
 		
 '''
-essentia.add_checking_for_new_commits( 
+essentia.set_check_for_new_commits( 
 	checking_cmd='cd g:\\sandbox\\essentia-sandbox && "c:\\program files\\svn\\svn" status -u clean-essentia\\trunk | grep \*', 
 	minutes_idle=5
 )

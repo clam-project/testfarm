@@ -223,7 +223,7 @@ class Tests_Server(ColoredTestCase):
 		listener.current_time = lambda : "a date"
 		server = Server(project_name= a_project.name)
 		task = Task(a_project, a_client, 'task')
-		task.add_checking_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
+		task.set_check_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
 		Runner(task, testinglisteners=[listener])
 		self.assertEquals(
 			{'a_client' : 

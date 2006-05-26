@@ -15,7 +15,7 @@ example.add_deployment( [
 	{CMD: "ls", INFO: lambda x : x}
 ] )
 
-#example.add_checking_for_new_commits( "cvs -nq up -dP | grep ^[UP]" )
+#example.set_check_for_new_commits( "cvs -nq up -dP | grep ^[UP]" )
 
 example.add_subtask("teeesting", [
 	"echo Should not write this!"

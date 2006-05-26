@@ -62,7 +62,7 @@ songstamp = Task(
 	)
 
 
-songstamp.add_checking_for_new_commits( 
+songstamp.set_check_for_new_commits( 
 	checking_cmd='cd $HOME/fingerprint-sandboxes && svn status -u clean-fingerprint/ | grep \*', 
 	minutes_idle=5
 )

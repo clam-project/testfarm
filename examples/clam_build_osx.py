@@ -36,7 +36,7 @@ clam = Task(
 	)
 
 
-clam.add_checking_for_new_commits( 
+clam.set_check_for_new_commits( 
 	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up  | grep ^[UP]",  
 	minutes_idle=5
 )

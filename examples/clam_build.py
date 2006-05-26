@@ -51,9 +51,9 @@ repositories = [
 	"testing-annotator",
 ]
 
-for repository in repositories :
-	clam.add_checking_for_new_commits( 
-		checking_cmd="cd $HOME/clam-sandboxes/%s && cvs -nq up -dP | grep ^[UP]"%repository,  
+clam.set_check_for_new_commits( 
+		checking_cmd="cd $HOME/clam-sandboxes && cvs -nq up -dP %s | grep ^[UP]" %
+			 " ".join(repositories),  
 		minutes_idle=5
 )
 clam.add_deployment( [

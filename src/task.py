@@ -204,7 +204,7 @@ class Task :
 	def get_num_subtasks(self): # Note : Deployment task is considered as a separated task
 		return len( self.subtasks )
 	
-	def add_checking_for_new_commits(self, checking_cmd, minutes_idle = 5 ):
+	def set_check_for_new_commits(self, checking_cmd, minutes_idle = 5 ):
 		self.not_idle_checking_cmd = checking_cmd
 		self.seconds_idle = minutes_idle * 60
 
