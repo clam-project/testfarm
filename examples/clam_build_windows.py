@@ -42,7 +42,15 @@ clam = Task(
 
 
 clam.set_check_for_new_commits( 
-	checking_cmd='cd f:\\clam-sandboxes\\ && cvs -nq up -dP testing-clam testing-vmqt testing-annotator testing-neteditor testing-smstools | grep ^[UP]',  
+	checking_cmd = "(" + ' && '.join(
+		[r'cd f:\clam-sandboxes\%s && cvs -nq up -dP'%module for module in [
+			'testing-clam',
+			'testing-vmqt',
+			'testing-annotator',
+			'testing-neteditor',
+			'testing-smstools',
+		]])+r") | grep '\b[UP]\b'",
+#	checking_cmd= r'cd f:\ && cvs -nq up -dP testing-clam testing-vmqt testing-annotator testing-neteditor testing-smstools | grep \\^[UP]',  
 	minutes_idle=5
 )
 
@@ -86,14 +94,15 @@ clam.add_subtask('smstools compilation', [
 	cd_clam,
 	'cd testing-smstools',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	'cd scons\\QtSMSTools',
-	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local release=1 double=1'
+	{ CMD: "echo Skiping SMSTools: PortMidi problem unresolved !!!", INFO: lambda x:x },
+#	'cd scons\\QtSMSTools',
+#	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local release=1 double=1'
 ] )
 clam.add_subtask('network editor compilation', [
 	cd_clam,
 	'cd testing-neteditor',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	'cd scons\\',
+	'cd scons',
 	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local release=1 double=1'
 ] )
 
@@ -101,7 +110,7 @@ clam.add_subtask('vmqt compilation and examples', [
 	cd_clam,
 	'cd testing-vmqt',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	{ INFO: set_qtdir_to_qt4 },
+	{CMD: "echo seting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
 	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
 	'scons examples',
 ] )
@@ -111,8 +120,8 @@ clam.add_subtask('annotator compilation', [
 	cd_clam,
 	'cd testing-annotator',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	'cd src',
-	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local clam_sconstools=f:\\clam-sandboxes\\testing-clam clam_vmqt4_path=f:\\clam-sandboxes\\testing-vmqt release=1 double=1'
+	{CMD: "echo seting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
+	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools clam_vmqt4_path=f:\\clam-sandboxes\\testing-vmqt release=1 double=1'
 ] )
 
 
@@ -120,4 +129,5 @@ clam.add_subtask('annotator compilation', [
 Runner( 
 	clam,  
 	remote_server_url="http://10.55.0.66/testfarm_server",
+	continuous = True
 )
