@@ -61,7 +61,7 @@ clam.add_deployment([
 	cd_clam,
 	'cd testing-clam\\scons\\libs',
 	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-'scons configure prefix=f:\\clam-sandboxes\\local sandbox_path=f:\\clam-external-libs  qt_includes=f:\\clam-external-libs\\qt\\include qt_libs=f:\\clam-external-libs\\qt\\lib release=1 double=1',
+'scons configure prefix=f:\\clam-sandboxes\\local sandbox_path=f:\\clam-external-libs  qt_includes=f:\\clam-external-libs\\qt\\include qt_libs=f:\\clam-external-libs\\qt\\lib use_portmidi=1 release=1 double=1',
 	'scons',
 	'scons install',
 #	'scons install', #TODO bug? check if repeating scons install is really necessary.
@@ -70,6 +70,7 @@ clam.add_deployment([
 clam.add_subtask('unit tests', [
 	cd_clam,
 	'cd testing-clam\\scons\\tests',
+	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=f:\\clam-sandboxes\\local cppunit_prefix=f:\\clam-external-libs\cppunit test_data_path=f:\\clam-sandboxes\\CLAM-TestData release=1 double=1 unit_tests',
 	'cd unit_tests',
 	{CMD: 'UnitTests.exe', INFO: lambda x:x, STATUS_OK: force_ok },
@@ -78,6 +79,7 @@ clam.add_subtask('unit tests', [
 clam.add_subtask('functional test', [
 	cd_clam,
 	'cd testing-clam\\scons\\tests',
+	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=f:\\clam-sandboxes\\local cppunit_prefix=f:\\clam-external-libs\cppunit test_data_path=f:\\clam-sandboxes\\CLAM-TestData release=1 double=1 functional_tests',
 	'cd functional_tests',
 	{CMD: 'FunctionalTests.exe', INFO: lambda x:x, STATUS_OK: force_ok },
@@ -86,6 +88,7 @@ clam.add_subtask('functional test', [
 clam.add_subtask('clam examples compilation', [
 	cd_clam,
 	'cd testing-clam\\scons\\examples',
+	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	'scons clam_prefix=f:\\clam-sandboxes\\local release=1 double=1',
 	])
 
@@ -94,16 +97,15 @@ clam.add_subtask('smstools compilation', [
 	cd_clam,
 	'cd testing-smstools',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	{ CMD: "echo Skiping SMSTools: PortMidi problem unresolved !!!", INFO: lambda x:x },
-#	'cd scons\\QtSMSTools',
-#	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local release=1 double=1'
+	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
 ] )
 clam.add_subtask('network editor compilation', [
 	cd_clam,
 	'cd testing-neteditor',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	'cd scons',
-	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local release=1 double=1'
+	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	'scons clam_prefix=f:\\clam-sandboxes\\local install_prefix=\\clam-sandboxes\\local clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
 ] )
 
 clam.add_subtask('vmqt compilation and examples', [
