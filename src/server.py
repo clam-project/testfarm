@@ -552,7 +552,8 @@ class Server:
 		if self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-#			self.__helper_apache_log('TestFarm: sended: %s \nout: %s ' % (filesstr, str(out)) )
+			self.__helper_apache_log('>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<')
+			self.__helper_apache_log('sended: %s \nout: %s ' % (filesstr, str(out)) )
 
 
 	def collect_stats(self):
