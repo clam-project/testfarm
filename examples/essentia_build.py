@@ -27,7 +27,7 @@ if sys.platform == "linux2":
 elif sys.platform == "darwin":
 	lib_path = "DYLD_LIBRARY_PATH"
 	machine = Client("testing_machine_osx_tiger")
-	machine.brief_description ='<img src="http://clam.iua.upf.es/images/apple.png"/>'
+	machine.brief_description ='<img src="http://clam.iua.upf.es/images/apple_icon.png"/>'
 
 
 essentia = Task(
