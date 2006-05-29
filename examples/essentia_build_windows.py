@@ -19,12 +19,12 @@ cd_essentia = "cd g:\\sandbox\\essentia-sandbox\\clean-essentia\\trunk"
 essentia_update = '"c:\\program files\\svn\\svn" update svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia\\trunk'
 essentia_checkout = '"c:\\program files\\svn\\svn" checkout svn+ssh://svn@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia\\trunk'
 
-breezy = Client("linux_ubuntu_breezy")
-breezy.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
+windows = Client("windows")
+windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows.png"/>'
 
 essentia = Task(
 			project = Project("essentia_trunk"),
-			client = breezy,
+			client = windows,
 			task_name = "doing a chechout" 
 		)
 		
