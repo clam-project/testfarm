@@ -149,6 +149,7 @@ class Server:
 		updated_log = []
 		for entry in log :
 			tag = entry[0]
+			count = 0
 			if tag == 'BEGIN_TASK':
 				assert entry[2] != date, "Error. found two repos with same date."
 				date = entry[2]
@@ -188,7 +189,7 @@ class Server:
 		if info and info != extracted_note :
 			filename = '%s/purged_info__%s' % (prefix, postfix)
 			f = open(filename, 'w')
-			f.write(info)
+			f.write( str(info) ) #non string can be passed as info. so str() is needed 
 			f.close()
 			info = extracted_note
 		else:
@@ -307,7 +308,9 @@ class Server:
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
-# 			self.purge_client_logfile(client, last_date) #TODO
+			#purgue_client is still experimental:
+ 			self.purge_client_logfile(client, last_date) #TODO improve purgue method
+			
 			filenames.append(filename)
 		return filenames
 
@@ -585,7 +588,6 @@ class Server:
 				if stats_list :
 					clients_with_stats.append( client )
 				else:
-					print '++++++++ found client without stats:', client #TODO remove
 					continue
 
 				diagram_count += 1
