@@ -32,7 +32,7 @@ elif sys.platform == "darwin":
 
 essentia = Task(
 		project = Project("essentia_trunk"),
-		client = Client(machine),
+		client = machine,
 		task_name = "" 
 		)
 
