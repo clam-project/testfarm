@@ -329,7 +329,7 @@ class Server:
 				status_ok = entry[3]
 				if status_ok == 'True' : #TODO change to "Success"
 					status = 'stable'
-				elif status_ok == 'Aborted' :
+				elif execution_opened and status_ok == 'Aborted' :
 					status = 'aborted'
 				else :
 					status = 'broken'
@@ -438,10 +438,6 @@ class Server:
 		#		day_executions = self.__initialize_clients_in_day_executions(day_executions, executions_per_client)
 				day_executions[day][client].append( (begintime_str, endtime_str, repo_name, status) )
 		
-	#	print "##################DICTIONARY FORMAT CLIENTS DAY ITERATIONS#######################"
-	#	print day_executions
-	#	print "#################################################################################"
-	
 		return day_executions
 
 	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day, all_clients): # TODO : MS Finish Implementation
@@ -545,15 +541,13 @@ class Server:
 			apache.log_error('TestFarm:  '+ str(msg) )
 		
 	def update_static_html_files(self):
-#		sys.stderr.write( 'update static html files' )
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
 		if self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-			self.__helper_apache_log('>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<')
-			self.__helper_apache_log('sended: %s \nout: %s ' % (filesstr, str(out)) )
+			#self.__helper_apache_log('sended: %s \nout: %s ' % (filesstr, str(out)) )
 
 
 	def collect_stats(self):
@@ -577,11 +571,11 @@ class Server:
 		clients_with_stats = []
 		prefix_html = '%s/%s' % (self.html_base_dir, self.project_name)
 		prefix_logs = '%s/%s' % (self.logs_base_dir, self.project_name)
+		images = []
+		pngs = []
+		pngs_thumb = []
+		svgs = []
 		for client in clients:
-			images = []
-			pngs = []
-			pngs_thumb = []
-			svgs = []
 			diagram_count = 0
 			alltasks_stats = allclients_stats[ client ]	
 			for task in alltasks_stats.keys():
