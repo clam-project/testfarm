@@ -43,14 +43,14 @@ clam.set_check_for_new_commits(
 
 clam.add_subtask("Which new commits?", [	
 	"cd $HOME/clam-sandboxes",
-	{ CMD: "cd testing-clam && cvs -q up", INFO: filter_cvs_update },
+	{ CMD: "cd testing-clam && cvs -qn up -dP", INFO: pass_text },
 ] )
 clam.add_deployment( [
 	{INFO: start_timer},
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-clam CLAM",
 	"cd testing-clam",
-	{CMD: "cvs up -dP", INFO: pass_text},
+	"cvs -q up -dP",
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure",
 	"scons",
