@@ -61,7 +61,7 @@ clam.add_deployment([
 	cd_clam,
 	'cd testing-clam\\scons\\libs',
 	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-'scons configure prefix=f:\\clam-sandboxes\\local sandbox_path=f:\\clam-external-libs  qt_includes=f:\\clam-external-libs\\qt\\include qt_libs=f:\\clam-external-libs\\qt\\lib use_portmidi=1 release=1 double=1',
+'scons configure prefix=f:\\clam-sandboxes\\local sandbox_path=f:\\clam-external-libs  qt_includes=f:\\clam-external-libs\\qt\\include qt_libs=f:\\clam-external-libs\\qt\\lib with_portmidi=1 release=1 double=1',
 	'scons',
 	'scons install',
 #	'scons install', #TODO bug? check if repeating scons install is really necessary.
