@@ -135,6 +135,12 @@ clam.add_subtask('neteditor package'), [
 	'scons package'
 ])
 
+clam.add_subtask('VstPrototyper'), [
+	cd_clam,
+	'cd testing-neteditor\\src\\VstPrototyper',
+	'scons install_prefix=f:\\clam-sandboxes\\tlocal clam_prefix =f:\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools vstsdk_path=f:\\clam-external-libs\\vstsdk2.3'
+] )
+
 clam.add_subtask('vmqt compilation and examples', [
 	cd_clam,
 	'cd testing-vmqt',
@@ -156,12 +162,12 @@ clam.add_subtask('annotator install'), [
 	cd_clam,
 	'cd testing-annotator',
 	'scons install'
-])
+] )
 clam.add_subtask('annotator package'), [
 	cd_clam,
 	'cd testing-annotator',
 	'scons package'
-])
+] )
 
 
 
