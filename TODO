@@ -124,4 +124,4 @@ Done	- API change: add_checking... -> set_check... (only one check is allowed)
 	- fix: idle message should appear only at current day, not all days
 Done	- fix: INFO now can receive any python structure. str() conversion is
           done, avoiding process to crash at purgue method
-	- fix all plots goes to the same client bug
+Done	- fix all plots goes to the same client bug. Not all pngs where uploaded to the web server
