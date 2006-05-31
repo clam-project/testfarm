@@ -28,11 +28,13 @@ def filter_cvs_update( text ):
 
 def set_qtdir_to_qt4(x) : 
 	os.environ['QTDIR']='f:\\Qt4.1.1\\'
-	return ¨QTDIR set to ¨ + os.environ['QTDIR']
+	return 'QTDIR set to ' + os.environ['QTDIR']
 
 def set_qtdir_to_qt3(x) : 
 	os.environ['QTDIR']='f:\\clam-external-libs\\qt\\'
-	return ¨QTDIR set to ¨ + os.environ['QTDIR']
+	return 'QTDIR set to ' + os.environ['QTDIR']
+
+os.environ['EXTERNALDLLDIR']='f:\\clam-external-libs\dlls'
 
 cd_clam = 'cd f:\\clam-sandboxes'
 
@@ -105,12 +107,12 @@ clam.add_subtask('smstools compilation', [
 	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	'scons clam_prefix=f:\\clam-sandboxes\\tlocal install_prefix=\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
 ] )
-clam.add_subtask('smstools install'), [
+clam.add_subtask('smstools install', [
 	cd_clam,
 	'cd testing-smstools',
 	'scons install'
-])
-clam.add_subtask('smstools package'), [
+] )
+clam.add_subtask('smstools package', [
 	cd_clam,
 	'cd testing-smstools',
 	'scons package'
@@ -124,26 +126,26 @@ clam.add_subtask('network editor compilation', [
 	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	'scons clam_prefix=f:\\clam-sandboxes\\tlocal install_prefix=\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
 ] )
-clam.add_subtask('neteditor install'), [
+clam.add_subtask('neteditor install', [
 	cd_clam,
 	'cd testing-neteditor',
 	'scons install'
 ])
-clam.add_subtask('neteditor package'), [
+clam.add_subtask('neteditor package', [
 	cd_clam,
 	'cd testing-neteditor',
 	'scons package'
 ])
 
-clam.add_subtask('VstPrototyper'), [
+clam.add_subtask('VstPrototyper', [
 	cd_clam,
 	'cd testing-neteditor\\src\\VstPrototyper',
-	'scons install_prefix=f:\\clam-sandboxes\\tlocal clam_prefix =f:\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools vstsdk_path=f:\\clam-external-libs\\vstsdk2.3'
+	'scons install_prefix=f:\\clam-sandboxes\\tlocal clam_prefix=f:\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools vstsdk_path=f:\\clam-external-libs\\vstsdk2.3'
 ] )
 
 clam.add_subtask('vmqt compilation and examples', [
 	cd_clam,
-	'cd testing-vmqt',
+	'cd testing-annotator\\vmqt',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	{CMD: "echo seting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
 	'scons clam_prefix=f:\\clam-sandboxes\\tlocal install_prefix=\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
@@ -156,14 +158,14 @@ clam.add_subtask('annotator compilation', [
 	'cd testing-annotator',
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	{CMD: "echo seting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
-	'scons clam_prefix=f:\\clam-sandboxes\\tlocal install_prefix=\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools clam_vmqt4_path=f:\\clam-sandboxes\\testing-vmqt release=1 double=1'
+	'scons clam_prefix=f:\\clam-sandboxes\\tlocal install_prefix=\\clam-sandboxes\\tlocal clam_sconstools=f:\\clam-sandboxes\\testing-clam\\scons\\sconstools release=1 double=1'
 ] )
-clam.add_subtask('annotator install'), [
+clam.add_subtask('annotator install', [
 	cd_clam,
 	'cd testing-annotator',
 	'scons install'
 ] )
-clam.add_subtask('annotator package'), [
+clam.add_subtask('annotator package', [
 	cd_clam,
 	'cd testing-annotator',
 	'scons package'
