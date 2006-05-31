@@ -537,8 +537,9 @@ class Server:
 		return filename
 
 	def __helper_apache_log(self, msg):
-			from mod_python import apache
-			apache.log_error('TestFarm:  '+ str(msg) )
+		'debugging method'
+		from mod_python import apache
+		apache.log_error('TestFarm:  '+ str(msg) )
 		
 	def update_static_html_files(self):
 		newfiles, clients_with_stats = self.plot_stats()
@@ -547,7 +548,6 @@ class Server:
 		if self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-			#self.__helper_apache_log('sended: %s \nout: %s ' % (filesstr, str(out)) )
 
 
 	def collect_stats(self):
@@ -626,7 +626,7 @@ class Server:
 				#maybe use: 'xrange="2006/04/04.22:00 2006/04/05.12:00"'
 				ploticus_cmd_tmpl = '''\
 ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
-datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime xrange="2006/05/19.21:15 2006/05/19.22:30" \
+datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime \
 title="some statistics (still experimental)" -o %s %s''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
 
 				cmd = ploticus_cmd_tmpl % ("-png", plotfilename, columns, png_filename, '')
