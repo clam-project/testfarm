@@ -54,10 +54,12 @@ songstamp_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/fingerpr
 HOME = os.environ['HOME']
 os.environ['LD_LIBRARY_PATH']='%s/fingerprint-sandboxes/tlocal/lib:/usr/local/lib' % HOME
 
+breezy = Client("testing_machine-linux_breezy")
+breezy.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 
 songstamp = Task(
 	project = Project("SongStamp"), 
-	client = Client("testing_machine-linux_breezy"), 
+	client = breezy, 
 	task_name = "with svn update" 
 	)
 
