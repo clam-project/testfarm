@@ -125,3 +125,4 @@ Done	- API change: add_checking... -> set_check... (only one check is allowed)
 Done	- fix: INFO now can receive any python structure. str() conversion is
           done, avoiding process to crash at purgue method
 Done	- fix all plots goes to the same client bug. Not all pngs where uploaded to the web server
+	- clients shoulnd not push the server. EFFICIENCY PROBLEM. timely updates instead
