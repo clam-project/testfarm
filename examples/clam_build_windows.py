@@ -167,7 +167,9 @@ clam.add_subtask('annotator install', [
 ] )
 clam.add_subtask('annotator package', [
 	cd_clam,
-	'cd testing-annotator',
+	'cd testing-annotator\\SimacServicesClient',
+	'buildExeFromPython.py',
+	'cd ..',
 	'scons package'
 ] )
 
