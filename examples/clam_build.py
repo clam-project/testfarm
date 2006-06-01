@@ -71,7 +71,7 @@ clam.add_subtask("Unit Tests (with scons)", [
 	"cd scons/tests",
 	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
 	{INFO : start_timer}, 
-	"unit_tests/UnitTests",
+	{CMD: "unit_tests/UnitTests", INFO: lambda x:x, STATUS_OK:forece_ok},
 	{STATS : exectime_unittests},
 ] )
 clam.add_subtask("Functional Tests (with scons)", [
@@ -80,7 +80,7 @@ clam.add_subtask("Functional Tests (with scons)", [
 	"cd scons/tests",
 	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
 	{INFO : start_timer}, 
-	{CMD:"functional_tests/FunctionalTests", INFO: lambda x : x, STATUS_OK: force_ok },
+	{CMD:"functional_tests/FunctionalTests", INFO: lambda x:x, STATUS_OK: force_ok },
 	{STATS : exectime_functests},
 ] )
 clam.add_subtask("CLAM Examples (with scons)", [
@@ -95,7 +95,7 @@ clam.add_subtask("SMSTools installation", [
 	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
 	"scons install",
-	"./changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/smstools ",
+	"$HOME/clam-sandboxes/testing-clam/scons/sconstools/changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/smstools ",
 ] )
 '''
 clam.add_subtask("execute QTSMStools", [
@@ -108,7 +108,7 @@ clam.add_subtask("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes/testing-neteditor",
 	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
-	"../testing-smstools/changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/networkeditor ",
+	"$HOME/clam-sandboxes/testing-clam/scons/sconstools/changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/smstools ",
 ] )
 '''
 clam.add_subtask("execute NetworkEditor", [
