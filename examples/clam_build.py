@@ -71,7 +71,7 @@ clam.add_subtask("Unit Tests (with scons)", [
 	"cd scons/tests",
 	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
 	{INFO : start_timer}, 
-	{CMD:"unit_tests/UnitTests", INFO: lambda x : x, STATUS_OK: force_ok},
+	"unit_tests/UnitTests",
 	{STATS : exectime_unittests},
 ] )
 clam.add_subtask("Functional Tests (with scons)", [
