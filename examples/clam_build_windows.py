@@ -38,7 +38,7 @@ os.environ['EXTERNALDLLDIR']='f:\\clam-external-libs\dlls'
 
 cd_clam = 'cd f:\\clam-sandboxes'
 
-windows = Client("testing_machine-windows")
+windows = Client("windows_xp")
 windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows_icon.png"/>'
 
 clam = Task(
