@@ -95,6 +95,7 @@ clam.add_subtask("SMSTools installation", [
 	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
 	"scons install",
+	"./changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/smstools ",
 ] )
 '''
 clam.add_subtask("execute QTSMStools", [
@@ -107,6 +108,7 @@ clam.add_subtask("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes/testing-neteditor",
 	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
+	"../testing-smstools/changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/networkeditor ",
 ] )
 '''
 clam.add_subtask("execute NetworkEditor", [
@@ -171,7 +173,7 @@ clam.add_subtask("Deploy SMSTools srcdeps branch for SMSBase tests", [
 	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
 	'echo "CLAM_PATH=$HOME/clam-sandboxes/testing-clam/" > testing-smstools-srcdeps/build/clam-location.cfg'
 ] )
-'''
+
 clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"cd $HOME/clam-sandboxes",
 	"cd testing-smstools-srcdeps/build/FunctionalTests",
@@ -179,7 +181,7 @@ clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 	"CONFIG=debug make", #release doesn't work
 	{CMD: "./SMSToolsTests", INFO: lambda x : x}
 ] )
-'''
+
 
 
 Runner( clam, 
