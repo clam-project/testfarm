@@ -63,6 +63,7 @@ clam.add_deployment( [
 	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
+	"scons",
 	"scons install",
 ] )
 clam.add_subtask("Unit Tests (with scons)", [

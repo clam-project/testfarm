@@ -54,6 +54,7 @@ clam.add_deployment( [
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure",
 	"scons",
+	"scons",
 	{INFO: deployment_time}
 #	"sudo scons install",
 ] )
