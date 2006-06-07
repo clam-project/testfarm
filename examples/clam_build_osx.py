@@ -37,7 +37,7 @@ clam = Task(
 
 
 clam.set_check_for_new_commits( 
-	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -nq up  | grep ^[UP]",  
+	checking_cmd="cd $HOME/clam-sandboxes/testing-clam && cvs -n up -dP | grep ^[UP]",  
 	minutes_idle=5
 )
 
@@ -62,7 +62,7 @@ clam.add_deployment( [
 clam.add_subtask("SMSTools installation", [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-smstools CLAM_SMSTools",
-	"cd testing-smstools && cvs up ",
+	"cd testing-smstools && cvs -q up -Pd ",
 	"cd $HOME/clam-sandboxes/testing-smstools/scons/QtSMSTools",
 	"scons"
 ] )
@@ -76,7 +76,7 @@ clam.add_subtask("execute QTSMStools", [
 clam.add_subtask("NetworkEditor installation", [
 	"cd $HOME/clam-sandboxes",
 #	"cvs co -d testing-neteditor CLAM_NetworkEditor",
-	"cd testing-neteditor && cvs up -dP",
+	"cd testing-neteditor && cvs -q up -dP",
 	"cd scons",
 	"scons"
 ] )
