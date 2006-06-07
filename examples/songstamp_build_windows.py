@@ -53,7 +53,7 @@ songstamp_update = 'svn update svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clea
 songstamp_checkout = 'svn checkout svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint'
 
 windows = Client("windows")
-windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows.png"/>'
+windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows_icon.png/>'
 
 songstamp = Task(
 	project = Project("SongStamp"), 
@@ -72,8 +72,9 @@ songstamp.add_deployment([
 	{CMD : "cd d:\\sandbox\\fingerprint-sandboxes", INFO : pass_text },
 	{CMD : "mkdir clean-fingerprint", STATUS_OK : force_ok},	
 	"cd clean-fingerprint",
+	{CMD : songstamp_update, INFO : pass_text },
 #	songstamp_update,
-	{CMD : songstamp_checkout, INFO : pass_text },
+#	{CMD : songstamp_checkout, INFO : pass_text },
 #	songstamp_checkout,
 #	{CMD : "svn diff --revision HEAD clean-songstamp/", INFO: pass_text},
 #	{CMD : songstamp_checkout, INFO : pass_text },
