@@ -52,8 +52,8 @@ cd_fingerprint_path = "cd " + fingerprint_path
 songstamp_update = 'svn update svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint'
 songstamp_checkout = 'svn checkout svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint'
 
-windows = Client("windows")
-windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows_icon.png/>'
+windows = Client("testing_machine-windows_xp")
+windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows_icon.png"/>'
 
 songstamp = Task(
 	project = Project("SongStamp"), 
