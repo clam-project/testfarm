@@ -53,7 +53,7 @@ songstamp_update = 'svn update svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clea
 songstamp_checkout = 'svn checkout svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint'
 
 windows = Client("windows")
-windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows.png"/> <img src="http://clam.iua.upf.es/images/windows.png"/>'
+windows.brief_description = '<img src="http://clam.iua.upf.es/images/windows.png"/>'
 
 songstamp = Task(
 	project = Project("SongStamp"), 
