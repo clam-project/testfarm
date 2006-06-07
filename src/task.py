@@ -134,6 +134,8 @@ class SubTask:
 		initial_working_dir = os.path.abspath(os.curdir)
 		temp_file = tempfile.NamedTemporaryFile()
 		temp_file_name = temp_file.name
+		if sys.platform =='win32':
+			temp_file_name = 'C:\\testfarmtemp.txt'
 		for maybe_dict in self.commands :
 			# 1 : Create a temp file to save working directory
 			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)	
