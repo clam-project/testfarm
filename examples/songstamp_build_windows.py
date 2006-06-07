@@ -29,24 +29,24 @@ def force_ok(text):
 	return True
 
 
-root_path = "d:\\sandbox\\fingerprint-sandboxes\\"
+root_path = "d:\\sandbox\\fingerprint-sandboxes"
 cd_root_path = "cd " + root_path
 
-install_path = root_path + "local\\"
+install_path = root_path + "\\local"
 cd_install_path = "cd " + install_path
 
-songstamp_library_path = root_path + "clean-fingerprint\\songstamp_library\\trunk\\"
+songstamp_library_path = root_path + "\\clean-fingerprint\\songstamp_library\\trunk"
 cd_songstamp_library = "cd " + songstamp_library_path
 
-songstamp_app_path = root_path + "clean-fingerprint\\songstamp_app\\trunk\\"
+songstamp_app_path = root_path + "\\clean-fingerprint\\songstamp_app\\trunk"
 cd_songstamp_app = "cd " + songstamp_app_path
 
-songstamptest_path = root_path + "local\\"
+songstamptest_path = root_path + "\\local"
 cd_songstamptest = "cd " + songstamptest_path
 
-testdb_path = root_path + "test-db\\"
+testdb_path = root_path + "\\test-db"
 
-fingerprint_path = root_path + "local\\database\\"
+fingerprint_path = root_path + "\\local\\database"
 cd_fingerprint_path = "cd " + fingerprint_path
 
 songstamp_update = 'svn update svn+ssh://svn@mtgdb.iua.upf.edu/fingerprint/ clean-fingerprint'
@@ -69,7 +69,7 @@ songstamp.set_check_for_new_commits(
 
 songstamp.add_deployment([
 	#cd_root_path,
-	{CMD : "cd d:\\sandbox\\fingerprint-sandboxes\\", INFO : pass_text },
+	{CMD : "cd d:\\sandbox\\fingerprint-sandboxes", INFO : pass_text },
 	{CMD : "mkdir clean-fingerprint", STATUS_OK : force_ok},	
 	"cd clean-fingerprint",
 #	songstamp_update,
@@ -87,13 +87,13 @@ songstamp.add_deployment([
 #songstamp.add_subtask("build SongStamp core library", [
 #	cd_songstamp_library,
 ##	"scons benchmark=1 prefix=" + install_path,
-#	"scons benchmark=1 prefix=" + root_path + "songstamp-app-install",
+#	"scons benchmark=1 prefix=" + root_path + "\\songstamp-app-install",
 #] )	
 	
 #songstamp.add_subtask("build SongStamp application", [
 #	cd_songstamp_app,
 ##	"scons benchmark=1 prefix=" + install_path,	
-#	"scons benchmark=1 prefix=" + root_path + "songstamp-app-install",	
+#	"scons benchmark=1 prefix=" + root_path + "\\songstamp-app-install",	
 #] )
 
 #songstamp.add_subtask("copy data files to install path", [
@@ -136,12 +136,12 @@ songstamp.add_deployment([
 
 #songstamp.add_subtask("build SongStamp core library for mobile gsm", [
 #	cd_songstamp_library,
-#	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon-install",
+#	"scons mobile_gsm=1 prefix=" + root_path + "\\songstamp-daemon-install",
 #] )	
 
 #songstamp.add_subtask("build SongStamp daemon", [
-#	"cd " + root_path + "clean-fingerprint/songstamp_daemon/trunk/",
-#	"scons mobile_gsm=1 prefix=" + root_path + "songstamp-daemon-install",	
+#	"cd " + root_path +"\\clean-fingerprint/songstamp_daemon/trunk/",
+#	"scons mobile_gsm=1 prefix=" + root_path + "\\songstamp-daemon-install",	
 #] )
 
 # Test: SongStamp Training
@@ -153,12 +153,12 @@ songstamp.add_deployment([
 
 #songstamp.add_subtask("build SongStamp core library for training", [
 #	cd_songstamp_library,
-#	"scons training=1 prefix=" + root_path + "songstamp-training-install",
+#	"scons training=1 prefix=" + root_path + "\\songstamp-training-install",
 #] )
 
 #songstamp.add_subtask("build SongStamp Training", [
 #	"cd " + root_path + "clean-fingerprint/songstamp_training/trunk/",
-#	"scons training=1 prefix=" + root_path + "songstamp-training-install",
+#	"scons training=1 prefix=" + root_path + "\\songstamp-training-install",
 #] )
 
 Runner( songstamp, 
