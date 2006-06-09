@@ -34,10 +34,10 @@ a:visited {
 
 .inprogress
 {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	margin-left: 2em;
-	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 	padding: 0.3em;
 	text-align: center;
 	font-size: 0.8em;
@@ -48,10 +48,10 @@ a:visited {
 
 .aborted
 {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	margin-left: 2em;
-	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 	padding: 0.3em;
 	text-align: center;
 	font-size: 0.8em;
@@ -62,10 +62,10 @@ a:visited {
 
 .idle
 {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	margin-left: 2em;
-	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 	padding-top: 0.3em;
 	padding-bottom: 0.3em;
 	padding-right: 2em;
@@ -77,10 +77,10 @@ a:visited {
 }
 .stable
 {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	margin-left: 2em;
-	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 	padding-top: 0.3em;
 	padding-bottom: 0.3em;
 	padding-right: 2em;
@@ -93,10 +93,10 @@ a:visited {
 }
 .broken
 {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	margin-left: 2em;
-	margin-right: 2em;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
 	padding: 0.3em;
 	text-align: center;
 	font-size: 0.8em;
@@ -106,14 +106,14 @@ a:visited {
 }
 table
 {
-	border-spacing: 10px;
+	border-spacing: 5px;
 }
 
 th 
 { 
 	border: solid 1px #ddd; 
 	background-color: #fff;
-	padding: 1em;
+	padding: 0.8em;
 	width : 250px;
 }
 td 
