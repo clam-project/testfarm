@@ -61,9 +61,9 @@ songstamp = Task(
 	client = windows, 
 	task_name = "with svn update" 
 	)
+	
 
 songstamp.set_check_for_new_commits( 
-	#checking_cmd='cd root_path && svn status -u clean-fingerprint/ | grep \*', 
 	checking_cmd='cd d:\\sandbox\\fingerprint-sandboxes && svn status -u clean-fingerprint | grep \*', 
 	minutes_idle=5
 )
@@ -168,6 +168,6 @@ songstamp.add_subtask("clean-up database", [
 
 Runner( songstamp, 
 	remote_server_url = 'http://10.55.0.66/testfarm_server',
-	continuous = True,
+	continuous = False,
 #	local_base_dir = '/home/testfarmclient/fingerprint-sandboxes' 
 )
