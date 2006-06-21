@@ -382,8 +382,7 @@ class Server:
 	def __html_format_client_executions(self, client_name, client_idle, client_executions):
 		content = []
 		time_tmpl = "%(hour)s:%(min)s:%(sec)s %(D)s/%(M)s"
-		new_commits_found = client_idle['new_commits_found']
-		if client_idle and not new_commits_found :
+		if client_idle and not client_idle['new_commits_found'] :
 			idlechecktime_str = client_idle['date']
 			content_dict = {}
 			content_dict['date'] = "<p>Last check done at : %s" % self.__format_datetime(
@@ -446,6 +445,7 @@ class Server:
 		executions_per_day_key_sorted = executions_per_day.keys()
 		executions_per_day_key_sorted.sort(reverse = True)
 		html_time_tmpl = "%(D)s/%(M)s/%(Y)s"
+		is_last_day = True
 		for day in executions_per_day_key_sorted :
 			#content.append('<tr>')
 			formatted_day = self.__format_datetime(day+'-00-00-00', html_time_tmpl)
@@ -456,10 +456,14 @@ class Server:
 				content.append('<td>')
 				client_executions = day_clients.get(client, []) # if client return client executions , else return empty list
 			#	print "CLIENT_VALUE IN DAY CLIENTS = ", client_executions
-				client_idle = idle_per_client[client]
+				if is_last_day :
+					client_idle = idle_per_client[client]
+				else : 	
+					client_idle = {}
 				content += self.__html_format_client_executions(client, client_idle, client_executions) 
 				content.append('</td>')
 			content.append('</tr>')
+			is_last_day = False
 		return content
 
 	def __html_project_info(self):
