@@ -61,6 +61,7 @@ clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clam-sandboxes/testing-clam",
 	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
+	"rm -rf $HOME/clam-sandboxes/tlocal/*"
 	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
 	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
 	"scons",
