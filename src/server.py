@@ -366,6 +366,37 @@ class Server:
 				allstats[current_task].append( (begin_time, stats_entry) )
 		return allstats
 
+	def __get_missing_details_dates(self, log, client_name):
+		log.reverse()
+		missing_details_dates = []
+		begin_task_found = False
+		details_filename_tmpl = "%s/%s/details-%s-%s.html"
+		for entry in log :
+			tag = entry[0]
+			if tag == 'BEGIN_TASK':
+				begin_task_found = True
+				details_filename = details_filename_tmpl % (self.html_base_dir, self.project_name, client_name, entry[2])
+				if not os.path.isfile(details_filename):
+					missing_details_dates.append(entry[2])	
+				else:
+					break
+		assert begin_task_found, "BEGIN_TASK not found"
+		return missing_details_dates
+	
+
+	def write_missing_details_static_html(self):
+		filenames = []
+		for client in self.client_names():
+			client_log = self.load_client_log(client)
+			missing_dates = self.__get_missing_details_dates(client_log, client)
+			for missing_date in missing_dates :
+				filename = self.__write_details_static_html_file(client, missing_date)
+				#purgue_client is still experimental:
+ 				self.purge_client_logfile(client, missing_date) #TODO improve purgue method
+				filenames.append(filename)
+		return filenames
+	
+
 	def idle(self):
 		result = {}
 		for client_name in self.client_names():

@@ -29,10 +29,10 @@ import os, sys
 _logs_base_dir = '/var/www/testfarm_logs'
 _html_base_dir = '/var/www/testfarm_html'
 
-server = Server(
-	logs_base_dir = _logs_base_dir,
-	html_base_dir = _html_base_dir
-)
+#server = Server(
+#	logs_base_dir = _logs_base_dir,
+#	html_base_dir = _html_base_dir
+#)
 
 create_dir_if_needed(_logs_base_dir)
 create_dir_if_needed(_html_base_dir)
@@ -43,22 +43,22 @@ def create_dirs(req, project_name):
 	return "remote dirs Ok"
 
 def append_log_entry(req, project_name, client_name, entry):
-	server.project_name = project_name
+#	server.project_name = project_name
 	filename = log_filename(_logs_base_dir, project_name, client_name)
 	f = open( filename, 'a+')
 	f.write(entry)
 	f.close()
-	server.update_static_html_files()
+#	server.update_static_html_files()
 	return "remote OK"
 	return apache.OK
 
 def write_idle_info( req, project_name, client_name, idle_info ) :
-	server.project_name = project_name
+#	server.project_name = project_name
 	filename = idle_filename(_logs_base_dir, project_name, client_name)
 	f = open( filename, 'w')
 	f.write(idle_info)
 	f.close()
-	server.update_static_html_files()
+#	server.update_static_html_files()
 	return "remote Ok"
 	return apache.OK
 

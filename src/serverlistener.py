@@ -18,10 +18,11 @@
 #
 #
 
-import subprocess, datetime
+import subprocess
 from dirhelpers import *
 from client import Client
 from project import Project
+from dirhelpers import current_time
 
 
 class ServerListener:
@@ -96,8 +97,8 @@ class ServerListener:
 	def clean_log_files(self):
 		subprocess.call('rm -rf %s' % self.logs_base_dir, shell=True)
 
-	def current_time(self):
-		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+#	def current_time(self):
+#		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 	def listen_end_command(self, command, ok, output, info, stats):
 		entry = str( ('END_CMD', command, ok, output, info, stats) ) + ',\n'
@@ -120,12 +121,12 @@ class ServerListener:
 		self.__append_log_entry(entry)
 	
 	def listen_begin_task(self, task_name):
-		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
+		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, current_time())
 		self.executions_needs_update = True
 		self.__append_log_entry(entry)
 
 	def listen_end_task(self, task_name, status):
-		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
+		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, current_time(), status)
 		self.__append_log_entry(entry)
 		self.executions_needs_update = True
 
@@ -135,10 +136,10 @@ class ServerListener:
 	def listen_found_new_commits(self,  new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
 		idle_dict['new_commits_found'] = new_commits_found
-		idle_dict['date'] = self.current_time()
+		idle_dict['date'] = current_time()
 		idle_dict['next_run_in_seconds']=next_run_in_seconds	
 		self.__write_idle_info( str( idle_dict ) )
 			
 	def listen_end_task_gently(self, task_name): #TODO: Refactor 
-		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, self.current_time())
+		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, current_time())
 		self.__append_log_entry(append_entry)	

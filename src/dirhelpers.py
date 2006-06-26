@@ -20,11 +20,13 @@
 #
 #
 
-import os
+import os, datetime
 
 def remove_path_and_extension( path ):
 	return os.path.splitext( os.path.basename( path ) )[0]
 
+def current_time():
+		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
 
 def log_filename(logs_base_dir, project_name, client_name) :
 	return '%s/%s/%s.testfarmlog' % (logs_base_dir, project_name, client_name)
