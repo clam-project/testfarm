@@ -66,7 +66,7 @@ clam.add_deployment([
 	"cd testing-clam",
 	{ CMD: "cvs -q up -dP", INFO: filter_cvs_update },
 	cd_clam,
-	"rm -rf tlocal\\*"
+	"rm -rf tlocal\\*",
 	'cd testing-clam\\scons\\libs',
 	{CMD: "echo seting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 'scons configure prefix=f:\\clam-sandboxes\\tlocal sandbox_path=f:\\clam-external-libs  qt_includes=f:\\clam-external-libs\\qt\\include qt_libs=f:\\clam-external-libs\\qt\\lib with_portmidi=1 release=1 double=1',
