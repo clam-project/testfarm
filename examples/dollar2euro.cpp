@@ -1,7 +1,7 @@
 	
 #include <iostream>
 
-#define FACTOR	0.797193878
+#define FACTOR	0.79719390
 
 int main(int argc, char* argv[])
 {
