@@ -22,8 +22,7 @@
 
 from server import Server
 from dirhelpers import current_time
-from dummy_threading import Timer
-import os, sys
+import os, sys, time
 
 _logs_base_dir = '/var/www/testfarm_logs'
 _html_base_dir = '/var/www/testfarm_html'
@@ -46,13 +45,7 @@ def update_projects_static_html_files():
 			server.update_static_html_files()
 			
 
-update_projects_static_html_files() 
-
-while 1 :
-	try:
-		#date = current_time()
-		timer = Timer( 10.0, update_projects_static_html_files() )
-		timer.start()
-	except KeyboardInterrupt: 
-		sys.exit(0)
+while True:
+	update_projects_static_html_files()
+	time.sleep( 30 )
 

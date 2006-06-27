@@ -318,6 +318,7 @@ class Server:
 		log = self.load_client_log(client_name)
 		executions = []
 		execution_opened = False
+		begin_time = ''
 		for entry in  log :
 			tag = entry[0]
 			if tag == 'BEGIN_TASK' :
@@ -333,7 +334,9 @@ class Server:
 					status = 'aborted'
 				else :
 					status = 'broken'
-				assert begin_time, "Error in log file. Non matching END_TASK"
+				if not begin_time:
+					print "Warning: Error in log file. Non matching END_TASK. client:" + client_name
+					continue
 				executions.append( (begin_time, end_time, repo_name, status) )
 				execution_opened = False
 		if execution_opened :
@@ -380,7 +383,8 @@ class Server:
 					missing_details_dates.append(entry[2])	
 				else:
 					break
-		assert begin_task_found, "BEGIN_TASK not found"
+	# TODO: why this assert? prevents starting without log files
+	#	assert begin_task_found, "BEGIN_TASK not found" 
 		return missing_details_dates
 	
 
