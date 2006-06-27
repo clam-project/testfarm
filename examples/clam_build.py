@@ -72,9 +72,9 @@ clam.add_subtask("Unit Tests (with scons)", [
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd scons/tests",
 	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
+	"cd unit_tests",
 	{INFO : start_timer}, 
-	{CMD: 'echo skiping unittests execution', INFO: lambda x:x},
-#	{CMD: "unit_tests/UnitTests", INFO: lambda x:x, STATUS_OK: force_ok},
+	{CMD: "./UnitTests", INFO: lambda x:x},
 	{STATS : exectime_unittests},
 ] )
 clam.add_subtask("Functional Tests (with scons)", [
@@ -82,9 +82,9 @@ clam.add_subtask("Functional Tests (with scons)", [
 	"cd $HOME/clam-sandboxes/testing-clam",
 	"cd scons/tests",
 	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
+	"cd functional_tests",
 	{INFO : start_timer}, 
-	{CMD: 'echo skiping functests execution', INFO: lambda x:x},
-#	{CMD:"functional_tests/FunctionalTests", INFO: lambda x:x, STATUS_OK: force_ok },
+	{CMD:"./FunctionalTests", INFO: lambda x:x},
 	{STATS : exectime_functests},
 ] )
 clam.add_subtask("CLAM Examples (with scons)", [
