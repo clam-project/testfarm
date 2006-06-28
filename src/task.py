@@ -79,6 +79,8 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 				logFile.write(tmp)
 				logFile.flush()						
 		if pipe.poll() is not None:
+			for line in pipe.stdout :
+				output.append(line)
 			break	
 	status = pipe.wait()
 	
