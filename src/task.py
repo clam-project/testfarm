@@ -101,6 +101,7 @@ def run_command(command, initial_working_dir, verbose=False):
 
 
 class SubTask:
+	"Defines a subtask, with a set of commands"
 	def __init__(self, name, commands, mandatory = False):
 		self.name = name
 		self.commands = commands
@@ -127,9 +128,11 @@ class SubTask:
 			listener.listen_end_command( cmd, status, output, info, stats )
 
 	def is_mandatory(self):
+		"Returns if the subtask is mandatory or not"
 		return self.mandatory
 
 	def do_subtask(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False): #TODO : Refactor
+		"Executes the subtask and all its commands"
 		self.__begin_subtask(listeners)
 		if server_to_push:
 				server_to_push.update_static_html_files()
@@ -190,7 +193,7 @@ class SubTask:
 
 class Task :
 	# Attributes : name, subtasks[], deployment[] 
-
+	"Defines a task, with a set of subtasks"
 	def __init__(self, project, client, task_name = '-- unnamed task --'): 
 		self.name = task_name;
 		assert is_string(project.name), '< %s > is not a valid project name (should be a string)' % str(project_name)
@@ -209,16 +212,20 @@ class Task :
 		return len( self.subtasks )
 	
 	def set_check_for_new_commits(self, checking_cmd, minutes_idle = 5 ):
+		"Sets the checking command and seconds to idle"
 		self.not_idle_checking_cmd = checking_cmd
 		self.seconds_idle = minutes_idle * 60
 
 	def add_deployment(self, commands): #TODO must be unique
+		"A separated subtask to deploy"
 		self.add_subtask("Deployment", commands, mandatory = True)
 
 	def add_subtask(self, subtaskname, commands, mandatory = False):
+		"Adds a subtask"
 		self.subtasks.append(SubTask(subtaskname, commands, mandatory))
 
 	def do_checking_for_new_commits(self, listeners, verbose=False):
+		"Checks if there is a new commit in the version control system"
 		initial_working_dir = os.path.abspath(os.curdir)
 		if not self.not_idle_checking_cmd :
 			new_commits_found = True #default
@@ -230,6 +237,7 @@ class Task :
 		return new_commits_found
 
 	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
+		"Executes all subtasks and sends results"
 		all_ok = True
 		for listener in listeners:
 			listener.listen_begin_task( self.name )
@@ -247,6 +255,7 @@ class Task :
 		return all_ok
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
+		"Asks listeners to stop the task execution gently if the execution was aborted by user"
 		for listener in listeners:
 			listener.listen_end_task_gently(self.name)
 		if server_to_push :

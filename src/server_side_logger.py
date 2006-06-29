@@ -43,6 +43,7 @@ def create_dirs(req, project_name):
 	return "remote dirs Ok"
 
 def append_log_entry(req, project_name, client_name, entry):
+	"Appends an entry to logfile"
 #	server.project_name = project_name
 	filename = log_filename(_logs_base_dir, project_name, client_name)
 	f = open( filename, 'a+')
@@ -68,14 +69,12 @@ def write_client_info(req, client_name, project_name, client_info):
 	f.write( client_info )
 	return "remote client Ok"
 
-
 def write_project_info(req, project_name, project_info):# TODO : remove CODE DUPLICATION 
 	filename = project_info_filename(_logs_base_dir, project_name)
 	f = open(filename, 'w')
 	f.write( project_info )
 	f.close()
 	return "remote project Ok"
-
 
 
 	

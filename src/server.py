@@ -65,6 +65,7 @@ footer = """
 #     SERVER
 #
 class Server:
+	"Reads the logs from a directory defined by the project name, structures the data and prints it as HTML pages"
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
 		html_base_dir = '/tmp/testfarm_html',
@@ -81,6 +82,7 @@ class Server:
 	
 		
 	def client_names(self):
+		"Returns all client's names in the project"
 		assert self.project_name, "Error, project_name was expected. But was None"
 		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.project_name) )
 		result = map( remove_path_and_extension, logfiles)
@@ -118,6 +120,7 @@ class Server:
 
 	
 	def last_date(self, log):
+		"Returns the date of the last task executed given a logfile"
 		log.reverse()
 		for entry in log :
 			tag = entry[0]
@@ -126,6 +129,7 @@ class Server:
 		assert "BEGIN_TASK not found"
 
 	def single_execution_details(self, client_name, wanted_date):
+		"Retrieves a single execution from a logfile given the date of the execution"
 		log = self.load_client_log(client_name)
 		result = []
 		in_wanted_execution = False
@@ -142,6 +146,7 @@ class Server:
 		return result
 
 	def purge_client_logfile(self, client_name, last_date):
+		"Deletes (large) INFO and OUTPUT entries from logfile"
 		log = self.load_client_log(client_name)
 		date = ''
 		prefix = '%s/%s' % (self.logs_base_dir, self.project_name)
@@ -173,6 +178,7 @@ class Server:
 		f.close()
 				
 	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, prefix, postfix ):
+		"Moves INFO and OUTPUT entries to separated files"
 		extracted_note = '[SAVED TO FILE]'
 		output = cmd_tuple[3]
 		info = cmd_tuple[4]
@@ -205,6 +211,7 @@ class Server:
 			)	
 
 	def __html_single_execution_details(self, client_name, wanted_date):
+		"Creates an HTML file with the details of an execution given a date"
 		content = []
 		id_info = 1; # auto-increment id
 		id_output = 1; # auto-increment id
@@ -291,6 +298,7 @@ class Server:
 #		return header_details + "\n".join(content) + footer
 
 	def __write_details_static_html_file(self, client_name, wanted_date):
+		"Writes an HTML file with the details of an execution given a date"
 		details = self.__html_single_execution_details(client_name, wanted_date)
 		filename = "%s/%s/details-%s-%s.html" % (
 			self.html_base_dir, 
@@ -303,6 +311,7 @@ class Server:
 		return filename
 	
 	def __write_last_details_static_html_file(self):
+		"Writes an HTML file with the details of the last execution"
 		filenames = []
 		for client in self.client_names():
 			client_log = self.load_client_log(client)
@@ -315,6 +324,7 @@ class Server:
 		return filenames
 
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
+		"Returns all task executions given a client name"
 		log = self.load_client_log(client_name)
 		executions = []
 		execution_opened = False
@@ -346,6 +356,7 @@ class Server:
 		return executions
 
 	def __collect_client_stats(self, client_name):
+		"Collect all client's stats entries from client's logfile"
 		log = self.load_client_log(client_name)
 		allstats = {}
 		begin_time = ''
@@ -370,6 +381,7 @@ class Server:
 		return allstats
 
 	def __get_missing_details_dates(self, log, client_name):
+		"Returns dates of all task executions in logfile that haven't a details HTML file"
 		log.reverse()
 		missing_details_dates = []
 		begin_task_found = False
@@ -389,6 +401,7 @@ class Server:
 	
 
 	def write_missing_details_static_html(self):
+		"Writes details HTML file for those task executions without it"
 		filenames = []
 		for client in self.client_names():
 			client_log = self.load_client_log(client)
@@ -402,6 +415,7 @@ class Server:
 	
 
 	def idle(self):
+		"Returns idle entries for all clients"
 		result = {}
 		for client_name in self.client_names():
 			idle_entry = self.load_client_idle(client_name)
@@ -409,12 +423,14 @@ class Server:
 		return result
 
 	def get_executions(self):
+		"Returns all client's task executions"
 		result = {}
 		for client_name in self.client_names():
 			result[client_name] = self.__get_client_executions(client_name)
 		return result
 
 	def __html_format_client_executions(self, client_name, client_idle, client_executions):
+		"Generates HTML code for a client's task executions"
 		content = []
 		time_tmpl = "%(hour)s:%(min)s:%(sec)s %(D)s/%(M)s"
 		if client_idle and not client_idle['new_commits_found'] :
@@ -458,6 +474,7 @@ class Server:
 	"""
 
 	def day_executions(self, executions_per_client):
+		"Returns client's task exeuctions ordered by day"
 		day_executions = {}
 		# order executions per day
 		time_tmpl = "%(Y)s-%(M)s-%(D)s"
@@ -475,6 +492,7 @@ class Server:
 		return day_executions
 
 	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day, all_clients): # TODO : MS Finish Implementation
+		"Generates HTML code for a client's task executions ordered by day"
 		content = []
 		# all_clients = self.client_names() DOES NOT WORK PROPERLY
 		executions_per_day_key_sorted = executions_per_day.keys()
@@ -502,6 +520,7 @@ class Server:
 		return content
 
 	def __html_project_info(self):
+		"Generates HTML code for the project information file"
 		project_info = ""
 		brief_description = " "
 		long_description_given = False
@@ -521,6 +540,7 @@ class Server:
 		return project_info, brief_description
 	
 	def __html_client_info(self, client_name): #TODO : remove code duplication
+		"Generates HTML code for the client information file"
 		client_info = ""
 		brief_description = ""
 		long_description_given = False
@@ -540,6 +560,7 @@ class Server:
 		return client_info, brief_description
 
 	def __html_index(self, clients_with_stats):
+		"Creates the main HTML file for the project"
 		project_info, project_brief_description = self.__html_project_info()
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
@@ -567,6 +588,7 @@ class Server:
 					} + '\n'.join(content) + footer
 		
 	def __write_html_index(self, clients_with_stats):
+		"Writes the main HTML file for the project"
 		filename = "%s/%s/index.html" % (	
 			self.html_base_dir, 
 			self.project_name )
@@ -581,6 +603,7 @@ class Server:
 		apache.log_error('TestFarm:  '+ str(msg) )
 		
 	def update_static_html_files(self):
+		"Updates all project's HTML files"
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
@@ -590,6 +613,7 @@ class Server:
 
 
 	def collect_stats(self):
+		"Collect statistics for all clients"
 		result = {}
 		for client in self.client_names():
 			result[client] = self.__collect_client_stats(client)
@@ -601,10 +625,12 @@ class Server:
 			assert length == len(stats[key]), "Error found stat with diferent length. key: %s\n%s" %(key, stats)
 
 	def __format_datetime(self, time_str, pattern, time_tags = ["Y", "M", "D", "hour", "min", "sec"]) :
+		"Gives format for a date time"
 		time_dict = dict(zip( time_tags, time_str.split("-") ))
 		return pattern % time_dict 
 
 	def plot_stats(self): # TODO refactor extract methods
+		"Plots all statistics"
 		allclients_stats = self.collect_stats()
 		clients = allclients_stats.keys()
 		clients_with_stats = []

@@ -25,6 +25,7 @@ from serverlistener import ServerListener
 from serverlistenerproxy import ServerListenerProxy
 
 class Runner :
+	"The interface to another modules. It runs a defined script and sends information to listeners."
 	def __init__(self, 
 		task,
 		continuous=False,
@@ -34,7 +35,7 @@ class Runner :
 		testinglisteners = []
 
 	) :
-		
+		"Runs a task defined in user's script"	
 		self.listeners = [ ConsoleResultListener() ]
 
 		serverlistener = None # for keyboard interrupt purpose

@@ -19,7 +19,7 @@
 #
 
 class Project :
-
+	"Defines a project, with its name and descriptions. It also supports new added attributes."
 	def __init__(self, project_name, brief_description = None, long_description= None) :
 		assert project_name, "Error, project name was expected"
 		self.name = project_name
@@ -29,5 +29,6 @@ class Project :
 
 
 	def set_attribute(self, attribute_name, attribute_value):
+		"Adds an attribute defined by user"
 		self.attributes[attribute_name] = attribute_value
 

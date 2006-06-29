@@ -19,7 +19,7 @@
 #
 
 class Client :
-
+	"Defines a client, with its name and descriptions. It also supports new added attributes."
 	def __init__(self, client_name, brief_description = None, long_description= None) :
 		assert client_name, "Error, client name was expected"
 		self.name = client_name
@@ -28,6 +28,7 @@ class Client :
 		self.attributes = {}
 	
 	def set_attribute(self, attribute_name, attribute_value):
+		"Adds an attribute defined by user"
 		self.attributes[attribute_name] = attribute_value	
 
 	

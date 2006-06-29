@@ -21,8 +21,7 @@
 #
 
 from server import Server
-from dirhelpers import current_time
-import os, sys, time
+import os
 
 _logs_base_dir = '/var/www/testfarm_logs'
 _html_base_dir = '/var/www/testfarm_html'
@@ -35,6 +34,7 @@ server = Server(
 )
 
 def update_projects_static_html_files():
+	"Updates all projects's html files"
 	list_dir = os.listdir(_html_base_dir)
 	print list_dir
 	for entry in list_dir:

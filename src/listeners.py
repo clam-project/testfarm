@@ -41,7 +41,7 @@ class NullResultListener : #TODO base class
 	def listen_end_task_gently(self, taskname):
 		pass 
 
-class DummyResultListener :
+class DummyResultListener(NullResultListener) :
 	"helper ResultListener class "
 	def __init__(self):
 		self.results = []
@@ -80,7 +80,8 @@ class DummyResultListener :
 	def listen_end_task_gently(self, taskname):
 		pass 
 
-class ConsoleResultListener :
+class ConsoleResultListener(NullResultListener) :
+	"Prints execution status and progress in console mode."
 	def __init__(self):
 		self.results = []
 
