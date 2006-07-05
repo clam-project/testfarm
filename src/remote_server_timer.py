@@ -21,7 +21,7 @@
 #
 
 from server import Server
-import os
+import os, time
 
 _logs_base_dir = '/var/www/testfarm_logs'
 _html_base_dir = '/var/www/testfarm_html'
