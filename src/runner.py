@@ -73,6 +73,7 @@ class Runner :
 			while continuous :
 				new_commits_found = task.do_checking_for_new_commits( self.listeners, verbose=verbose )
 				if new_commits_found:
+					time.sleep(2) #avoid having executions with the same time
 					task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 				else:
 					if server_to_push: #update idle time display

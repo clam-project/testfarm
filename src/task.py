@@ -116,8 +116,8 @@ class SubTask:
 			listener.listen_end_subtask( self.name )
 
 	def __begin_command(self, cmd, listeners):
-		for listener in listeners :
-			listener.listen_begin_command( cmd )
+		for listener in listeners : pass
+	#		listener.listen_begin_command( cmd )
 
 	#def __end_command(self, cmd, listeners):
 	#	for listener in listeners :
