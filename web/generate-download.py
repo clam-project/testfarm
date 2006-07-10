@@ -7,7 +7,7 @@ def execute(cmd):
 
 def write_download_page() :
 	html = []
-	for details in execute('ls -lht export/*.tar.gz').split('\n'):
+	for details in execute('ls -lht export/*.tar*').split('\n'):
 		separated = details.split()
 		if separated[2] != 'parumi' : continue 
 		size = separated[4] 
@@ -28,7 +28,7 @@ def create_tarball(version):
 		cmd = 'cd export && cvs export -r HEAD -d testfarm-%(ver)s testfarm' % {'ver':version}
 		print cmd
 		print execute(cmd)
- 		cmd = 'cd export/examples && rm songstamp* essentia*'
+ 		cmd = 'cd export/examples && rm songstamp* essentia* ardour*'
 		print execute(cmd)
 		cmd = 'cd export && tar cvzf testfarm-%(ver)s.tar.gz testfarm-%(ver)s/ && rm -rf testfarm-%(ver)s/' % {'ver':version}
 		print execute(cmd)
