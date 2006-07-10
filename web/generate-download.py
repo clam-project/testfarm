@@ -30,7 +30,7 @@ def create_tarball(version):
 		print execute(cmd)
  		cmd = 'cd export/examples && rm songstamp* essentia*'
 		print execute(cmd)
-		cmd = 'cd export && tar cvf testfarm-%(ver)s.tar.gz testfarm-%(ver)s/ && rm -rf testfarm-%(ver)s/' % {'ver':version}
+		cmd = 'cd export && tar cvzf testfarm-%(ver)s.tar.gz testfarm-%(ver)s/ && rm -rf testfarm-%(ver)s/' % {'ver':version}
 		print execute(cmd)
 
 
