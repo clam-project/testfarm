@@ -690,9 +690,10 @@ class Server:
 				
 				#maybe use: 'xrange="2006/04/04.22:00 2006/04/05.12:00"'
 				ploticus_cmd_tmpl = '''\
-ploticus %s -prefab chron data=%s header=yes x=1 y=2 %s \
+ploticus %s -prefab chron data="%s" header=yes x=1 y=2 %s \
 datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime \
-title="some statistics (still experimental)" -o %s %s 2>&1 | cat > /dev/null''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
+title="some statistics (still experimental)" -o "%s" %s 2>&1 | cat > /dev/null''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
+#note: the 2>&1 | cat > /dev/null should be changed for silent option in ploticus. if it might exist
 
 				cmd = ploticus_cmd_tmpl % ("-png", plotfilename, columns, png_filename, '')
 				subprocess.call( cmd, shell=True) 
