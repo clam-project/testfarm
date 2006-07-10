@@ -121,8 +121,8 @@ Current	- CLAM in windows
 	  -> copy (or link) css and js files
 Done	- organize src directories
 Done	- API change: add_checking... -> set_check... (only one check is allowed)
-	- fix: idle message should appear only at current day, not all days
+Done	- fix: idle message should appear only at current day, not all days
 Done	- fix: INFO now can receive any python structure. str() conversion is
           done, avoiding process to crash at purgue method
 Done	- fix all plots goes to the same client bug. Not all pngs where uploaded to the web server
-	- clients shoulnd not push the server. EFFICIENCY PROBLEM. timely updates instead
+Don	- clients shoulnd not push the server. EFFICIENCY PROBLEM. timely updates instead
