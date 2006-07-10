@@ -47,5 +47,5 @@ def update_projects_static_html_files():
 
 while True:
 	update_projects_static_html_files()
-	time.sleep( 30 )
+	time.sleep( 130 )
 
