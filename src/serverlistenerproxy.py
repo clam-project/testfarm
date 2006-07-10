@@ -112,7 +112,7 @@ class ServerListenerProxy(NullResultListener):
 
 	def listen_end_subtask(self, subtaskname):
 		entry = "('END_SUBTASK', '%s'),\n" % subtaskname
-		self.__append_log_entry(entry)
+		self.__append_log_entry('\t' + entry)
 	
 	def listen_begin_task(self, task_name):
 		entry = "('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())

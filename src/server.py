@@ -160,7 +160,6 @@ class Server:
 				date = entry[2]
 				count = 1
 				updated_log.append('\n')
-				print
 
 			# write the maybe modified entry in an auxiliar file
 			if tag == 'END_CMD' and date != last_date:
@@ -319,7 +318,6 @@ class Server:
 			filename = self.__write_details_static_html_file(client, last_date)
 			#purgue_client is still experimental:
  			self.purge_client_logfile(client, last_date) #TODO improve purgue method
-			
 			filenames.append(filename)
 		return filenames
 
@@ -607,7 +605,7 @@ class Server:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		if self.project_name == 'CLAM': #TODO the proper way
+		if False and self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
 

@@ -10,7 +10,7 @@ from runner import Runner
 
 dollar_euro = Task( project = Project("Conversio"),
 	client = Client("client_linux_dapper"),
-	task_name = "compilacion del programa"
+	task_name = "compilacio del programa"
 )
 
 dollar_euro.add_subtask( "compilacio", [
@@ -29,6 +29,6 @@ dollar_euro.add_subtask( "dormir", ["sleep 3"])
 
 Runner( dollar_euro, 
 #	remote_server_url="http://localhost/testfarm_server",
-	local_base_dir = "/tmp",	
+	local_base_dir = "/tmp/localdir",	
 	continuous=True
 )

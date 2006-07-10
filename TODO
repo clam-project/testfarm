@@ -99,6 +99,7 @@ Done	- brake index.html columns by days
 	- IMPORTANT: support for "constant release"
 	 -> server service that returns "currenty stable"
 	 -> decide: always upload? or ask to the server?
+	- Timeout when server doesn't respond
 
 High Priority
 ----------------

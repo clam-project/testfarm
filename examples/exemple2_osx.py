@@ -39,6 +39,6 @@ dollar_euro.add_subtask( "dormir", ["sleep 5"])
 
 Runner( dollar_euro, 
 #	remote_server_url="http://localhost/testfarm_server",
-	local_base_dir = "/tmp",	
+	local_base_dir = "/tmp/localdir",	
 	continuous=True
 )

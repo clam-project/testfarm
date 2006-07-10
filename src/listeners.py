@@ -138,7 +138,7 @@ class ConsoleResultListener(NullResultListener) :
 		self.pprint_cmd_result( cmd, ok, output, info, stats )
 
 	def listen_begin_command(self, cmd):
-		#self.pprint('BOLD', "    BEGIN_CMD %s" % cmd )
+	#	self.pprint('BOLD', "    BEGIN_CMD %s" % cmd )
 		self.pprint_begin_cmd(cmd)	
 	
 #	def listen_end_command(self, cmd):
