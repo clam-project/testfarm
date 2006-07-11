@@ -71,7 +71,7 @@ essentia.add_subtask("automatic tests", [
 	cd_essentia,
 	"cd test",
 	"scons prefix=/tmp/essentia",
-	"cd build/unittests/descriptortests/",
+	"cd build/descriptortests/",
 	{CMD : "%s=/tmp/essentia/lib/ ./test" % lib_path, INFO : pass_text},
 ] )
 
