@@ -36,8 +36,6 @@ essentia = Task(
 		task_name = "" 
 		)
 
-essentia.add_subtask("TODO fix bug: update html at begin time ", [] )
-
 essentia.set_check_for_new_commits( 
 	checking_cmd='cd $HOME/essentia-sandboxes && svn status -u clean-essentia/trunk | grep \*', 
 	minutes_idle=5
