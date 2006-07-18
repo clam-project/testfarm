@@ -136,6 +136,20 @@ td
 	border: solid 1px #eee;
 }
 
+.taskok
+{
+	background-color: #00C200;
+	color: white;
+}
+
+.taskfailure
+{
+	background-color: red;
+	color: white;
+}
+
+
+
 .subtask
 {
 	left: 2%;

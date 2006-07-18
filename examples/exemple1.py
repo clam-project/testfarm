@@ -25,7 +25,7 @@ dollar_euro.add_subtask( "un exemple: dollar a euro", [
 	{CMD: "./dollar2euro 2", INFO: lambda x:x}
 ] )
 
-dollar_euro.add_subtask( "dormir", ["sleep 3"])
+dollar_euro.add_subtask( "dormir", ["sleep 10"])
 
 Runner( dollar_euro, 
 #	remote_server_url="http://localhost/testfarm_server",
