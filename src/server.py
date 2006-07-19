@@ -217,7 +217,6 @@ class Server:
 		opened_task = False
 		opened_subtask = False
 		opened_cmd = False
-		status = "nofinishedtask" 
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0].strip()
 			if tag == 'BEGIN_TASK':
@@ -256,9 +255,8 @@ class Server:
 					#assert opened_task
 					content.append('</div>')
 				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
-				status = entry[3] 
 				#exiting, so no need to make opened_task=False
-				return header_details + '\n'.join(content) + footer, status	
+				return header_details + '\n'.join(content) + footer	
 			else:
 				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was: "%s"' % tag
 				#assert opened_task
@@ -288,7 +286,7 @@ class Server:
 		if opened_task :	
 			content.append( '</div>')
 			
-		return header_details + '\n'.join(content) + footer, status	
+		return header_details + '\n'.join(content) + footer	
 
 	#minimal version:
 #	def html_single_execution_details(self, client_name, wanted_date):
@@ -300,7 +298,7 @@ class Server:
 
 	def __write_details_static_html_file(self, client_name, wanted_date):
 		"Writes an HTML file with the details of an execution given a date"
-		details, status = self.__html_single_execution_details(client_name, wanted_date)
+		details = self.__html_single_execution_details(client_name, wanted_date)
 		filename = "%s/%s/details-%s-%s.html" % (
 			self.html_base_dir, 
 			self.project_name, 
@@ -309,20 +307,19 @@ class Server:
 		f = open( filename, 'w' )
 		f.write( details )
 		f.close()
-		return filename, status
+		return filename
 	
 	def __write_last_details_static_html_file(self):
 		"Writes an HTML file with the details of the last execution"
 		filenames = []
-		clients_last_status = {}
 		for client in self.client_names():
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
-			filename, clients_last_status[client] = self.__write_details_static_html_file(client, last_date)
+			filename = self.__write_details_static_html_file(client, last_date)
 			#purgue_client is still experimental:
  			self.purge_client_logfile(client, last_date) #TODO improve purgue method
 			filenames.append(filename)
-		return filenames, clients_last_status
+		return filenames
 
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
 		"Returns all task executions given a client name"
@@ -560,7 +557,18 @@ class Server:
 	
 		return client_info, brief_description
 
-	def __html_index(self, clients_with_stats, clients_last_status):
+	def get_clients_last_finished_task(self, executions_per_client):
+		clients_last_status = {}
+		for client in executions_per_client.keys():
+			client_executions = executions_per_client[client]
+			client_executions.sort(key=lambda entry:entry[0], reverse=True)
+			for execution in client_executions:
+				if execution[3] == "stable" or execution[3] == "broken":
+					clients_last_status[client] = execution[3]
+					break
+		return clients_last_status
+
+	def __html_index(self, clients_with_stats):
 		"Creates the main HTML file for the project"
 		project_info, project_brief_description = self.__html_project_info()
 		executions_per_client = self.get_executions()
@@ -568,23 +576,30 @@ class Server:
 		content = ['<table>\n<tr>']
 		for client in executions_per_client.keys():
 			client_info, client_brief_description = self.__html_client_info(client)
-			if clients_last_status[client] == "True":
-				last_status_class = '<th class="taskok">'
-			elif clients_last_status[client] == "False":
-				last_status_class = '<th class="taskfailure">'
-			else:
-				last_status_class = '<th>'
-			content.append("%s Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (last_status_class, client_info, client, client_brief_description) )
+
+			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
 		content.append('</tr>')
 
 		content.append('<tr>')
+
+	 	clients_last_status = self.get_clients_last_finished_task(executions_per_client)
 		for client in executions_per_client.keys():
 			if client in clients_with_stats:
 				thumb_html = '<a href="%s-stats.html"><img src="%s_1-thumb.png" /></a> <a href="%s-stats.html">more...</a>' % (client, client, client)
-				
 			else:
 				thumb_html = ''
-			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
+
+			try:
+				if clients_last_status[client] == "stable":
+					last_status_class = 'class="taskok"'
+				elif clients_last_status[client] == "broken":
+					last_status_class = 'class="taskfailure"'
+				else:
+					last_status_class = ''
+			except KeyError:
+				last_status_class = ''
+
+			content.append('<td style="text-align:center" %s> %s </td>' % (last_status_class, thumb_html))
 		content.append('</tr>')	
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, executions_per_client.keys())
@@ -594,13 +609,13 @@ class Server:
 					'project_brief_description':project_brief_description
 					} + '\n'.join(content) + footer
 		
-	def __write_html_index(self, clients_with_stats, clients_last_status):
+	def __write_html_index(self, clients_with_stats):
 		"Writes the main HTML file for the project"
 		filename = "%s/%s/index.html" % (	
 			self.html_base_dir, 
 			self.project_name )
 		f = open( filename, 'w' )
-		f.write( self.__html_index( clients_with_stats, clients_last_status ) )
+		f.write( self.__html_index( clients_with_stats ) )
 		f.close()
 		return filename
 
@@ -612,8 +627,8 @@ class Server:
 	def update_static_html_files(self):
 		"Updates all project's HTML files"
 		newfiles, clients_with_stats = self.plot_stats()
-		detailsfiles, clients_last_status = self.__write_last_details_static_html_file()
-		newfiles.append( self.__write_html_index( clients_with_stats, clients_last_status ) )
+		newfiles += self.__write_last_details_static_html_file()
+		newfiles.append( self.__write_html_index( clients_with_stats ) )
 		if False and self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)

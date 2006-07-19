@@ -1,12 +1,13 @@
 #! /usr/bin/python
 
 import sys
-sys.path.append('../src')
-from task import *
+sys.path.append('../../')
+from testfarm.src import *
+"""from task import *
 from project import Project
 from client import Client
 from runner import Runner
-
+"""
 
 dollar_euro = Task( project = Project("Conversio"),
 	client = Client("client_linux_dapper"),
