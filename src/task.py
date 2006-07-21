@@ -240,6 +240,7 @@ class Task :
 		"Executes all subtasks and sends results"
 		all_ok = True
 		for listener in listeners:
+			listener.listen_task_info(self)
 			listener.listen_begin_task( self.name )
 		for subtask in self.subtasks :
 			current_result = subtask.do_subtask(listeners, server_to_push, verbose=verbose)

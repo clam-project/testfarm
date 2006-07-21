@@ -36,6 +36,8 @@ class NullResultListener : #TODO base class
 		pass
 	def listen_end_task(self, taskname, status):
 		pass
+	def listen_task_info(self, task):
+		pass
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
 		pass
 	def listen_end_task_gently(self, taskname):

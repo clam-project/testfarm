@@ -118,6 +118,13 @@ class Server:
 		except IOError:
 			return None
 
+	def load_task_info(self, client_name, task_name):
+		filename = task_info_filename( self.logs_base_dir, self.project_name, client_name, task_name)
+		try :
+			task_info = eval("[ %s ]" % open( filename ).read() )
+			return task_info
+		except IOError:
+			return None
 	
 	def last_date(self, log):
 		"Returns the date of the last task executed given a logfile"
@@ -207,7 +214,25 @@ class Server:
 			output,
 			info,
 			cmd_tuple[5] # stats
-			)	
+			)
+
+	def __html_task_still_to_be_done(self, task_tobedone):
+		content = []
+		for entry in task_tobedone :
+			tag = entry[0].strip()
+			# check if the tag begin_task was not read ????
+			if tag == 'BEGIN_SUBTASK':
+				content.append( '<div class="subtask_tobedone"> BEGIN_SUBTASK "%s"' % entry[1] )
+			elif tag == 'CMD':
+				content.append( '<div class=command>' )
+				content.append( '<span class="command_tobedone"> %s</span>' % entry[1] )
+				content.append( '</div>' )
+			elif tag == 'END_SUBTASK':
+				content.append( '<span class="end_subtask_tobedone"> END_SUBTASK "%s"</span></div>' % entry[1] )
+			elif tag == 'END_TASK':
+				content.append( '<span class="end_task_tobedone"> END_TASK "%s"</span></div>' %  entry[1] )
+		return content
+
 
 	def __html_single_execution_details(self, client_name, wanted_date):
 		"Creates an HTML file with the details of an execution given a date"
@@ -217,24 +242,34 @@ class Server:
 		opened_task = False
 		opened_subtask = False
 		opened_cmd = False
+		task_tobedone = None
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0].strip()
 			if tag == 'BEGIN_TASK':
 				#assert not opened_task
 				#assert not opened_subtask
 				#assert not opened_cmd
-				content.append('<div class="task"> BEGIN_TASK "%s" %s' % (entry[1], entry[2]) )
+				if not task_tobedone : 
+					task_tobedone = self.load_task_info(client_name, entry[1])
+				#	print "TASK_INFO BEFORE =", task_tobedone
+				new_entry = (entry[0], entry[1])
+				task_tobedone.remove(new_entry)
+				content.append( '<div class="task"> BEGIN_TASK "%s" %s' % ( entry[1], entry[2] ) )
 				opened_task = True
 			elif tag == 'BEGIN_SUBTASK':
 				#assert opened_task
 				#assert not opened_subtask
 				#assert not opened_cmd
-				content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1])
+				new_entry = (entry[0], entry[1])
+				task_tobedone.remove(new_entry)
+				content.append( '<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1] )
 				opened_subtask = True
 			elif tag == 'BEGIN_CMD':
 				#assert opened_task
 				#assert opened_subtask
 				#assert not opened_cmd
+				new_entry = ("CMD", entry[1])
+				task_tobedone.remove(new_entry)
 				content.append( '<div class=command>' )
 				content.append( '<span class="command_string"> %s</span>' % entry[1] )
 				opened_cmd = True						
@@ -242,19 +277,24 @@ class Server:
 				#assert opened_task
 				#assert opened_subtask
 				#assert not opened_cmd
-				content.append('END_SUBTASK "%s"</div>' % entry[1])
+				new_entry = (entry[0], entry[1])
+				task_tobedone.remove(new_entry)
+				content.append( 'END_SUBTASK "%s"</div>' % entry[1] )
 				opened_subtask = False
 			elif tag == 'END_TASK':
 				if opened_cmd:
 					#assert opened_task
 					#assert opened_subtask
 					content.append( '<span class="command_failure">[FAILURE]</span>' )
-					content.append( '<p class="output"> command execution aborted by the client</p>')
-					content.append('</div>')
+					content.append( '<p class="output"> command execution aborted by the client</p>' )
+					content.append( '</div>' )
 				if opened_subtask:
 					#assert opened_task
-					content.append('</div>')
-				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
+					content.append( '</div>' )
+
+				new_entry = (entry[0], entry[1])
+				task_tobedone.remove(new_entry)
+				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3] ) )
 				#exiting, so no need to make opened_task=False
 				return header_details + '\n'.join(content) + footer	
 			else:
@@ -274,18 +314,21 @@ class Server:
 					content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % id_info )
 					id_info += 1
 				if entry[5] :
-					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
+					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join( entry[5] ) )
 				content.append( '</div>' )
 				opened_cmd = False
 		
 		if opened_cmd :
 			content.append( '<span class="command_inprogress">in progress ...</span>' )
 			content.append( '</div>')
-		if opened_subtask :
-			content.append( '</div>')
-		if opened_task :	
-			content.append( '</div>')
+		
+		content += self.__html_task_still_to_be_done(task_tobedone)
 			
+		"""if opened_subtask :
+			content.append( '</div>' )
+		if opened_task :	
+			content.append( '</div>' )
+		"""	
 		return header_details + '\n'.join(content) + footer	
 
 	#minimal version:

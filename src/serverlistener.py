@@ -23,6 +23,7 @@ from dirhelpers import *
 from client import Client
 from project import Project
 from listeners import NullResultListener
+from task import get_command_and_parsers
 
 class ServerListener(NullResultListener):
 	"Receives and writes results as logs in a directory defined by project's name"
@@ -92,6 +93,24 @@ class ServerListener(NullResultListener):
 				entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
 				f.write( entry )
 			f.close()
+
+	def __write_task_info(self, task):	
+		task_info_file = task_info_filename(self.logs_base_dir, task.project.name, task.client.name, task.name)
+		f = open(task_info_file, 'w')
+		entry = "('BEGIN_TASK', '%s'),\n" % task.name
+		f.write(entry)
+		for subtask in task.subtasks :
+			entry = "('BEGIN_SUBTASK', '%s'),\n" % subtask.name 
+			f.write(entry)
+			for maybe_dict in subtask.commands :
+				cmd, _, _, _ = get_command_and_parsers(maybe_dict)
+				entry = "('CMD', '%s'),\n" % cmd
+				f.write(entry)
+			entry = "('END_SUBTASK', '%s'),\n" % subtask.name 
+			f.write(entry)
+		entry = "('END_TASK', '%s'),\n" % task.name
+		f.write(entry)
+		f.close()
 	
 	def clean_log_files(self):
 		"Deletes all log files"
@@ -130,6 +149,9 @@ class ServerListener(NullResultListener):
 		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.executions_needs_update = True
+	
+	def listen_task_info(self, task):
+		self.__write_task_info(task)	
 
 	def executions_updated(self):
 		self.executions_needs_update = False

@@ -41,8 +41,12 @@ def client_info_filename(logs_base_dir, project_name, client_name) :
 	return '%s/%s/%s.info' % (logs_base_dir, project_name, client_name)
 
 def project_info_filename(logs_base_dir, project_name) :
-	"Returns a client info filename given a project name"
+	"Returns a project info filename given a project name"
 	return '%s/%s/%s.info' % (logs_base_dir, project_name, project_name)
+
+def task_info_filename(logs_base_dir, project_name, client_name, task_name):
+	"Returns a task info filename given a task name"
+	return "%s/%s/%s-%s.info" % (logs_base_dir, project_name, client_name, task_name)
 
 def create_dir_if_needed(dir):
 	"Creates new directories if they are not defined yet"

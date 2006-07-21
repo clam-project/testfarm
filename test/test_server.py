@@ -317,7 +317,7 @@ class Tests_Server(ColoredTestCase):
 		Runner(task, testinglisteners=[listener1])
 		
 		listener1.current_time = lambda : "2006-04-05-00-00-00"
-		task = Task(a_client,a_project,'task')	
+		task = Task(a_project, a_client, 'task')	
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':1} }] )
 		Runner(task, testinglisteners=[listener1])
 		
@@ -446,6 +446,27 @@ time	clau_1	clau_2
 ('one more attribute', 'one_more_value')]
 , server.load_project_info())
 
+	def test_send_task_info(self):
+		a_project = Project('project name')
+		a_client = Client('client name')
+		listener = ServerListener( client = a_client, project = a_project)
+		server = Server(project_name = a_project.name)
+		task = Task(a_project, a_client, 'task')
+		task.add_subtask('subtask1', ["echo subtask1"])	
+		task.add_subtask('subtask2', [{CMD:"echo something echoed", INFO: lambda x:x}])	
+		listener.listen_task_info(task)
+		self.assertEquals(
+[('BEGIN_TASK', 'task'),
+('BEGIN_SUBTASK', 'subtask1'),
+('CMD', 'echo subtask1'),
+('END_SUBTASK', 'subtask1'),
+('BEGIN_SUBTASK', 'subtask2'),
+('CMD', 'echo something echoed'),
+('END_SUBTASK', 'subtask2'),
+('END_TASK', 'task'),]
+		, server.load_task_info(a_client.name, task.name))
+
+
 
 
 #
@@ -511,6 +532,7 @@ class Tests_ServerListener(ColoredTestCase):
 		listener.listen_found_new_commits(True, next_run_in_seconds=60)
 		self.assertEquals("{'date': '1000-10-10-10-10-10', 'new_commits_found': True, 'next_run_in_seconds': 60}", 
 			open(listener.idle_file).read())
+
 
 
 

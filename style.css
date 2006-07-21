@@ -148,7 +148,10 @@ td
 	color: white;
 }
 
-
+.end_task_tobedone
+{
+	color: #DDD;	
+}
 
 .subtask
 {
@@ -158,10 +161,33 @@ td
 	border: solid 1px #999;
 }
 
+.subtask_tobedone
+{
+	left: 2%;
+	padding: 1em; 
+	margin: 1em;
+	color: #DDD;
+	border: solid 1px #999;
+}
+
+.end_subtask_tobedone
+{
+	color: #DDD;	
+}
+
 .command
 {
 	position: relative;
 	left: 2%;
+}
+
+.command_tobedone
+{
+	color: #DDD;
+	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
+	padding-left: 3em;
 }
 
 .command_string
@@ -199,6 +225,8 @@ td
 	font-size: 1.2em;
 	padding-left: 3em;
 }
+
+
 
 .output
 {
