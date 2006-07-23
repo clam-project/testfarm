@@ -102,4 +102,4 @@ check_installed_python()
 
 do_create_dirs_and_copy_files()
 
-print "Testfarm was succesfully installed."
+print "testfarm was succesfully installed."
