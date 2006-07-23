@@ -5,9 +5,25 @@ Testfarm dependencies
 - libapache2-mod-python >= 3.1
 - ploticus
 
+How To Install Testfarm ?
+---------------------------------------
+(UNIX like Systems)
+
+- execute the script "install.py" ensuring that you are the system root or a sudoer
+	- example : If you have python2.4 and the lib is located in /usr/lib, ./install.py should create a directory in /usr/lib/python2.4/site-packages/testfarm and add testfarm source files to it. 
+
+
+(Win32 like Systems)
+- execute the script "install.py"
+	- example : If you have python2.4 located in C:\Python24, 'C:\Python24\python.exe install.py' should create a directory in C:\Python24\lib\site-packages\testfarm and add testfarm source files to it. 
+
+(General)
+- Note: you can use an option, '--verbose',  with the install.py to see what the script is doing. Another option, '--help' will display a help about the use of the script.
+
 How To Install a TestFarm Server ?
 ---------------------------------------
 
+(UNIX like Systems)
 - install libapache2-mod-python ( version >= 3.1 )
 
 - $ cd /etc/apache2/conf.d 
