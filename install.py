@@ -26,11 +26,12 @@ def print_verbose(msg):
 ###################### CHECK THAT THE PYTHON VERSION INSTALLED IS GREATER THAN OR EQUAL TO 2.4 ####################
 
 def check_installed_python():
-	print_verbose("checking installed python version... ")
+	print_verbose("checking installed python version ... ")
 	
 	global PYTHON_VERSION
 	PYTHON_VERSION = "python%s.%s" % ( sys.version_info[0], sys.version_info[1] )
 	if PYTHON_VERSION < PYTHON_NEEDED_VERSION :
+		print_verbose(" [Fail]\n")
 		raise CommandError, "ERROR, '%s' version was found, but Python 2.4 or greater is needed" % PYTHON_VERSION
 	
 	print_verbose("%s [OK]\n" % PYTHON_VERSION)
@@ -38,7 +39,7 @@ def check_installed_python():
 #################################### CREATE DIRS IN SITE-PACKAGES AND COPY FILES ##################################
 
 def do_create_dirs_and_copy_files():
-	print_verbose("checking operating system...")
+	print_verbose("checking operating system ... ")
 	global TESTFARM_DIR
 	if sys.platform == 'win32' :
 		print_verbose("Win32-like system\n")
@@ -54,8 +55,9 @@ def do_create_dirs_and_copy_files():
 		os.mkdir( TESTFARM_DIR ) # this command needs ROOT privileges
 	except OSError, oserror:
 		if errorcode[oserror.errno] == 'EEXIST': 
-			sys.stdout.write( oserror.strerror )
+			print_verbose( oserror.strerror )
 		else:
+			print_verbose( " [Fail]\n")
 			raise CommandError, oserror.strerror
 	print_verbose(" [OK]\n")
 	
@@ -63,14 +65,18 @@ def do_create_dirs_and_copy_files():
 	ls = os.listdir('src')
 #	python_files_filter = lambda entry : len(entry.split('.')) >= 2 and entry.split('.')[len(entry.split('.'))-1] == 'py' 
 #	filenames = filter(python_files_filter, ls)
-	count = 0
-	for entry in ls:
-		splitted_entry = entry.split('.')
-		if len(splitted_entry) >= 2 and splitted_entry[len(splitted_entry)-1] == 'py':
-			filename = '.'.join(splitted_entry)
-			shutil.copy('src/%s' % filename, TESTFARM_DIR)
-			count += 1
-	print_verbose(" copied %s files [OK]\n" %count)
+	try:
+		count = 0
+		for entry in ls:
+			splitted_entry = entry.split('.')
+			if len(splitted_entry) >= 2 and splitted_entry[len(splitted_entry)-1] == 'py':
+				filename = '.'.join(splitted_entry)
+				shutil.copy('src/%s' % filename, TESTFARM_DIR) # this command needs ROOT privileges
+				count += 1
+		print_verbose(" copied %s files [OK]\n" %count)
+	except IOError, ioerror:
+			print_verbose( " [Fail]\n")
+			raise CommandError, ioerror.strerror	
 		
 ######################################################### MAIN ####################################################
 
@@ -95,3 +101,5 @@ except IndexError:
 check_installed_python()
 
 do_create_dirs_and_copy_files()
+
+print "Testfarm was succesfully installed."
