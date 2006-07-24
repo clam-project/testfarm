@@ -1,11 +1,6 @@
 #! /usr/bin/python
 
-import sys
-sys.path.append('../src')
-from task import *
-from project import Project
-from client import Client
-from runner import Runner
+from testfarm import *
 
 def num_warnings(output):
 	warning_filter = lambda line : line.find('warning') != -1 or line.find('aviso') != -1
@@ -38,7 +33,7 @@ dollar_euro.add_subtask( "un exemple: dollar a euro", [
 dollar_euro.add_subtask( "dormir", ["sleep 5"])
 
 Runner( dollar_euro, 
-#	remote_server_url="http://localhost/testfarm_server",
-	local_base_dir = "/tmp/localdir",	
+	remote_server_url="http://localhost/testfarm_server",
+#	local_base_dir = "/tmp/localdir",	
 	continuous=True
 )

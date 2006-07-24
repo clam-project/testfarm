@@ -1,8 +1,9 @@
 #! /usr/bin/python
 
-import sys
-sys.path.append('../../')
-from testfarm.src import *
+#import sys
+#sys.path.append('../../')
+from testfarm import *
+#import testfarm
 """from task import *
 from project import Project
 from client import Client

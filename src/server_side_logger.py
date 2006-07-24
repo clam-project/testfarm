@@ -76,6 +76,11 @@ def write_project_info(req, project_name, project_info):# TODO : remove CODE DUP
 	f.close()
 	return "remote project Ok"
 
-
+def write_task_info(req, project_name, client_name, task_name, task_info):# TODO : remove CODE DUPLICATION 
+	filename = task_info_filename(_logs_base_dir, project_name, client_name, task_name)
+	f = open( filename, 'w' )
+	f.write( task_info )
+	f.close()
+	return "remote task Ok"
 	
 

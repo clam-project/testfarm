@@ -21,7 +21,7 @@
 import datetime
 from service_proxy import ServiceProxy
 from listeners import NullResultListener
-
+from task import get_command_and_parsers
 #
 # Server Listener Proxy
 #
@@ -94,6 +94,22 @@ class ServerListenerProxy(NullResultListener):
 				project_name=self.project.name,
 				project_info=entries) 
 
+	def __write_task_info(self, task):	
+		entries = "('BEGIN_TASK', '%s'),\n" % task.name
+		for subtask in task.subtasks :
+			entries += "('BEGIN_SUBTASK', '%s'),\n" % subtask.name 
+			for maybe_dict in subtask.commands :
+				cmd, _, _, _ = get_command_and_parsers(maybe_dict)
+				entries += "('CMD', '%s'),\n" % cmd
+			entries += "('END_SUBTASK', '%s'),\n" % subtask.name 
+		entries += "('END_TASK', '%s'),\n" % task.name
+		print self.webservice.remote_call(
+			"write_task_info",
+			project_name = task.project.name,
+			client_name = task.client.name,
+			task_name = task.name,
+			task_info = entries)
+ 
 	def current_time(self):
 		"Returns the current local time"
 		return datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
@@ -123,6 +139,9 @@ class ServerListenerProxy(NullResultListener):
 		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.iterations_needs_update = True
+
+	def listen_task_info(self, task):
+		self.__write_task_info(task)	
 
 	def iterations_updated(self):
 		self.iterations_needs_update = False
