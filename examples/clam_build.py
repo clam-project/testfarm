@@ -192,6 +192,6 @@ clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 
 Runner( clam, 
 	continuous = True,
-	remote_server_url = 'http://10.55.0.66/testfarm_server'
+	remote_server_url = 'http://10.55.0.50/testfarm_server'
 )
 
