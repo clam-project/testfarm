@@ -28,18 +28,40 @@ How To Install a TestFarm Server ?
 
 - $ cd /etc/apache2/conf.d 
 
-- $ sudo ln -s /your/path/to/testfarm/mod_python_testfarm.conf
+- $ sudo ln -s /path/to/testfarm/mod_python_testfarm.conf
 
 - edit mod_python_testfarm.conf 
-  change the Alias /testfarm_server to point to  /your/path/to/testfarm/src/server_side.py
-  change DirectoryMatch to point to /your/path/to/testfarm/src/
+  change the Alias /testfarm_server to point to  /path/to/testfarm/src/server_side.py
+  change DirectoryMatch to point to /path/to/testfarm/src/
 
 - check that the testfarm/src/server_side.py file and its parent directories are
   accessible by a different user. Tip check this: 
     $ sudo su nobody
-    $ ls -l /you/path/to/testfarm/server_side_logger.py
+    $ ls -l /path/to/testfarm/server_side_logger.py
 
 - $ sudo /etc/init.d/apache2 restart
+
+- set up the logs and html dirs :
+  $ sudo mkdir /var/www/testfarm_logs
+  $ sudo mkdir /var/www/testfarm_html
+  $ sudo chown www-data /var/www/testfarm_logs
+  $ sudo chown www-data /var/www/testfarm_html
+  
+
+- launch server process (deamon). maybe in a new terminal.
+  $ cd path/to/testfarm/src
+  $ sudo su www-data
+  $ ./remote_server_timer.py
+
+- add styles and javascript files to html project dirs. 
+  do this when the <PROJECT NAME> dir has already been created by the server.
+  $ sudo ln -s /path/to/testfarmclient/testfarm/style.css /var/www/testfarm_html/<PROJECT NAME>/
+  $ sudo ln -s /path/to/testfarm/testfarm.js  /var/www/testfarm_html/<PROJECT NAME>/
+  $ sudo ln -s /path/to/testfarm/testfarm_info.js  /var/www/testfarm_html/<PROJECT NAME>/
+
+
+
+
 
 
 
