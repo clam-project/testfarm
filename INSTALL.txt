@@ -37,7 +37,7 @@ How To Install a TestFarm Server ?
 - check that the testfarm/src/server_side.py file and its parent directories are
   accessible by a different user. Tip check this: 
     $ sudo su nobody
-    $ ls -l /you/path/to/testfarm/server_side.py
+    $ ls -l /you/path/to/testfarm/server_side_logger.py
 
 - $ sudo /etc/init.d/apache2 restart
 
@@ -46,7 +46,7 @@ How To Install a TestFarm Server ?
 SF project administration  
 ----------------------------
 
-(not interesting for users, just a personal note. 
+(not interesting for users, just for sourceforge project admins. 
 SF is slow and its help is over verbose :-( )
 
 how to upload a sourceforge release?
