@@ -23,12 +23,8 @@ def force_ok(output):
 	return True
 
 HOME = os.environ['HOME']
-os.environ['LD_LIBRARY_PATH']='%s/clam-sandboxes/tlocal/lib:/usr/local/lib' % HOME
-
-def filter_cvs_update( text ):
-	dont_start_interr = lambda line : not line or not line[0]=='?'
-	result = filter(dont_start_interr, text.split('\n') )	
-	return '\n'.join(result)
+os.environ['LD_LIBRARY_PATH']='%s/clamSandboxes/tlocal/lib:/usr/local/lib' % HOME
+os.environ['CLAM_TEST_DATA']='%s/clamSandboxes/CLAM-TestData' % HOME
 
 def set_qtdir_to_qt4(x) :
 	os.environ['QTDIR']='/usr/local/Trolltech/Qt-4.1.0/'
@@ -36,42 +32,37 @@ def set_qtdir_to_qt4(x) :
 def set_qtdir_to_qt3(x) :
 	os.environ['QTDIR']='/usr/'
 
-dapper = Client("linux_ubuntu_dapper")
+dapper = Client("linux_ubuntu_edgy_macbook")
 dapper.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 	
 
 clam = Task(
 	project = Project("CLAM"), 
 	client = dapper, 
-	task_name="with cvs update" 
+	task_name="with svn update" 
 	)
-repositories = [
-	"testing-clam",
-	"testing-neteditor",
-	"testing-smstools",
-	"testing-annotator",
-]
 
 clam.set_check_for_new_commits( 
-		checking_cmd="cd $HOME/clam-sandboxes && cvs -nq up -dP %s | grep ^[UP]" %
-			 " ".join(repositories),  
+		checking_cmd="cd $HOME/clamSandboxes && svn status -u testfarmTrunk | grep \*",
 		minutes_idle=5
 )
 clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-clam",
-	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	"rm -rf $HOME/clam-sandboxes/tlocal/*",
-	"cd $HOME/clam-sandboxes/testing-clam/scons/libs",
-	"scons configure prefix=$HOME/clam-sandboxes/tlocal",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
+	{CMD: "svn up", INFO: lambda x:x },
+	"rm -rf $HOME/clamSandboxes/tlocal/*",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM/scons/libs",
+	"scons configure prefix=$HOME/clamSandboxes/tlocal with_osc_support=0",
 	"scons",
 	"scons install",
+	"cd $HOME/clamSandboxes/tlocal/lib",
+	"for a in core processing vmqt vmfl audioio; do ln -s libclam_$a.so.0.91.1 libclam_$a.so.0.91; ln -s libclam_$a.so.0.91.1 libclam_$a.so.0; ln -s libclam_$a.so.0.91.1 libclam_$a.so; done"
 ] )
 clam.add_subtask("Unit Tests (with scons)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
 	"cd scons/tests",
-	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
+	"scons test_data_path=$HOME/clamSandboxes/CLAM-TestData clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal", # TODO: test_data_path and release
 	"cd unit_tests",
 	{INFO : start_timer}, 
 	{CMD: "./UnitTests", INFO: lambda x:x},
@@ -79,9 +70,9 @@ clam.add_subtask("Unit Tests (with scons)", [
 ] )
 clam.add_subtask("Functional Tests (with scons)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
 	"cd scons/tests",
-	"scons test_data_path=$HOME/clam-sandboxes/CLAM-TestData clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal", # TODO: test_data_path and release
+	"scons test_data_path=$HOME/clamSandboxes/CLAM-TestData clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal", # TODO: test_data_path and release
 	"cd functional_tests",
 	{INFO : start_timer}, 
 	{CMD:"./FunctionalTests", INFO: lambda x:x},
@@ -89,69 +80,56 @@ clam.add_subtask("Functional Tests (with scons)", [
 ] )
 clam.add_subtask("CLAM Examples (with scons)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
 	"cd scons/examples",
-	"scons clam_prefix=$HOME/clam-sandboxes/tlocal",
+	"scons clam_prefix=$HOME/clamSandboxes/tlocal",
 ] )
 clam.add_subtask("SMSTools installation", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-smstools",
-	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
+	"cd $HOME/clamSandboxes/testfarmTrunk/SMSTools",
+	{CMD: "svn up", INFO: lambda x:x },
+	"scons clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
 	"scons install",
-	"$HOME/clam-sandboxes/testing-clam/scons/sconstools/changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/smstools ",
-] )
-'''
-clam.add_subtask("execute QTSMStools", [
-	"cd $HOME/clam-sandboxes/testing-smstools",
-	"./QtSMSTools", #TODO run a while
-] )
-'''
-clam.add_subtask("NetworkEditor installation", [
-	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-neteditor",
-	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	"scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
-	"$HOME/clam-sandboxes/testing-clam/scons/sconstools/changeExampleDataPath.py $HOME/clam-sandboxes/tlocal/share/smstools ",
-] )
-'''
-clam.add_subtask("execute NetworkEditor", [
-	"cd $HOME/clam-sandboxes/testing-neteditor",
-	"./NetworkEditor", #TODO run a while
-] )
-'''
-clam.add_subtask('vmqt compilation and examples', [
-	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
-	"cd $HOME/clam-sandboxes/testing-annotator/vmqt",
-	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	'scons clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal release=1 double=1',
-	'scons examples',
+	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
 ] )
 
+
+clam.add_subtask('vmqt4 compilation and examples', [
+	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
+	"cd $HOME/clamSandboxes/testfarmTrunk/Annotator/vmqt",
+	{CMD: "svn up", INFO: lambda x:x },
+	'scons clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal release=1 double=1',
+	'scons examples',
+] )
 clam.add_subtask("Annotator installation", [
 	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
-	"cd $HOME/clam-sandboxes/testing-annotator",
-	{CMD: "cvs -q up -dP", INFO: filter_cvs_update },
-	"scons clam_vmqt4_path=vmqt clam_sconstools=$HOME/clam-sandboxes/testing-clam/scons/sconstools install_prefix=$HOME/clam-sandboxes/tlocal clam_prefix=$HOME/clam-sandboxes/tlocal",
+	"cd $HOME/clamSandboxes/testfarmTrunk/Annotator",
+	{CMD: "svn up", INFO: lambda x:x },
+	"scons clam_vmqt4_path=vmqt clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
 	"scons install",
 ] )
-'''
-clam.add_subtask("execute Annotator", [
-	"cd $HOME/clam-sandboxes/testing-annotator",
-	"./Annotator" #TODO run a while
+
+clam.add_subtask("NetworkEditor installation", [
+	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
+	"cd $HOME/clamSandboxes/testfarmTrunk/NetworkEditor",
+	{CMD: "svn up", INFO: lambda x:x },
+	"scons install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
+	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
 ] )
+
 '''
 clam.add_subtask("Deploy OLD (srcdeps) build system", [
-	"cd $HOME/clam-sandboxes/testing-clam/build/srcdeps",
+	"cd $HOME/clamSandboxes/testing-clam/build/srcdeps",
 	"make",
 	"cd ..",
 	"pwd && autoconf",
 	"./configure"
 	
 ])
+'''
 clam.add_subtask("Unit Tests (with srcdeps)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
 	"cd build/Tests/UnitTests",
 	"make depend",
 	"CONFIG=release make",
@@ -163,7 +141,7 @@ clam.add_subtask("Unit Tests (with srcdeps)", [
 ] )
 clam.add_subtask("Functional Tests (with srcdeps)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clam-sandboxes/testing-clam",
+	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
 	"cd build/Tests/FunctionalTests",
 	"make depend",
 	"CONFIG=release make",
@@ -173,21 +151,22 @@ clam.add_subtask("Functional Tests (with srcdeps)", [
 	{STATS : exectime_functests}
 ] )
 
+'''
 clam.add_subtask("Deploy SMSTools srcdeps branch for SMSBase tests", [
-	"cd $HOME/clam-sandboxes",
+	"cd $HOME/clamSandboxes",
 	"rm -rf testing-smstools-srcdeps",
 	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
-	'echo "CLAM_PATH=$HOME/clam-sandboxes/testing-clam/" > testing-smstools-srcdeps/build/clam-location.cfg'
+	'echo "CLAM_PATH=$HOME/clamSandboxes/testfarmTrunk/CLAM/" > testing-smstools-srcdeps/build/clam-location.cfg'
 ] )
 
 clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
-	"cd $HOME/clam-sandboxes",
+	"cd $HOME/clamSandboxes",
 	"cd testing-smstools-srcdeps/build/FunctionalTests",
 	"make depend",
 	"CONFIG=debug make", #release doesn't work
 	{CMD: "./SMSToolsTests", INFO: lambda x : x}
 ] )
-
+'''
 
 
 Runner( clam, 
