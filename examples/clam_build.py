@@ -113,7 +113,7 @@ clam.add_subtask("NetworkEditor installation", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/NetworkEditor",
 	{CMD: "svn up", INFO: lambda x:x },
-	"scons install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
+	"scons install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal annotator_path=$HOME/clamSandboxes/testfarmTrunk/Annotator",
 	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
 ] )
 
@@ -126,7 +126,6 @@ clam.add_subtask("Deploy OLD (srcdeps) build system", [
 	"./configure"
 	
 ])
-'''
 clam.add_subtask("Unit Tests (with srcdeps)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
