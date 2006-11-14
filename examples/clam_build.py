@@ -150,7 +150,6 @@ clam.add_subtask("Functional Tests (with srcdeps)", [
 	{STATS : exectime_functests}
 ] )
 
-'''
 clam.add_subtask("Deploy SMSTools srcdeps branch for SMSBase tests", [
 	"cd $HOME/clamSandboxes",
 	"rm -rf testing-smstools-srcdeps",
