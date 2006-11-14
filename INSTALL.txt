@@ -38,6 +38,7 @@ How To Install a TestFarm Server ?
   accessible by a different user. Tip check this: 
     $ sudo su nobody
     $ ls -l /path/to/testfarm/server_side_logger.py
+    $ exit
 
 - $ sudo /etc/init.d/apache2 restart
 
@@ -48,16 +49,15 @@ How To Install a TestFarm Server ?
   $ sudo chown www-data /var/www/testfarm_html
   
 
-- launch server process (deamon). maybe in a new terminal.
+- launch server process (deamon) as www-data. maybe in a new terminal.
   $ cd path/to/testfarm/src
   $ sudo su www-data
   $ ./remote_server_timer.py
 
 - add styles and javascript files to html project dirs. 
   do this when the <PROJECT NAME> dir has already been created by the server.
-  $ sudo ln -s /path/to/testfarmclient/testfarm/style.css /var/www/testfarm_html/<PROJECT NAME>/
-  $ sudo ln -s /path/to/testfarm/testfarm.js  /var/www/testfarm_html/<PROJECT NAME>/
-  $ sudo ln -s /path/to/testfarm/testfarm_info.js  /var/www/testfarm_html/<PROJECT NAME>/
+  $ cd /path/to/testfarm
+  $ sudo cp style.css testfarm.js testfarm_info.js /var/www/testfarm_html/<PROJECT NAME>/
 
 
 
