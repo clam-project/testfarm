@@ -25,6 +25,7 @@ How To Install a TestFarm Server ?
 
 (UNIX like Systems)
 - install libapache2-mod-python ( version >= 3.1 )
+- install ploticus
 
 - $ cd /etc/apache2/conf.d 
 
