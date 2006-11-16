@@ -163,7 +163,8 @@ class Server:
 			tag = entry[0]
 			count = 0
 			if tag == 'BEGIN_TASK':
-				assert entry[2] != date, "Error. found two repos with same date."
+				#TODO assert entry[2] != date, "Error. found two repos with same date."
+				if entry[2] != date: print "Warning. found 2 repos with same date."
 				date = entry[2]
 				count = 1
 				updated_log.append('\n')
@@ -218,6 +219,8 @@ class Server:
 
 	def __html_task_still_to_be_done(self, task_tobedone):
 		content = []
+		if not task_tobedone:
+			task_tobedone = []
 		for entry in task_tobedone :
 			tag = entry[0].strip()
 			# check if the tag begin_task was not read ????
@@ -233,6 +236,14 @@ class Server:
 				content.append( '<span class="end_task_tobedone"> END_TASK "%s"</span></div>' %  entry[1] )
 		return content
 
+	def __remove_list_item(self, list, item, client_name):
+		if not list : 
+			print "Warning: trying to remove '"+str(item)+"' from a null list", "Project:", self.project_name, client_name
+			return
+		if item in list :
+			list.remove(item)
+		else:
+			print "Warning: trying to remove '"+str(item)+"' which dont exist in this list :", list, "Project:", self.project_name, client_name
 
 	def __html_single_execution_details(self, client_name, wanted_date):
 		"Creates an HTML file with the details of an execution given a date"
@@ -253,7 +264,8 @@ class Server:
 					task_tobedone = self.load_task_info(client_name, entry[1])
 				#	print "TASK_INFO BEFORE =", task_tobedone
 				new_entry = (entry[0], entry[1])
-				task_tobedone.remove(new_entry)
+				self.__remove_list_item(task_tobedone, new_entry, client_name)
+
 				content.append( '<div class="task"> BEGIN_TASK "%s" %s' % ( entry[1], entry[2] ) )
 				opened_task = True
 			elif tag == 'BEGIN_SUBTASK':
@@ -261,7 +273,7 @@ class Server:
 				#assert not opened_subtask
 				#assert not opened_cmd
 				new_entry = (entry[0], entry[1])
-				task_tobedone.remove(new_entry)
+				self.__remove_list_item(task_tobedone, new_entry, client_name)
 				content.append( '<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1] )
 				opened_subtask = True
 			elif tag == 'BEGIN_CMD':
@@ -269,7 +281,7 @@ class Server:
 				#assert opened_subtask
 				#assert not opened_cmd
 				new_entry = ("CMD", entry[1])
-				task_tobedone.remove(new_entry)
+				self.__remove_list_item(task_tobedone, new_entry, client_name)
 				content.append( '<div class=command>' )
 				content.append( '<span class="command_string"> %s</span>' % entry[1] )
 				opened_cmd = True						
@@ -278,7 +290,7 @@ class Server:
 				#assert opened_subtask
 				#assert not opened_cmd
 				new_entry = (entry[0], entry[1])
-				task_tobedone.remove(new_entry)
+				self.__remove_list_item(task_tobedone, new_entry, client_name)
 				content.append( 'END_SUBTASK "%s"</div>' % entry[1] )
 				opened_subtask = False
 			elif tag == 'END_TASK':
@@ -293,7 +305,7 @@ class Server:
 					content.append( '</div>' )
 
 				new_entry = (entry[0], entry[1])
-				task_tobedone.remove(new_entry)
+				self.__remove_list_item(task_tobedone, new_entry, client_name)
 				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3] ) )
 				#exiting, so no need to make opened_task=False
 				return header_details + '\n'.join(content) + footer	
@@ -675,6 +687,9 @@ class Server:
 		if False and self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
+		if False and self.project_name == 'practiques_ES1': #TODO the proper way
+			filesstr = ' '.join(newfiles)
+			out = subprocess.call('scp %s clamadm@www.iua.upf.es:tmp/testfarm_ES1/' % filesstr, shell=True)
 
 
 	def collect_stats(self):
