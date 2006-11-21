@@ -53,7 +53,6 @@ clam.add_subtask( "List of new commits", [
 clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
-	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
 	{CMD: "svn up", INFO: lambda x:x },
 	"rm -rf $HOME/clamSandboxes/tlocal/*",
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM/scons/libs",
