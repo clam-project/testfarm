@@ -49,11 +49,11 @@ clam.set_check_for_new_commits(
 clam.add_subtask( "List of new commits", [
 	"cd $HOME/clamSandboxes/testfarmTrunk",
 	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
+	{CMD: "svn up", INFO: lambda x:x },
 	] )
 clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
-	{CMD: "svn up", INFO: lambda x:x },
 	"rm -rf $HOME/clamSandboxes/tlocal/*",
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM/scons/libs",
 	"scons configure prefix=$HOME/clamSandboxes/tlocal with_osc_support=0",
@@ -91,7 +91,6 @@ clam.add_subtask("CLAM Examples (with scons)", [
 clam.add_subtask("SMSTools installation", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/SMSTools",
-	{CMD: "svn up", INFO: lambda x:x },
 	"scons clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
 	"scons install",
 	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
@@ -101,14 +100,12 @@ clam.add_subtask("SMSTools installation", [
 clam.add_subtask('vmqt4 compilation and examples', [
 	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
 	"cd $HOME/clamSandboxes/testfarmTrunk/Annotator/vmqt",
-	{CMD: "svn up", INFO: lambda x:x },
 	'scons clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal release=1 double=1',
 	'scons examples',
 ] )
 clam.add_subtask("Annotator installation", [
 	{CMD: "echo setting QTDIR to qt4 path ", INFO: set_qtdir_to_qt4},
 	"cd $HOME/clamSandboxes/testfarmTrunk/Annotator",
-	{CMD: "svn up", INFO: lambda x:x },
 	"scons clam_vmqt4_path=vmqt clam_sconstools=$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
 	"scons install",
 ] )
@@ -116,7 +113,6 @@ clam.add_subtask("Annotator installation", [
 clam.add_subtask("NetworkEditor installation", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/NetworkEditor",
-	{CMD: "svn up", INFO: lambda x:x },
 	"scons install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal annotator_path=$HOME/clamSandboxes/testfarmTrunk/Annotator",
 	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
 ] )
