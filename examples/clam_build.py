@@ -56,7 +56,7 @@ clam.add_deployment( [
 	"scons",
 	"scons install",
 	"cd $HOME/clamSandboxes/tlocal/lib",
-	{CMD:"for a in core processing vmqt vmfl audioio; do ln -s libclam_$a.so.0.91.1 libclam_$a.so.0.91; ln -s libclam_$a.so.0.91.1 libclam_$a.so.0; ln -s libclam_$a.so.0.91.1 libclam_$a.so; done", STATUS_OK: lambda x:True}
+	{CMD:"for a in core processing vmqt vmfl audioio; do ln -s libclam_$a.so.0.92.0 libclam_$a.so.0.91; ln -s libclam_$a.so.0.92.0 libclam_$a.so.0; ln -s libclam_$a.so.0.92.0 libclam_$a.so; done", STATUS_OK: lambda x:True}
 ] )
 clam.add_subtask("Unit Tests (with scons)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
@@ -168,8 +168,8 @@ clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 
 
 Runner( clam, 
-#	continuous = True,
-#	remote_server_url = 'http://10.55.0.50/testfarm_server'
-	local_base_dir='/tmp'
+	continuous = True,
+	remote_server_url = 'http://10.55.0.50/testfarm_server'
+#	local_base_dir='/tmp'
 )
 
