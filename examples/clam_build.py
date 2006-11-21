@@ -46,11 +46,15 @@ clam.set_check_for_new_commits(
 		checking_cmd="cd $HOME/clamSandboxes && svn status -u testfarmTrunk | grep \*",
 		minutes_idle=5
 )
+clam.add_subtask( "List of new commits", [
+	"cd $HOME/clamSandboxes/testfarmTrunk",
+	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
+	] )
 clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
+	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
 	{CMD: "svn up", INFO: lambda x:x },
-	{CMD:"svn log -rHEAD", INFO: lambda x:x },
 	"rm -rf $HOME/clamSandboxes/tlocal/*",
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM/scons/libs",
 	"scons configure prefix=$HOME/clamSandboxes/tlocal with_osc_support=0",
