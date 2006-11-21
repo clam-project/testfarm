@@ -41,7 +41,7 @@ essentia.set_check_for_new_commits(
 	minutes_idle=5
 )
 
-essentia.add_deployment([
+essentia.add_deployment([	
 	"cd $HOME/",
 	"mkdir -p essentia-sandboxes",
 	"cd essentia-sandboxes",
@@ -50,6 +50,7 @@ essentia.add_deployment([
 	#"rm -fr clean-essentia/trunk/algorithms",
 	#"rm -fr clean-essentia/trunk/test/build",
 	#{CMD : "svn diff --revision HEAD clean-essentia/trunk", INFO: pass_text},
+	{CMD : "svn log -r BASE:HEAD clean-essentia/trunk", INFO : pass_text },
 	{CMD : essentia_update, INFO : pass_text },
 ] )
 
