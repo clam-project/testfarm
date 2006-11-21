@@ -50,6 +50,7 @@ clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
 	{CMD: "svn up", INFO: lambda x:x },
+	{CMD:"svn log -rHEAD", INFO: lambda x:x },
 	"rm -rf $HOME/clamSandboxes/tlocal/*",
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM/scons/libs",
 	"scons configure prefix=$HOME/clamSandboxes/tlocal with_osc_support=0",
