@@ -30,6 +30,7 @@ essentia.set_check_for_new_commits(
 	minutes_idle=5
 )
 
+
 # change to false for checkout
 do_update = True
 
@@ -41,7 +42,7 @@ else:
 essentia.add_deployment([
 	"cd $HOME/testfarm",
 	"mkdir -p essentia-sandboxes",
-	{CMD : "svn log -r BASE:HEAD essentia-sandboxes", INFO : pass_text },
+	{CMD : "svn log -r BASE:HEAD essentia-sandboxes", INFO : lambda x:x },
 	{CMD : svn_command, INFO : lambda x: x },
 ] )
 
