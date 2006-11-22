@@ -3,13 +3,13 @@
 import sys
 sys.path.append('../src')
 from os import environ
-
 from task import *
 from client import Client
 from project import Project
 from runner import Runner
 
 # functions to parse minicppunit output
+import re
 def getNTests_line( line ) :
         executed = re.match(r"\033\[1m\s+Executed Tests:\s*(\d+)", line)
         passed   = re.match(r"\033\[32;1m\s+Passed Tests:\s*(\d+)", line)
@@ -17,7 +17,7 @@ def getNTests_line( line ) :
         if passed: return (0,passed.group(1))
         return (0,0)
 def getNTests( out ) :
-        dict = { 'passed_tests':0, 'referencia':100}
+        dict = { 'passed_tests':0, '50':50, '100':100}
         for line in out.splitlines() :
                 e,p = getNTests_line( line )
 #               if e : dict['executed_tests'] = e
@@ -82,7 +82,7 @@ essentia.add_subtask("build automatic tests", [
 
 essentia.add_subtask("run automatic tests", [
 	"cd $HOME/testfarm/essentia-sandboxes/test/build/descriptortests",
-	{CMD : "./test", INFO : lambda x: x, STATS : {'passed_tests': getNTests } },
+	{CMD : "./test", INFO : lambda x: x, STATS : getNTests },
 ] )
 
 if sys.platform == "linux2":
