@@ -1,4 +1,5 @@
-#! /usr/bin/python
+
+#!/Library/Frameworks/Python.framework/Versions/Current/bin/python
 
 import sys
 sys.path.append('../src')
@@ -9,26 +10,14 @@ from client import Client
 from project import Project
 from runner import Runner
 
-def pass_text(text) :
-	return text
-
-
 environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 
-cd_essentia = "cd $HOME/essentia-sandboxes/clean-essentia/trunk"
-
-essentia_update = 'svn update clean-essentia/trunk/'
-essentia_checkout = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ clean-essentia/trunk/'
-
 if sys.platform == "linux2":
-	lib_path = "LD_LIBRARY_PATH"
 	machine = Client("testing-machine_linux_breezy")
 	machine.brief_description ='<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 elif sys.platform == "darwin":
-	lib_path = "DYLD_LIBRARY_PATH"
 	machine = Client("testing_machine_osx_tiger")
 	machine.brief_description ='<img src="http://clam.iua.upf.es/images/apple_icon.png"/>'
-
 
 essentia = Task(
 		project = Project("essentia_trunk"),
@@ -37,46 +26,49 @@ essentia = Task(
 		)
 
 essentia.set_check_for_new_commits( 
-	checking_cmd='cd $HOME/essentia-sandboxes && svn status -u clean-essentia/trunk | grep \*', 
+	checking_cmd='cd $HOME/testfarm/essentia-sandboxes && svn status -u | grep \*', 
 	minutes_idle=5
 )
 
-essentia.add_deployment([	
-	"cd $HOME/",
+# change to false for checkout
+do_update = True
+
+if do_update:
+	svn_command = 'svn update essentia-sandboxes/'
+else:
+	svn_command = 'svn checkout svn+ssh://testfarm@mtgdb.iua.upf.edu/essentia/trunk/ essentia-sandboxes/'
+
+essentia.add_deployment([
+	"cd $HOME/testfarm",
 	"mkdir -p essentia-sandboxes",
-	"cd essentia-sandboxes",
-	#"rm -fr /tmp/essentia/",
-	#"rm -fr clean-essentia/trunk/build",
-	#"rm -fr clean-essentia/trunk/algorithms",
-	#"rm -fr clean-essentia/trunk/test/build",
-	#{CMD : "svn diff --revision HEAD clean-essentia/trunk", INFO: pass_text},
-	{CMD : "svn log -r BASE:HEAD clean-essentia/trunk", INFO : pass_text },
-	{CMD : essentia_update, INFO : pass_text },
+	{CMD : "svn log -r BASE:HEAD essentia-sandboxes", INFO : pass_text },
+	{CMD : svn_command, INFO : lambda x: x },
 ] )
 
-essentia.add_subtask("build core libs", [
-	cd_essentia,
-	"scons base prefix=/tmp/essentia/",
-	"scons install base prefix=/tmp/essentia",
+essentia.add_subtask("build essentia", [
+	"cd $HOME/testfarm/essentia-sandboxes/",
+	"scons",
 ] )
 
-essentia.add_subtask("build plugin libs", [
-	cd_essentia,
-	"scons prefix=/tmp/essentia",
-	"scons install prefix=/tmp/essentia",
+essentia.add_subtask("build essentia python wrapper", [
+	"cd $HOME/testfarm/essentia-sandboxes/",
+	"scons python",
 ] )
 
-essentia.add_subtask("automatic tests", [
-	cd_essentia,
-	"cd test",
-	"scons prefix=/tmp/essentia",
-	"cd build/descriptortests/",
-	{CMD : "%s=/tmp/essentia/lib/ ./test" % lib_path, INFO : pass_text},
+essentia.add_subtask("build automatic tests", [
+	"cd $HOME/testfarm/essentia-sandboxes/test/",
+	"scons",
 ] )
 
+essentia.add_subtask("run automatic tests", [
+	"cd $HOME/testfarm/essentia-sandboxes/test/build/descriptortests",
+	{CMD : "./test", INFO : lambda x: x },
+] )
 
 Runner ( 
 	essentia,  
-	remote_server_url='http://10.55.0.66/testfarm_server',
+	# folder where to put dir log and html
+	remote_server_url='http://10.55.0.50/testfarm_server',
+	#local_base_dir ="/Users/aula324/testfarm/Mac-osX",
 	continuous=True 
 )
