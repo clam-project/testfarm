@@ -1,5 +1,4 @@
-
-#!/Library/Frameworks/Python.framework/Versions/Current/bin/python
+#! /usr/bin/python
 
 import sys
 sys.path.append('../src')
@@ -10,14 +9,34 @@ from client import Client
 from project import Project
 from runner import Runner
 
+# functions to parse minicppunit output
+def getNTests_line( line ) :
+        executed = re.match(r"\033\[1m\s+Executed Tests:\s*(\d+)", line)
+        passed   = re.match(r"\033\[32;1m\s+Passed Tests:\s*(\d+)", line)
+        if executed: return (executed.group(1),0)
+        if passed: return (0,passed.group(1))
+        return (0,0)
+def getNTests( out ) :
+        dict = { 'passed_tests':0, 'referencia':100}
+        for line in out.splitlines() :
+                e,p = getNTests_line( line )
+#               if e : dict['executed_tests'] = e
+                if p : dict['passed_tests'] = p
+        return dict
+# end parser functions
+
+
 environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 
 if sys.platform == "linux2":
+	print "detected linux"
 	machine = Client("testing-machine_linux_breezy")
 	machine.brief_description ='<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 elif sys.platform == "darwin":
+	print "detected mac osx"
 	machine = Client("testing_machine_osx_tiger")
 	machine.brief_description ='<img src="http://clam.iua.upf.es/images/apple_icon.png"/>'
+
 
 essentia = Task(
 		project = Project("essentia_trunk"),
@@ -63,8 +82,14 @@ essentia.add_subtask("build automatic tests", [
 
 essentia.add_subtask("run automatic tests", [
 	"cd $HOME/testfarm/essentia-sandboxes/test/build/descriptortests",
-	{CMD : "./test", INFO : lambda x: x },
+	{CMD : "./test", INFO : lambda x: x, STATS : {'passed_tests': getNTests } },
 ] )
+
+if sys.platform == "linux2":
+	essentia.add_subtask("run valgrind with automatic tests (memory integrity checks)", [
+		"cd $HOME/testfarm/essentia-sandboxes/test/build/descriptortests",
+		{CMD : "valgrind --leak-check=full -q ./test | grep ^==[0-9]+===", INFO : lambda x:x, STATUS_OK: lambda x:True },
+	] )
 
 Runner ( 
 	essentia,  
