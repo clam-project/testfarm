@@ -32,7 +32,7 @@ def set_qtdir_to_qt4(x) :
 def set_qtdir_to_qt3(x) :
 	os.environ['QTDIR']='/usr/'
 
-dapper = Client("linux_ubuntu_edgy_macbook")
+dapper = Client("linux_ubuntu_feisty_macbook")
 dapper.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 	
 
@@ -113,7 +113,7 @@ clam.add_subtask("Annotator installation", [
 clam.add_subtask("NetworkEditor installation", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/NetworkEditor",
-	"scons install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal annotator_path=$HOME/clamSandboxes/testfarmTrunk/Annotator",
+	"scons install_prefix=$HOME/clamSandboxes/tlocal clam_prefix=$HOME/clamSandboxes/tlocal",
 	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
 ] )
 
@@ -169,7 +169,7 @@ clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
 
 Runner( clam, 
 	continuous = True,
-	remote_server_url = 'http://10.55.0.50/testfarm_server'
-#	local_base_dir='/tmp'
+#	remote_server_url = 'http://10.55.0.50/testfarm_server'
+	local_base_dir='/tmp'
 )
 
