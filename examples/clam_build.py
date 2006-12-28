@@ -8,6 +8,14 @@ from client import Client
 from runner import Runner
 import os, time
 
+def countLines( path ):
+	print "loc foro path:", path
+	from commands import getoutput
+	#print "find %s -name '*.?xx' -exec wc -l {} \;" % path.strip()
+	lines =  getoutput("find %s -name '*.?xx' -exec wc -l {} \;" % path.strip() ).split("\n")
+	#print lines
+	return reduce( lambda x,y: x+y , map( lambda x: int(x.split()[0]), lines) )
+
 start_time = -1
 def start_timer(output):
 	global start_time
@@ -41,16 +49,19 @@ clam = Task(
 	client = dapper, 
 	task_name="with svn update" 
 	)
-
 clam.set_check_for_new_commits( 
 		checking_cmd="cd $HOME/clamSandboxes && svn status -u testfarmTrunk | grep \*",
 		minutes_idle=5
 )
+
 clam.add_subtask( "List of new commits", [
 	"cd $HOME/clamSandboxes/testfarmTrunk",
 	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
 	{CMD: "svn up", INFO: lambda x:x },
 	] )
+clam.add_subtask("count lines of code", [
+	{CMD:"echo $HOME/clamSandboxes/testfarmTrunk/CLAM", STATS: lambda x: {"clam_loc": countLines(x) } }
+] )
 clam.add_deployment( [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
 	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
@@ -60,7 +71,7 @@ clam.add_deployment( [
 	"scons",
 	"scons install",
 	"cd $HOME/clamSandboxes/tlocal/lib",
-	{CMD:"for a in core processing vmqt vmfl audioio; do ln -s libclam_$a.so.0.95.0 libclam_$a.so.0.91; ln -s libclam_$a.so.0.95.0 libclam_$a.so.0; ln -s libclam_$a.so.0.95.0 libclam_$a.so; done", STATUS_OK: lambda x:True}
+	{CMD:"for v in "" .0 .0.96; do for a in core processing vmqt vmfl audioio; do ln -s libclam_$a.so.0.96.1 libclam_$a.so$v; done; done", STATUS_OK: lambda x:True}
 ] )
 clam.add_subtask("Unit Tests (with scons)", [
 	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
