@@ -40,7 +40,7 @@ def set_qtdir_to_qt4(x) :
 def set_qtdir_to_qt3(x) :
 	os.environ['QTDIR']='/usr/'
 
-dapper = Client("linux_ubuntu_feisty_macbook")
+dapper = Client("linux_ubuntu_dapper")
 dapper.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 	
 
@@ -128,59 +128,9 @@ clam.add_subtask("NetworkEditor installation", [
 	"$HOME/clamSandboxes/testfarmTrunk/CLAM/scons/sconstools/changeExampleDataPath.py $HOME/clamSandboxes/tlocal/share/smstools ",
 ] )
 
-'''
-clam.add_subtask("Deploy OLD (srcdeps) build system", [
-	"cd $HOME/clamSandboxes/testing-clam/build/srcdeps",
-	"make",
-	"cd ..",
-	"pwd && autoconf",
-	"./configure"
-	
-])
-clam.add_subtask("Unit Tests (with srcdeps)", [
-	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
-	"cd build/Tests/UnitTests",
-	"make depend",
-	"CONFIG=release make",
-	{INFO : start_timer}, 
-#	{CMD:"./UnitTests", INFO: lambda x : x},
-	{CMD:"./UnitTests"},
-	{STATS : exectime_unittests}
-
-] )
-clam.add_subtask("Functional Tests (with srcdeps)", [
-	{CMD: "echo setting QTDIR to qt3 path ", INFO: set_qtdir_to_qt3},
-	"cd $HOME/clamSandboxes/testfarmTrunk/CLAM",
-	"cd build/Tests/FunctionalTests",
-	"make depend",
-	"CONFIG=release make",
-	{INFO : start_timer}, 
-#	{CMD:"./FunctionalTests", INFO: lambda x : x},
-	{CMD:"./FunctionalTests"},
-	{STATS : exectime_functests}
-] )
-
-clam.add_subtask("Deploy SMSTools srcdeps branch for SMSBase tests", [
-	"cd $HOME/clamSandboxes",
-	"rm -rf testing-smstools-srcdeps",
-	"cvs co -r srcdeps-build-system-branch -d testing-smstools-srcdeps CLAM_SMSTools",
-	'echo "CLAM_PATH=$HOME/clamSandboxes/testfarmTrunk/CLAM/" > testing-smstools-srcdeps/build/clam-location.cfg'
-] )
-
-clam.add_subtask("Testing SMSTransformations (using SMSTools srcdeps branch)", [
-	"cd $HOME/clamSandboxes",
-	"cd testing-smstools-srcdeps/build/FunctionalTests",
-	"make depend",
-	"CONFIG=debug make", #release doesn't work
-	{CMD: "./SMSToolsTests", INFO: lambda x : x}
-] )
-'''
-
-
 Runner( clam, 
 	continuous = True,
-#	remote_server_url = 'http://10.55.0.50/testfarm_server'
-	local_base_dir='/tmp'
+	remote_server_url = 'http://10.55.0.50/testfarm_server'
+#	local_base_dir='/tmp'
 )
 
