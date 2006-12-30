@@ -53,7 +53,7 @@ clam.add_deployment( [
 
 Runner( clam, 
 	continuous = True,
-#	remote_server_url = 'http://10.55.0.50/testfarm_server'
-	local_base_dir='/tmp'
+	remote_server_url = 'http://10.55.0.50/testfarm_server'
+#	local_base_dir='/tmp'
 )
 
