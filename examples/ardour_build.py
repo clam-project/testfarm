@@ -1,41 +1,59 @@
 #! /usr/bin/python
 
-import sys, os, time
-
+import sys
 sys.path.append('../src')
 from task import *
+from project import Project
+from client import Client
 from runner import Runner
+import os, time
 
-start_time = -1
-def start_timer(output):
-	global start_time
-	start_time = time.time()
-def compile_time(output):
-	return {'compile_time': time.time()-start_time }
+startTime = -1
+def startTimer():
+	global startTime
+	startTime = time.time()
+def ellapsedTime():
+	global startTime
+	return time.time() - startTime
 
 HOME = os.environ['HOME']
-os.environ['LD_LIBRARY_PATH']='%s/local/lib:/usr/local/lib' % HOME
+os.environ['LD_LIBRARY_PATH']='%s/src/tlocal/lib:/usr/local/lib' % HOME
+os.environ['LANG']=''
 
+client = Client("linux_ubuntu_edgy")
+client.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
+	
 
-ardour2 = Task(
-	project_name="ardour2",
-	client_name="parumi_home_pc-linux_breezy",
-	task_name="wget snapshot and compile"
+clam = Task(
+	project = Project("ardour2-trunk"), 
+	client = client, 
+	task_name="with svn update" 
 	)
 
-ardour2.add_deployment( [
-	"cd %s" % HOME,
-	"cd src",
-	{CMD:"pwd", INFO: lambda x:x},
-	"rm ardour2-cvs*.bz2",
-	"wget http://ardour.org/files/releases/ardour2-cvs.tar.bz2",
-	"tar xjvf ardour2-cvs.tar.bz2",
-	{INFO : start_timer}, 
-	"cd ardour2",
-	"scons PREFIX=%s/local" % HOME, 
-	{STATS : compile_time  }, 
-	'scons install' ])
-
-Runner( ardour2,
-	local_base_dir = '%s/src/ardour_testfarm_files' % HOME
+clam.set_check_for_new_commits( 
+		checking_cmd="cd $HOME/src && svn status -u ardour2 | grep \*",
+		minutes_idle=5
 )
+
+clam.add_subtask( "List of new commits", [
+	"cd $HOME/src/ardour2",
+	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
+	{CMD: "svn up", INFO: lambda x:x },
+	] )
+
+clam.add_deployment( [
+	"cd $HOME/src/ardour2",
+	{CMD: "svn up", INFO: lambda x:x },
+	"rm -rf $HOME/src/tlocal/*",
+	{INFO : lambda x: startTimer() }, 
+	"scons PREFIX=$HOME/clamSandboxes/tlocal",
+	{STATS : lambda x: {'build_time' : ellapsedTime() } },
+	"scons install",
+] )
+
+Runner( clam, 
+	continuous = True,
+#	remote_server_url = 'http://10.55.0.50/testfarm_server'
+	local_base_dir='/tmp'
+)
+
