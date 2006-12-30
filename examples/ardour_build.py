@@ -24,34 +24,34 @@ client = Client("linux_ubuntu_edgy")
 client.brief_description = '<img src="http://clam.iua.upf.es/images/linux_icon.png"/> <img src="http://clam.iua.upf.es/images/ubuntu_icon.png"/>'
 	
 
-clam = Task(
+task = Task(
 	project = Project("ardour2-trunk"), 
 	client = client, 
-	task_name="with svn update" 
+	task_name="svn up and build" 
 	)
 
-clam.set_check_for_new_commits( 
+task.set_check_for_new_commits( 
 		checking_cmd="cd $HOME/src && svn status -u ardour2 | grep \*",
 		minutes_idle=5
 )
 
-clam.add_subtask( "List of new commits", [
+task.add_subtask( "List of new commits", [
 	"cd $HOME/src/ardour2",
 	{CMD:"svn log -r BASE:HEAD", INFO: lambda x:x },
 	{CMD: "svn up", INFO: lambda x:x },
 	] )
 
-clam.add_deployment( [
+task.add_deployment( [
 	"cd $HOME/src/ardour2",
 	{CMD: "svn up", INFO: lambda x:x },
 	"rm -rf $HOME/src/tlocal/*",
 	{INFO : lambda x: startTimer() }, 
-	"scons PREFIX=$HOME/clamSandboxes/tlocal",
+	"scons PREFIX=$HOME/src/tlocal",
 	{STATS : lambda x: {'build_time' : ellapsedTime() } },
 	"scons install",
 ] )
 
-Runner( clam, 
+Runner( task, 
 	continuous = True,
 	remote_server_url = 'http://10.55.0.50/testfarm_server'
 #	local_base_dir='/tmp'
