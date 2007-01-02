@@ -118,13 +118,6 @@ class Server:
 		except IOError:
 			return None
 
-	def load_task_info(self, client_name, task_name):
-		filename = task_info_filename( self.logs_base_dir, self.project_name, client_name, task_name)
-		try :
-			task_info = eval("[ %s ]" % open( filename ).read() )
-			return task_info
-		except IOError:
-			return None
 	
 	def last_date(self, log):
 		"Returns the date of the last task executed given a logfile"
@@ -163,11 +156,13 @@ class Server:
 			tag = entry[0]
 			count = 0
 			if tag == 'BEGIN_TASK':
-				#TODO assert entry[2] != date, "Error. found two repos with same date."
-				if entry[2] != date: print "Warning. found 2 repos with same date."
+				#assert entry[2] != date, "Error. found two repos with same date."
+				#TODO fix
+				if entry[2] == date : print "Warning", "Error. found two repos with same date."
 				date = entry[2]
 				count = 1
 				updated_log.append('\n')
+				print
 
 			# write the maybe modified entry in an auxiliar file
 			if tag == 'END_CMD' and date != last_date:
@@ -215,73 +210,34 @@ class Server:
 			output,
 			info,
 			cmd_tuple[5] # stats
-			)
-
-	def __html_task_still_to_be_done(self, task_tobedone):
-		content = []
-		if not task_tobedone:
-			task_tobedone = []
-		for entry in task_tobedone :
-			tag = entry[0].strip()
-			# check if the tag begin_task was not read ????
-			if tag == 'BEGIN_SUBTASK':
-				content.append( '<div class="subtask_tobedone"> BEGIN_SUBTASK "%s"' % entry[1] )
-			elif tag == 'CMD':
-				content.append( '<div class=command>' )
-				content.append( '<span class="command_tobedone"> %s</span>' % entry[1] )
-				content.append( '</div>' )
-			elif tag == 'END_SUBTASK':
-				content.append( '<span class="end_subtask_tobedone"> END_SUBTASK "%s"</span></div>' % entry[1] )
-			elif tag == 'END_TASK':
-				content.append( '<span class="end_task_tobedone"> END_TASK "%s"</span></div>' %  entry[1] )
-		return content
-
-	def __remove_list_item(self, list, item, client_name):
-		if not list : 
-			print "Warning: trying to remove '"+str(item)+"' from a null list", "Project:", self.project_name, client_name
-			return
-		if item in list :
-			list.remove(item)
-		else:
-			print "Warning: trying to remove '"+str(item)+"' which dont exist in this list :", list, "Project:", self.project_name, client_name
+			)	
 
 	def __html_single_execution_details(self, client_name, wanted_date):
 		"Creates an HTML file with the details of an execution given a date"
 		content = []
-		id_info = 1 # auto-increment id
-		id_output = 1 # auto-increment id
+		id_info = 1; # auto-increment id
+		id_output = 1; # auto-increment id
 		opened_task = False
 		opened_subtask = False
-		opened_cmd = False
-		task_tobedone = None
+		opened_cmd = False 
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0].strip()
 			if tag == 'BEGIN_TASK':
 				#assert not opened_task
 				#assert not opened_subtask
 				#assert not opened_cmd
-				if not task_tobedone : 
-					task_tobedone = self.load_task_info(client_name, entry[1])
-				#	print "TASK_INFO BEFORE =", task_tobedone
-				new_entry = (entry[0], entry[1])
-				self.__remove_list_item(task_tobedone, new_entry, client_name)
-
-				content.append( '<div class="task"> BEGIN_TASK "%s" %s' % ( entry[1], entry[2] ) )
+				content.append('<div class="task"> BEGIN_TASK "%s" %s' % (entry[1], entry[2]) )
 				opened_task = True
 			elif tag == 'BEGIN_SUBTASK':
 				#assert opened_task
 				#assert not opened_subtask
 				#assert not opened_cmd
-				new_entry = (entry[0], entry[1])
-				self.__remove_list_item(task_tobedone, new_entry, client_name)
-				content.append( '<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1] )
+				content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1])
 				opened_subtask = True
 			elif tag == 'BEGIN_CMD':
 				#assert opened_task
 				#assert opened_subtask
 				#assert not opened_cmd
-				new_entry = ("CMD", entry[1])
-				self.__remove_list_item(task_tobedone, new_entry, client_name)
 				content.append( '<div class=command>' )
 				content.append( '<span class="command_string"> %s</span>' % entry[1] )
 				opened_cmd = True						
@@ -289,24 +245,19 @@ class Server:
 				#assert opened_task
 				#assert opened_subtask
 				#assert not opened_cmd
-				new_entry = (entry[0], entry[1])
-				self.__remove_list_item(task_tobedone, new_entry, client_name)
-				content.append( 'END_SUBTASK "%s"</div>' % entry[1] )
+				content.append('END_SUBTASK "%s"</div>' % entry[1])
 				opened_subtask = False
 			elif tag == 'END_TASK':
 				if opened_cmd:
 					#assert opened_task
 					#assert opened_subtask
 					content.append( '<span class="command_failure">[FAILURE]</span>' )
-					content.append( '<p class="output"> command execution aborted by the client</p>' )
-					content.append( '</div>' )
+					content.append( '<p class="output"> command execution aborted by the client</p>')
+					content.append('</div>')
 				if opened_subtask:
 					#assert opened_task
-					content.append( '</div>' )
-
-				new_entry = (entry[0], entry[1])
-				self.__remove_list_item(task_tobedone, new_entry, client_name)
-				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3] ) )
+					content.append('</div>')
+				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
 				#exiting, so no need to make opened_task=False
 				return header_details + '\n'.join(content) + footer	
 			else:
@@ -326,21 +277,18 @@ class Server:
 					content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % id_info )
 					id_info += 1
 				if entry[5] :
-					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join( entry[5] ) )
+					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
 				content.append( '</div>' )
 				opened_cmd = False
 		
 		if opened_cmd :
 			content.append( '<span class="command_inprogress">in progress ...</span>' )
 			content.append( '</div>')
-		
-		content += self.__html_task_still_to_be_done(task_tobedone)
-			
-		"""if opened_subtask :
-			content.append( '</div>' )
+		if opened_subtask :
+			content.append( '</div>')
 		if opened_task :	
-			content.append( '</div>' )
-		"""	
+			content.append( '</div>')
+			
 		return header_details + '\n'.join(content) + footer	
 
 	#minimal version:
@@ -373,6 +321,7 @@ class Server:
 			filename = self.__write_details_static_html_file(client, last_date)
 			#purgue_client is still experimental:
  			self.purge_client_logfile(client, last_date) #TODO improve purgue method
+			
 			filenames.append(filename)
 		return filenames
 
@@ -612,17 +561,6 @@ class Server:
 	
 		return client_info, brief_description
 
-	def get_clients_last_finished_task(self, executions_per_client):
-		clients_last_status = {}
-		for client in executions_per_client.keys():
-			client_executions = executions_per_client[client]
-			client_executions.sort(key=lambda entry:entry[0], reverse=True)
-			for execution in client_executions:
-				if execution[3] == "stable" or execution[3] == "broken":
-					clients_last_status[client] = execution[3]
-					break
-		return clients_last_status
-
 	def __html_index(self, clients_with_stats):
 		"Creates the main HTML file for the project"
 		project_info, project_brief_description = self.__html_project_info()
@@ -631,30 +569,17 @@ class Server:
 		content = ['<table>\n<tr>']
 		for client in executions_per_client.keys():
 			client_info, client_brief_description = self.__html_client_info(client)
-
 			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
 		content.append('</tr>')
 
 		content.append('<tr>')
-
-	 	clients_last_status = self.get_clients_last_finished_task(executions_per_client)
 		for client in executions_per_client.keys():
 			if client in clients_with_stats:
 				thumb_html = '<a href="%s-stats.html"><img src="%s_1-thumb.png" /></a> <a href="%s-stats.html">more...</a>' % (client, client, client)
+				
 			else:
 				thumb_html = ''
-
-			try:
-				if clients_last_status[client] == "stable":
-					last_status_class = 'class="taskok"'
-				elif clients_last_status[client] == "broken":
-					last_status_class = 'class="taskfailure"'
-				else:
-					last_status_class = ''
-			except KeyError:
-				last_status_class = ''
-
-			content.append('<td style="text-align:center" %s> %s </td>' % (last_status_class, thumb_html))
+			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
 		content.append('</tr>')	
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, executions_per_client.keys())
@@ -684,10 +609,13 @@ class Server:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		if False and self.project_name == 'CLAM': #TODO the proper way
+		if True and self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-		if False and self.project_name == 'practiques_ES1': #TODO the proper way
+		if True and self.project_name == 'ardour2-trunk': #TODO the proper way
+			filesstr = ' '.join(newfiles)
+			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/ardour2' % filesstr, shell=True)
+		if True and self.project_name == 'practiques_ES1': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:tmp/testfarm_ES1/' % filesstr, shell=True)
 
