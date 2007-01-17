@@ -11,11 +11,12 @@ from runner import Runner
 # functions to parse minicppunit output
 import re
 def getNTests_line( line ) :
-        executed = re.match(r"\033\[1m\s+Executed Tests:\s*(\d+)", line)
-        passed   = re.match(r"\033\[32;1m\s+Passed Tests:\s*(\d+)", line)
+        executed = re.match(r".*Executed Tests:\ *(\d*)", line)
+        passed   = re.match(r".*Passed Tests:\ *(\d*)", line)
         if executed: return (executed.group(1),0)
         if passed: return (0,passed.group(1))
         return (0,0)
+
 def getNTests( out ) :
         dict = { 'passed_tests':0, '50':50, '100':100}
         for line in out.splitlines() :
@@ -24,7 +25,6 @@ def getNTests( out ) :
                 if p : dict['passed_tests'] = p
         return dict
 # end parser functions
-
 
 environ['SVN_SSH']='ssh -i %s/.ssh/svn_id_dsa' % environ['HOME']
 
@@ -75,14 +75,24 @@ essentia.add_subtask("build essentia python wrapper", [
 	"scons python",
 ] )
 
-essentia.add_subtask("build automatic tests", [
+essentia.add_subtask("install python bindings", [
+	"cd $HOME/testfarm/essentia-sandboxes/",
+	"sudo scons python install",
+] )
+
+essentia.add_subtask("build automatic cpp tests", [
 	"cd $HOME/testfarm/essentia-sandboxes/test/",
 	"scons",
 ] )
 
-essentia.add_subtask("run automatic tests", [
+essentia.add_subtask("run automatic cpp tests", [
 	"cd $HOME/testfarm/essentia-sandboxes/test/build/descriptortests",
 	{CMD : "./test", INFO : lambda x: x, STATS : getNTests },
+] )
+
+essentia.add_subtask("run automatic python tests", [
+	"cd $HOME/testfarm/essentia-sandboxes/test/src/pythontests",
+	{CMD : "python tests.py", INFO : lambda x: x, STATS : getNTests },
 ] )
 
 if sys.platform == "linux2":
