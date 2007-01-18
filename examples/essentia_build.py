@@ -8,6 +8,7 @@ from client import Client
 from project import Project
 from runner import Runner
 
+
 # functions to parse minicppunit output
 import re
 def getNTests_line( line ) :
@@ -95,11 +96,13 @@ essentia.add_subtask("run automatic python tests", [
 	{CMD : "python tests.py", INFO : lambda x: x, STATS : getNTests },
 ] )
 
+'''
 if sys.platform == "linux2":
 	essentia.add_subtask("run valgrind with automatic tests (memory integrity checks)", [
 		"cd $HOME/testfarm/essentia-sandboxes/test/build/descriptortests",
 		{CMD : "valgrind --leak-check=full -q ./test | grep ^==[0-9]+===", INFO : lambda x:x, STATUS_OK: lambda x:True },
 	] )
+''
 
 Runner ( 
 	essentia,  
