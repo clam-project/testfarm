@@ -1,4 +1,10 @@
 #! /usr/bin/python
+#
+# IMPORTANT: maintained (so up-to-date) clam-testfarm scripts can be
+# found in the clam repo, in CLAM/scripts. Checkout command:
+# svn co http://iua-share.upf.edu/svn/clam/trunk clam
+# So it's possible this script won't work.
+#
 
 # vcvars32.bat must be run in windows before this script
 
