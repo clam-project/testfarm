@@ -22,8 +22,8 @@ import urllib
 import urlparse
 
 Proxies = { 'http' : 'http://proxy.upf.edu:8080', 'ftp' : 'http://proxy.upf.edu:8080' }
-NoProxiesFor = ["localhost", "127.0.0.1", "10.55.0.50", "10.55.0.66"]
-useragent = 'simac-annotator-tasker'
+NoProxiesFor = ["localhost", "127.0.0.1", "10.55.0.50", "10.55.0.66", "efpc072.upf.es"]
+useragent = 'testfarm-python-client'
 
 
 class ServiceProxy :
