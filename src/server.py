@@ -476,7 +476,7 @@ class Server:
 	"""
 
 	def day_executions(self, executions_per_client):
-		"Returns client's task exeuctions ordered by day"
+		"Returns client's task executions ordered by day"
 		day_executions = {}
 		# order executions per day
 		time_tmpl = "%(Y)s-%(M)s-%(D)s"

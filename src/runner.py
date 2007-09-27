@@ -66,7 +66,7 @@ class Runner :
 			self.listeners = testinglisteners
 
 		try :
-			#do_subtasks at lease one time	
+			#do_subtasks at least one time	
 			task.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
 			task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 

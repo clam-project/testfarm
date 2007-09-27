@@ -50,7 +50,7 @@ def append_log_entry(req, project_name, client_name, entry):
 	f.write(entry)
 	f.close()
 #	server.update_static_html_files()
-	return "remote OK"
+#	return "remote OK"
 	return apache.OK
 
 def write_idle_info( req, project_name, client_name, idle_info ) :
@@ -60,27 +60,30 @@ def write_idle_info( req, project_name, client_name, idle_info ) :
 	f.write(idle_info)
 	f.close()
 #	server.update_static_html_files()
-	return "remote Ok"
+#	return "remote Ok"
 	return apache.OK
 
 def write_client_info(req, client_name, project_name, client_info): 
 	filename = client_info_filename(_logs_base_dir, project_name, client_name)
 	f = open(filename, 'w')
 	f.write( client_info )
-	return "remote client Ok"
+#	return "remote client Ok"
+	return apache.OK
 
 def write_project_info(req, project_name, project_info):# TODO : remove CODE DUPLICATION 
 	filename = project_info_filename(_logs_base_dir, project_name)
 	f = open(filename, 'w')
 	f.write( project_info )
 	f.close()
-	return "remote project Ok"
+#	return "remote project Ok"
+	return apache.OK
 
 def write_task_info(req, project_name, client_name, task_name, task_info):# TODO : remove CODE DUPLICATION 
 	filename = task_info_filename(_logs_base_dir, project_name, client_name, task_name)
 	f = open( filename, 'w' )
 	f.write( task_info )
 	f.close()
-	return "remote task Ok"
+#	return "remote task Ok"
+	return apache.OK
 	
 

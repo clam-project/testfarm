@@ -21,6 +21,8 @@
 import commands, os, time, sys, subprocess, tempfile
 
 from listeners import NullResultListener, ConsoleResultListener
+#TODO this is provisional
+import testfarmbot
 
 def is_string( data ):
 	try: # TODO : find another clean way to tho this check 
@@ -253,6 +255,13 @@ class Task :
 			listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
+		#TODO refactor: this is very hacky:
+		if all_ok:
+			testfarmcolor='green'
+		else:
+			testfarmcolor='RED!!!'
+		testfarmbot.send_and_quit("Linux testfarm client update. Current state is "+testfarmcolor)
+
 		return all_ok
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
