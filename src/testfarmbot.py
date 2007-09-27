@@ -1,0 +1,1 @@
+/home/parumi/patchedClam/CLAM/scripts/testfarmbot.py
