@@ -8,25 +8,35 @@ Testfarm dependencies
 How To Install Testfarm modules for testfarm clients?
 -----------------------------------------------------
 
-Well, just don't install them. An installer and packages are in our TODO
-but by now you can just specify the testfarm module path in your 
+Run testfarm/install.py with root privileges:
+$ sudo ./install.py
+
+To import testfarm classes from a testfarm client script import this:
+from task import *
+from project import Project
+from client import Client
+from runner import Runner
+
+How To Install Testfarm modules for testfarm clients? -- Alternative
+--------------------------------------------------------------------
+
+As an alternative, you can choose not to install them system-wide. 
+For that, just specify the testfarm module path in your 
 testfarm client sript. 
 An example: say you have the testfarm source in your home dir. 
 Then just begin your testfarm client adding the path to the sys.path,
 and doing these imports:
 
-
-#! /usr/bin/python
 import os, sys, time
 sys.path.append('%s/testfarm/src' % os.environ['HOME'])
 from task import *
 from project import Project
 from client import Client
 from runner import Runner
-from commands import getoutput
 
 A Testfarm client script example
 ---------------------------------
+
 Can be found here:
 https://iua-share.upf.edu/svn/clam/trunk/CLAM/scripts/clam_testfarm_client.py
 
