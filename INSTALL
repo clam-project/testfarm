@@ -5,20 +5,32 @@ Testfarm dependencies
 - libapache2-mod-python >= 3.1
 - ploticus
 
-How To Install Testfarm ?
----------------------------------------
-(UNIX like Systems)
+How To Install Testfarm modules for testfarm clients?
+-----------------------------------------------------
 
-- execute the script "install.py" ensuring that you are the system root or a sudoer
-	- example : If you have python2.4 and the lib is located in /usr/lib, ./install.py should create a directory in /usr/lib/python2.4/site-packages/testfarm and add testfarm source files to it. 
+Well, just don't install them. An installer and packages are in our TODO
+but by now you can just specify the testfarm module path in your 
+testfarm client sript. 
+An example: say you have the testfarm source in your home dir. 
+Then just begin your testfarm client adding the path to the sys.path,
+and doing these imports:
 
 
-(Win32 like Systems)
-- execute the script "install.py"
-	- example : If you have python2.4 located in C:\Python24, 'C:\Python24\python.exe install.py' should create a directory in C:\Python24\lib\site-packages\testfarm and add testfarm source files to it. 
+#! /usr/bin/python
+import os, sys, time
+sys.path.append('%s/testfarm/src' % os.environ['HOME'])
+from task import *
+from project import Project
+from client import Client
+from runner import Runner
+from commands import getoutput
 
-(General)
-- Note: you can use an option, '--verbose',  with the install.py to see what the script is doing. Another option, '--help' will display a help about the use of the script.
+A Testfarm client script example
+---------------------------------
+Can be found here:
+https://iua-share.upf.edu/svn/clam/trunk/CLAM/scripts/clam_testfarm_client.py
+
+
 
 How To Install a TestFarm Server ?
 ---------------------------------------
