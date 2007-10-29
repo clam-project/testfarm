@@ -21,8 +21,6 @@
 import commands, os, time, sys, subprocess, tempfile
 
 from listeners import NullResultListener, ConsoleResultListener
-#TODO this is provisional
-import testfarmbot
 
 def is_string( data ):
 	try: # TODO : find another clean way to tho this check 
@@ -260,7 +258,10 @@ class Task :
 			testfarmcolor='green'
 		else:
 			testfarmcolor='RED!!!'
-		testfarmbot.send_and_quit("Linux testfarm client update. Current state is "+testfarmcolor)
+		if self.project=="CLAM":
+			#TODO this is provisional
+			import testfarmbot
+			testfarmbot.send_and_quit("Linux testfarm client update. Current state is "+testfarmcolor)
 
 		return all_ok
 
