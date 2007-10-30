@@ -86,6 +86,7 @@ class Server:
 		assert self.project_name, "Error, project_name was expected. But was None"
 		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.project_name) )
 		result = map( remove_path_and_extension, logfiles)
+		result.sort()
 		return result
 
 	def load_client_log(self, client_name):
@@ -181,6 +182,7 @@ class Server:
 				
 	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, prefix, postfix ):
 		"Moves INFO and OUTPUT entries to separated files"
+		
 		extracted_note = '[SAVED TO FILE]'
 		output = cmd_tuple[3]
 		info = cmd_tuple[4]
@@ -194,7 +196,7 @@ class Server:
 			pass
 		#	print 'dont extract output: ', output
 
-		if info and info != extracted_note :
+		if False and info and info != extracted_note : #DISABLED for efficiency - Pau
 			filename = '%s/purged_info__%s' % (prefix, postfix)
 			f = open(filename, 'w')
 			f.write( str(info) ) #non string can be passed as info. so str() is needed 
@@ -567,7 +569,9 @@ class Server:
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
-		for client in executions_per_client.keys():
+		clients = executions_per_client.keys()
+		clients.sort()
+		for client in clients :
 			client_info, client_brief_description = self.__html_client_info(client)
 			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
 		content.append('</tr>')
@@ -617,7 +621,7 @@ class Server:
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/ardour2' % filesstr, shell=True)
 		if True and self.project_name == 'practiques_ES1': #TODO the proper way
 			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp %s clamadm@www.iua.upf.es:tmp/testfarm_ES1/' % filesstr, shell=True)
+			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm_ES1/' % filesstr, shell=True)
 
 
 	def collect_stats(self):
