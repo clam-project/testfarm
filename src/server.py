@@ -163,7 +163,6 @@ class Server:
 				date = entry[2]
 				count = 1
 				updated_log.append('\n')
-				print
 
 			# write the maybe modified entry in an auxiliar file
 			if tag == 'END_CMD' and date != last_date:
