@@ -1,14 +1,6 @@
 #! /usr/bin/python
 
-#import sys
-#sys.path.append('../../')
 from testfarm import *
-#import testfarm
-"""from task import *
-from project import Project
-from client import Client
-from runner import Runner
-"""
 
 dollar_euro = Task( project = Project("Conversio"),
 	client = Client("client_linux_dapper"),
