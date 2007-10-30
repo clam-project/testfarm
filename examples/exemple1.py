@@ -16,14 +16,12 @@ dollar_euro = Task( project = Project("Conversio"),
 )
 
 dollar_euro.add_subtask( "compilacio", [
-	"cd $HOME/conversio",
 	"g++ dollar2euro.cpp -o dollar2euro" 
 	], 
 	mandatory = True
 )
 
 dollar_euro.add_subtask( "un exemple: dollar a euro", [
-	"cd $HOME/conversio",
 	{CMD: "./dollar2euro 2", INFO: lambda x:x}
 ] )
 
