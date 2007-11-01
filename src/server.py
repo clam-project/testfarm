@@ -81,7 +81,7 @@ class Server:
 			print 'Warning: html dir was not created because Server was not initialized with a project_name'
 	
 		
-	def client_names(self):
+	def clients_sorted(self):
 		"Returns all client's names in the project"
 		assert self.project_name, "Error, project_name was expected. But was None"
 		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.project_name) )
@@ -316,7 +316,7 @@ class Server:
 	def __write_last_details_static_html_file(self):
 		"Writes an HTML file with the details of the last execution"
 		filenames = []
-		for client in self.client_names():
+		for client in self.clients_sorted():
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
@@ -406,7 +406,7 @@ class Server:
 	def write_missing_details_static_html(self):
 		"Writes details HTML file for those task executions without it"
 		filenames = []
-		for client in self.client_names():
+		for client in self.clients_sorted():
 			client_log = self.load_client_log(client)
 			missing_dates = self.__get_missing_details_dates(client_log, client)
 			for missing_date in missing_dates :
@@ -420,7 +420,7 @@ class Server:
 	def idle(self):
 		"Returns idle entries for all clients"
 		result = {}
-		for client_name in self.client_names():
+		for client_name in self.clients_sorted():
 			idle_entry = self.load_client_idle(client_name)
 			result[client_name] = idle_entry
 		return result
@@ -428,7 +428,7 @@ class Server:
 	def get_executions(self):
 		"Returns all client's task executions"
 		result = {}
-		for client_name in self.client_names():
+		for client_name in self.clients_sorted():
 			result[client_name] = self.__get_client_executions(client_name)
 		return result
 
@@ -447,8 +447,8 @@ class Server:
 %(date)s
 <p>Next check will be in %(next_run_in_seconds)s seconds </p>
 </div>''' % content_dict)
-		for begintime_str, endtime_str, repo_name, status in client_executions:
-			name_html = "<p>%s</p>" % repo_name
+		for begintime_str, endtime_str, task_name, status in client_executions:
+			name_html = "<p>%s</p>" % task_name + " - " + client_name
 			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
 			if endtime_str :					
 				if status == "aborted" :
@@ -494,10 +494,10 @@ class Server:
 		
 		return day_executions
 
-	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day, all_clients): # TODO : MS Finish Implementation
+	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day, clients): # TODO : MS Finish Implementation
 		"Generates HTML code for a client's task executions ordered by day"
 		content = []
-		# all_clients = self.client_names() DOES NOT WORK PROPERLY
+		# clients = self.clients_sorted() DOES NOT WORK PROPERLY
 		executions_per_day_key_sorted = executions_per_day.keys()
 		executions_per_day_key_sorted.sort(reverse = True)
 		html_time_tmpl = "%(D)s/%(M)s/%(Y)s"
@@ -505,12 +505,13 @@ class Server:
 		for day in executions_per_day_key_sorted :
 			#content.append('<tr>')
 			formatted_day = self.__format_datetime(day+'-00-00-00', html_time_tmpl)
-			content.append('<tr><td colspan="%s" align="center">%s</td></tr><tr>' % (len(all_clients), formatted_day)) # insert a brake line
+			# this inserts a break line in the table indicating the day
+			content.append('<tr><td colspan="%s" align="center">%s</td></tr><tr>' % (len(clients), formatted_day)) 
 			day_clients = executions_per_day[day]
-			for client in all_clients:
+			for client in clients:
 			#	print "CLIENT_KEY IN DAY CLIENTS = ", client
 				content.append('<td>')
-				client_executions = day_clients.get(client, []) # if client return client executions , else return empty list
+				client_executions = day_clients.get(client, []) # if client then return client executions , else return empty list
 			#	print "CLIENT_VALUE IN DAY CLIENTS = ", client_executions
 				if is_last_day :
 					client_idle = idle_per_client[client]
@@ -568,15 +569,13 @@ class Server:
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
 		content = ['<table>\n<tr>']
-		clients = executions_per_client.keys()
-		clients.sort()
-		for client in clients :
+		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
 			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
 		content.append('</tr>')
 
 		content.append('<tr>')
-		for client in executions_per_client.keys():
+		for client in self.clients_sorted():
 			if client in clients_with_stats:
 				thumb_html = '<a href="%s-stats.html"><img src="%s_1-thumb.png" /></a> <a href="%s-stats.html">more...</a>' % (client, client, client)
 				
@@ -585,7 +584,7 @@ class Server:
 			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
 		content.append('</tr>')	
 		executions_per_day = self.day_executions(executions_per_client)
-		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, executions_per_client.keys())
+		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, self.clients_sorted() )
 		content.append('</table>')
 		return header_index % {'project_name':self.project_name+":", 
 					'project_info':project_info,
@@ -615,9 +614,6 @@ class Server:
 		if True and self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-		if True and self.project_name == 'ardour2-trunk': #TODO the proper way
-			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/ardour2' % filesstr, shell=True)
 		if True and self.project_name == 'practiques_ES1': #TODO the proper way
 			filesstr = ' '.join(newfiles)
 			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm_ES1/' % filesstr, shell=True)
@@ -626,7 +622,7 @@ class Server:
 	def collect_stats(self):
 		"Collect statistics for all clients"
 		result = {}
-		for client in self.client_names():
+		for client in self.clients_sorted():
 			result[client] = self.__collect_client_stats(client)
 		return result
 
