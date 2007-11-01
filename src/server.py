@@ -18,6 +18,20 @@
 #
 #
 
+"""
+TODO
+* separate html formatting code in a different class/source file
+* Server should become a LogsFormatter something that on construction
+  takes the filesystem logs state and writes html. But should not persist 
+  in memory (as now remote_server_timer does)
+* clients glob should be done only once (at constructor)
+* do not use a huge testfarmlog file, but a different log file for each execution
+  easier to clean old history
+* regenerate only the necessary. 
+ 
+
+"""
+
 import datetime, os, glob, sys
 import subprocess
 from dirhelpers import *
