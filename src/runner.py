@@ -32,7 +32,8 @@ class Runner :
 		local_base_dir = None,	
 		remote_server_url = None,
 		verbose = False,
-		testinglisteners = []
+		testinglisteners = [],
+		scp_target = None
 
 	) :
 		"Runs a task defined in user's script"	
@@ -57,7 +58,8 @@ class Runner :
 			server_to_push = Server( 
 				logs_base_dir=local_base_dir + "/logs", 
 				html_base_dir=local_base_dir + "/html", 
-				project_name=task.project.name )
+				project_name=task.project.name,
+				scp_target = scp_target)
 
 		else:
 			server_to_push = None

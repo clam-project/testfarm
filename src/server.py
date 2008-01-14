@@ -83,11 +83,13 @@ class Server:
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
 		html_base_dir = '/tmp/testfarm_html',
-		project_name = None
+		project_name = None,
+		scp_target = None
 	) :
 		self.logs_base_dir = logs_base_dir 
 		self.html_base_dir = html_base_dir
 		create_dir_if_needed( html_base_dir )
+		self.scp_target = scp_target
 		if project_name: #TODO not very sure of this  (PA)
 			create_dir_if_needed( '%s/%s' % (html_base_dir, project_name) )
 			self.project_name = project_name
@@ -625,13 +627,9 @@ class Server:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		if True and self.project_name == 'CLAM': #TODO the proper way
+		if self.scp_target :
 			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-		if True and self.project_name == 'practiques_ES1': #TODO the proper way
-			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm_ES1/' % filesstr, shell=True)
-
+			out = subprocess.call('scp -q %s %s' % (filesstr, self.scp_target), shell=True)
 
 	def collect_stats(self):
 		"Collect statistics for all clients"
@@ -714,7 +712,7 @@ class Server:
 				ploticus_cmd_tmpl = ploticus_binary + '''\
  %s -prefab chron data="%s" header=yes x=1 y=2 %s \
 datefmt=yyyy/mm/dd  xinc="1 day" mode=line unittype=datetime \
-title="some statistics (still experimental)" -o "%s" %s''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
+title="some statistics (still experimental)" -o "%s" %s 2>/dev/null''' # + 'xrange="2006/04/06.20:35 2006/04/06.21:15"'
 #TODO: make ploticus command silent. -diagfile and -errfile doesn't prevent getting anoying messages about number of records and fields for records...
 				cmd = ploticus_cmd_tmpl % ("-png", plotfilename, columns, png_filename, '')
 				subprocess.call( cmd, shell=True) 
