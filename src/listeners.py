@@ -133,7 +133,7 @@ class ConsoleResultListener(NullResultListener) :
 		cmd_color = self.color('CYAN')
 		yellow = self.color('YELLOW')
 		normal = self.color('NORMAL')
-		sys.stdout.write( "	| %scmd:%s%60s%s" % (yellow, cmd_color, cmd, normal) )
+		sys.stdout.write( "    + %scmd:%s%60s%s" % (yellow, cmd_color, cmd, normal) )
 		sys.stdout.flush()
 	
 	def listen_end_command(self, cmd, ok, output, info, stats):
