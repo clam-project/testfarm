@@ -204,6 +204,8 @@ class Task :
 		self.deployment = None #TODO : use this as unique development task
 		self.not_idle_checking_cmd = ""
 		self.seconds_idle = 0
+		self.last_commiter=""
+		self.last_revision=""
 		
 	def get_name(self):
 		return self.name;
@@ -232,6 +234,20 @@ class Task :
 		else :
 			output, zero_if_new_commits_found = run_command( self.not_idle_checking_cmd, initial_working_dir, verbose=verbose )
 			new_commits_found = not zero_if_new_commits_found
+		if new_commits_found :
+			#TODO solve how to chdir to clam
+			cdclam = "cd ~/clam && "
+			commiter, _ = run_command( cdclam+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done", initial_working_dir )
+			self.last_commiter = commiter.strip()
+			revision, _ = run_command( cdclam+"svn info -rHEAD | grep Rev: | while read a b c d; do echo $d; done", initial_working_dir )
+			self.last_commiter = commiter.strip()
+			self.last_revision = revision.strip()
+			print "last_commiter", self.last_commiter
+			if len(self.last_commiter.split())>1 :
+				# svn command was error
+				self.last_commiter=""
+				self.last_revision=""
+
 		for listener in listeners :
 			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
 		return new_commits_found
@@ -253,16 +269,35 @@ class Task :
 			listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
-		#TODO refactor: this is very hacky:
-		if all_ok:
-			testfarmcolor='green'
-		else:
-			testfarmcolor='RED!!!'
-		if self.project=="CLAM":
+		if self.project.name=="CLAM":
 			#TODO this is provisional
-			import testfarmbot
-			testfarmbot.send_and_quit("Linux testfarm client update. Current state is "+testfarmcolor)
-
+			if all_ok:
+				color='green'
+			else:
+				color='RED!!!'
+			msg = "commited revision %s and the current state (in linux client) is %s " % (
+				self.last_revision, 
+				color
+				)
+			if not all_ok:
+				msg += "\n%s: your commit is RED. please fix it!\n" % self.last_commiter
+			print "**** sending mail to acustica-ml ****"
+			import smtplib
+			s = smtplib.SMTP('iua-mail.upf.edu')
+			s.set_debuglevel(0)
+			mailmessage = 'From:Testfarm Bot (do not reply)\r\nTo:BM-Audio\r\nSubject:Testfarm is '+color+'\r\n'+msg
+			mailmessage += 'Check the testfarm page for the specific error:\nhttp://clam.iua.upf.edu/testfarm\n'
+			if not all_ok:
+				print 'RED - sending mail'
+				s.sendmail('parumi@iua.upf.edu', 'acustica-bm@lists.parumi.org', mailmessage)
+			else:
+				print 'GREEN - not sending mail'
+			print "**** testfarm bot hack ****"
+			import socket
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(("localhost", 2222))
+			s.send(msg)
+			s.close()
 		return all_ok
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener

@@ -29,6 +29,7 @@ class Runner :
 	def __init__(self, 
 		task,
 		continuous=False,
+		first_run_always=True,
 		local_base_dir = None,	
 		remote_server_url = None,
 		verbose = False,
@@ -69,8 +70,11 @@ class Runner :
 
 		try :
 			#do_subtasks at least one time	
-			task.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
-			task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+			new_commits_found = task.do_checking_for_new_commits( self.listeners, verbose=verbose ) #this creates a valid .idle file
+			print "first_run_always ",first_run_always
+			print "new commits_found ", new_commits_found
+			if first_run_always or new_commits_found :
+				task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
 
 			while continuous :
 				new_commits_found = task.do_checking_for_new_commits( self.listeners, verbose=verbose )

@@ -37,7 +37,9 @@ import subprocess
 from dirhelpers import *
 
 header_index = """
-<html>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <meta http-equiv="refresh" content="120">
 <link href="style.css" rel="stylesheet" type="text/css">
@@ -57,7 +59,9 @@ document.onclick=hideMe();
 """
 
 header_details = """
-<html>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm Details</title>
@@ -84,12 +88,10 @@ class Server:
 		logs_base_dir = '/tmp/testfarm_tests',
 		html_base_dir = '/tmp/testfarm_html',
 		project_name = None,
-		scp_target = None
 	) :
 		self.logs_base_dir = logs_base_dir 
 		self.html_base_dir = html_base_dir
 		create_dir_if_needed( html_base_dir )
-		self.scp_target = scp_target
 		if project_name: #TODO not very sure of this  (PA)
 			create_dir_if_needed( '%s/%s' % (html_base_dir, project_name) )
 			self.project_name = project_name
@@ -107,6 +109,7 @@ class Server:
 
 	def load_client_log(self, client_name):
 		filename = log_filename( self.logs_base_dir, self.project_name, client_name )
+		print "Loading: ", filename
 		return eval("[ %s ]" % open( filename ).read() )
 
 	def load_client_idle(self, client_name):
@@ -627,9 +630,13 @@ class Server:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		if self.scp_target :
+		if self.project_name == 'CLAM': #TODO the proper way
 			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp -q %s %s' % (filesstr, self.scp_target), shell=True)
+			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
+		if self.project_name == 'practiques_ES1': #TODO the proper way
+			filesstr = ' '.join(newfiles)
+			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm_ES1/' % filesstr, shell=True)
+
 
 	def collect_stats(self):
 		"Collect statistics for all clients"
@@ -732,7 +739,7 @@ title="some statistics (still experimental)" -o "%s" %s 2>/dev/null''' # + 'xran
 			f = open(stats_html_filename, 'w')
 			f.write('<html><body>\n')
 			for png, svg in zip(pngs, svgs):
-				f.write('<img src="%s"> <p><a href="%s">svg</a></p>\n' % (png, svg) )
+				f.write('<h3>%s</h3> <img src="%s"> <p><a href="%s">svg</a></p>\n' % (png, png, svg) )
 			f.write('</body></html>\n')
 			f.close()
 			images.append(stats_html_filename)
