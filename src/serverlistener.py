@@ -104,7 +104,7 @@ class ServerListener(NullResultListener):
 			f.write(entry)
 			for maybe_dict in subtask.commands :
 				cmd, _, _, _ = get_command_and_parsers(maybe_dict)
-				entry = "('CMD', '%s'),\n" % cmd
+				entry = "('CMD', %s),\n" % repr(cmd)
 				f.write(entry)
 			entry = "('END_SUBTASK', '%s'),\n" % subtask.name 
 			f.write(entry)
@@ -125,7 +125,7 @@ class ServerListener(NullResultListener):
 		self.__append_log_entry(entry)
 
 	def listen_begin_command(self, cmd):
-		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
+		entry = "('BEGIN_CMD', %s),\n" % repr(cmd)
 		self.__append_log_entry(entry)
 	
 	#def listen_end_command(self, cmd):
