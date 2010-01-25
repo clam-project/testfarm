@@ -143,30 +143,20 @@ class SubTask:
 			temp_file_name = 'C:\\testfarmtemp.txt'
 		for maybe_dict in self.commands :
 			# 1 : Create a temp file to save working directory
-			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)	
-			if sys.platform == 'win32': #TODO multiplatform
-				cmd_with_pwd = cmd + " && cd > %s" % temp_file_name
-			else:
-				cmd_with_pwd = cmd + " && pwd > %s" % temp_file_name	
+			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
+			pwd_cmd = 'pwd'
+			if sys.platform == 'win32' : pwd_cmd = 'cd'
+			cmd_with_pwd = cmd + " && %s > '%s'" %(pwd_cmd, temp_file_name)
 			# 2 : Begin command run 
 			self.__begin_command(cmd, listeners)
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			output, exit_status = run_command(cmd_with_pwd, initial_working_dir, verbose=verbose)
-			if status_ok_parser :
-				status_ok = status_ok_parser( output ) #TODO assert that returns a boolean
-			else:
-				status_ok = exit_status == 0
-			if info_parser :
-				info = info_parser(output)
-			else :
-				info = ''
-			if stats_parser :
-				stats = stats_parser(output)
-			else:
-				stats = {}
-			if status_ok :
-				output = ''
+
+			status_ok = status_ok_parser( output ) if status_ok_parser else (exit_status==0)
+			info  = info_parser(output)  if info_parser  else ''
+			stats = stats_parser(output) if stats_parser else {}
+			if status_ok : output = ''
 			#self.__send_result(listeners, cmd, status_ok, output, info, stats)
 						
 			f = open( temp_file_name )
@@ -271,16 +261,14 @@ class Task :
 			server_to_push.update_static_html_files()
 		if self.project.name=="CLAM":
 			#TODO this is provisional
-			if all_ok:
-				color='green'
-			else:
-				color='RED!!!'
+			color = 'green' if all_ok else 'RED!!!'
 			msg = "commited revision %s and the current state (in linux client) is %s " % (
 				self.last_revision, 
 				color
 				)
 			if not all_ok:
 				msg += "\n%s: your commit is RED. please fix it!\n" % self.last_commiter
+			"""
 			print "**** sending mail to acustica-ml ****"
 			import smtplib
 			s = smtplib.SMTP('iua-mail.upf.edu')
@@ -298,6 +286,7 @@ class Task :
 			s.connect(("localhost", 2222))
 			s.send(msg)
 			s.close()
+			"""
 		return all_ok
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
