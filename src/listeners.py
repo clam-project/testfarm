@@ -112,22 +112,26 @@ class ConsoleResultListener(NullResultListener) :
 		print "%s%s%s %s" % (mycol, str, self.color('NORMAL'), label)
 
 	def pprint_cmd_result(self, cmd, status_ok, output, info, stats):
-		if status_ok:
-			status_text = '[ ok ]'
-			status_color = self.color('GREEN')
-		else :
-			status_text = "[ failure ]"
-			status_color = self.color('RED')
 		normal = self.color('NORMAL')
-		output_color = normal
 		yellow = self.color('YELLOW')
+		red = self.color('RED')
+		green = self.color('GREEN')
+		if status_ok:
+			status_text = green+'[ ok ]'+normal
+		else :
+			status_text = red+'[ failure ]'+normal
 		if output :
 			ending = '%s---------------------------------------------\n' % yellow
 			ending += 'Output of failing command:%s\n\n%s\n' % (normal, output)
-			ending += '%s\n---------------------------------------------%s\n' % (yellow, normal)
+			ending += '\n%s---------------------------------------------%s\n' % (yellow, normal)
 		else:
 			ending = ''
-		sys.stdout.write( "\t\t%s%s%s\n    | %sinfo:%s %s\n    | %sstats:%s %s\n%s%s%s    |\n" % (status_color, status_text, normal, yellow, normal, info, yellow, normal, stats, output_color, ending, normal) )
+		sys.stdout.write("\n".join([
+			"\t\t%s"%(status_text),
+			"    | %sinfo:%s %s"%(yellow, normal, info),
+			"    | %sstats:%s %s"%(yellow, normal, stats),
+			"%s    |"% (ending),
+			]))
 
 	def pprint_begin_cmd(self, cmd):
 		cmd_color = self.color('CYAN')
