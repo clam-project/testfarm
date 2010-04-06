@@ -4,9 +4,13 @@ import sys
 sys.path.append('../src')
 from task import *
 from runner import Runner 
+from project import Project
+from client import Client
+from runner import Runner
+from commands import getoutput
 
-example = Task(	project_name = "example project",
-		client_name = "an_example_client",
+example = Task(	project = Project("example project"),
+		client = Client("an_example_client"),
 		task_name = "this_is_just_a_test"
 )
 

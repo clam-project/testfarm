@@ -109,7 +109,7 @@ class Server:
 
 	def load_client_log(self, client_name):
 		filename = log_filename( self.logs_base_dir, self.project_name, client_name )
-		print "Loading: ", filename
+		#print "Loading: ", filename
 		return eval("[ %s ]" % open( filename ).read() )
 
 	def load_client_idle(self, client_name):

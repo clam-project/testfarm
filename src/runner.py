@@ -33,9 +33,7 @@ class Runner :
 		local_base_dir = None,	
 		remote_server_url = None,
 		verbose = False,
-		testinglisteners = [],
-		scp_target = None
-
+		testinglisteners = []
 	) :
 		"Runs a task defined in user's script"	
 		self.listeners = [ ConsoleResultListener() ]
@@ -59,8 +57,7 @@ class Runner :
 			server_to_push = Server( 
 				logs_base_dir=local_base_dir + "/logs", 
 				html_base_dir=local_base_dir + "/html", 
-				project_name=task.project.name,
-				scp_target = scp_target)
+				project_name=task.project.name)
 
 		else:
 			server_to_push = None
