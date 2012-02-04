@@ -630,13 +630,9 @@ class Server:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		if self.project_name == 'CLAM': #TODO the proper way
-			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm/' % filesstr, shell=True)
-		if self.project_name == 'practiques_ES1': #TODO the proper way
-			filesstr = ' '.join(newfiles)
-			out = subprocess.call('scp %s clamadm@www.iua.upf.es:testfarm_ES1/' % filesstr, shell=True)
-
+		# TODO: I removed the scp's here, i guess that newfiles construction is useless now
+		# TODO: ...so maybe the whole function but i don't know whether those calls have side
+		# TODO: effects. --- dgarcia
 
 	def collect_stats(self):
 		"Collect statistics for all clients"
