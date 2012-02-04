@@ -79,6 +79,7 @@ How To Install a TestFarm Server ?
 
 - add styles and javascript files to html project dirs. 
   do this when the <PROJECT NAME> dir has already been created by the server.
+  $ sudo mkdir /var/www/testfarm_html/<PROJECT NAME>/
   $ cd /path/to/testfarm
   $ sudo cp style.css testfarm.js testfarm_info.js /var/www/testfarm_html/<PROJECT NAME>/
 
