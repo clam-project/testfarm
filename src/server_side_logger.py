@@ -87,5 +87,5 @@ def write_task_info(req, project_name, client_name, task_name, task_info):# TODO
 	return apache.OK
 
 def version():
-	return "testfarm svn revision 330"
+	return "testfarm svn revision $Revision$"
 
