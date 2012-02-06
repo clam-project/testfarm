@@ -464,7 +464,7 @@ time	clau_1	clau_2
 ('CMD', 'echo something echoed'),
 ('END_SUBTASK', 'subtask2'),
 ('END_TASK', 'task'),]
-		, server.load_task_info(a_client.name, task.name))
+		, server.load_client_info(a_client.name))#, task.name))
 
 
 
@@ -511,7 +511,7 @@ class Tests_ServerListener(ColoredTestCase):
 ('BEGIN_CMD', 'echo something echoed'),
 ('END_CMD', 'echo something echoed', True, '', 'something echoed\\n', {}),
 ('BEGIN_CMD', './lalala gh'),
-('END_CMD', './lalala gh', False, '/bin/sh: ./lalala: No such file or directory\\n', '', {}),
+('END_CMD', './lalala gh', False, '/bin/sh: ./lalala: not found\\n', '', {}),
 ('END_SUBTASK', 'subtask2'),
 ('END_TASK', 'task', '2006-03-17-13-26-20', 'False'),
 
