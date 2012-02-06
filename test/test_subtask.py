@@ -69,7 +69,7 @@ END_SUBTASK subtask""", listener.log() )
 		self.assertEquals("""\
 BEGIN_SUBTASK subtask
 ('echo hello', 'ok', '', '', {})
-('non-existing-command', 'failure', '/bin/sh: non-existing-command: command not found\\n', '', {})
+('non-existing-command', 'failure', '/bin/sh: non-existing-command: not found\\n', '', {})
 END_SUBTASK subtask""", listener.log() )
 	
 	def test_results_log__command_fails_with_stderr_and_stdout(self):
