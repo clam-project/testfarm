@@ -464,7 +464,7 @@ time	clau_1	clau_2
 ('CMD', 'echo something echoed'),
 ('END_SUBTASK', 'subtask2'),
 ('END_TASK', 'task'),]
-		, server.load_client_info(a_client.name))#, task.name))
+		, server.load_task_info(a_client.name))#, task.name))
 
 
 
