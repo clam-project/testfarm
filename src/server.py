@@ -601,7 +601,7 @@ class Server:
 			'{',
 			'	lastupdate: Date(),'
 			'	clients: ['
-		]
+			]
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
 			content+=[
@@ -618,11 +618,11 @@ class Server:
 				] + [
 				'			currentTask: "%s",' % "MyCurrentTask",
 				'		},',
-			]))
+				]
 		content +=[
 			'\t]',
 			'}',
-		]))
+		]
 		return "\n".join(content)
 
 	def __html_index(self, clients_with_stats):
