@@ -273,7 +273,7 @@ class Server:
 			content.append( 'END_TASK "%s" %s %s</div>' % (task_name, end_time, status) )
 			#exiting, so no need to make opened_task=False
 			return header_details + '\n'.join(content) + footer	
-		def END_CMD(ok, output, info, stats) :
+		def END_CMD(command, ok, output, info, stats) :
 			#assert opened_task
 			#assert opened_subtask
 			#assert opened_cmd
@@ -306,7 +306,7 @@ class Server:
 				'END_TASK',
 				'BEGIN_SUBTASK',
 				'END_SUBTASK',
-				'EGIN_CMD',
+				'BEGIN_CMD',
 				'END_CMD',
 				], 'Log Parsing Error. Bad entry tag: "%s"' % tag
 			locals()[tag](*entry[1:])
@@ -604,7 +604,7 @@ class Server:
 		]
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
-			content.append([
+			content+=[
 				'		{',
 				'			name: "%s",'%client_info,
 				'			name_details: "%s",'%client_brief_description,
@@ -618,14 +618,12 @@ class Server:
 				] + [
 				'			currentTask: "%s",' % "MyCurrentTask",
 				'		},',
-			])
-
-		executions_per_day = self.day_executions(executions_per_client)
-		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, self.clients_sorted() )
-		content.append([
-			'\t]'
+			]))
+		content +=[
+			'\t]',
 			'}',
-		])
+		]))
+		return "\n".join(content)
 
 	def __html_index(self, clients_with_stats):
 		"Creates the main HTML file for the project"
