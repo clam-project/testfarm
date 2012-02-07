@@ -234,6 +234,65 @@ class Server:
 
 	def __html_single_execution_details(self, client_name, wanted_date):
 		"Creates an HTML file with the details of an execution given a date"
+		def BEGIN_TASK(taskname, begin_date) :
+			#assert not opened_task
+			#assert not opened_subtask
+			#assert not opened_cmd
+			content.append('<div class="task"> BEGIN_TASK "%s" %s' % (taskname, begin_date) )
+			opened_task = True
+		def BEGIN_SUBTASK(subtaskname) :
+			#assert opened_task
+			#assert not opened_subtask
+			#assert not opened_cmd
+			subtask_name = entry[1]
+			content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % subtaskname )
+			opened_subtask = True
+		def BEGIN_CMD(command) :
+			#assert opened_task
+			#assert opened_subtask
+			#assert not opened_cmd
+			content.append( '<div class=command>' )
+			content.append( '<span class="command_string"> %s</span>' % command )
+			opened_cmd = True						
+		def END_SUBTASK(subtask_name) :
+			#assert opened_task
+			#assert opened_subtask
+			#assert not opened_cmd
+			content.append('END_SUBTASK "%s"</div>' % subtask_name)
+			opened_subtask = False
+		def END_TASK(task_name, end_time, status) :
+			if opened_cmd:
+				#assert opened_task
+				#assert opened_subtask
+				content.append( '<span class="command_failure">[FAILURE]</span>' )
+				content.append( '<p class="output"> command execution aborted by the client</p>')
+				content.append('</div>')
+			if opened_subtask:
+				#assert opened_task
+				content.append('</div>')
+			content.append( 'END_TASK "%s" %s %s</div>' % (task_name, end_time, status) )
+			#exiting, so no need to make opened_task=False
+			return header_details + '\n'.join(content) + footer	
+		def END_CMD(ok, output, info, stats) :
+			#assert opened_task
+			#assert opened_subtask
+			#assert opened_cmd
+			if ok :
+				content.append( '<span class="command_ok">[OK]</span>' )
+			else:
+				content.append( '<span class="command_failure">[FAILURE]</span>' )
+				content.append( '<p id="output%d" class="output"> OUTPUT: %s </p>' % ( id_output, output ) )
+				content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % id_output )
+				id_output += 1
+			if info :
+				content.append( '<p id="info%d" class="info"> INFO: %s </p>' % ( id_info, info ) )
+				content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % id_info )
+				id_info += 1
+			if stats :
+				content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(stats) )
+			content.append( '</div>' )
+			opened_cmd = False
+
 		content = []
 		id_info = 1; # auto-increment id
 		id_output = 1; # auto-increment id
@@ -242,65 +301,16 @@ class Server:
 		opened_cmd = False 
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0].strip()
-			if tag == 'BEGIN_TASK':
-				#assert not opened_task
-				#assert not opened_subtask
-				#assert not opened_cmd
-				content.append('<div class="task"> BEGIN_TASK "%s" %s' % (entry[1], entry[2]) )
-				opened_task = True
-			elif tag == 'BEGIN_SUBTASK':
-				#assert opened_task
-				#assert not opened_subtask
-				#assert not opened_cmd
-				content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % entry[1])
-				opened_subtask = True
-			elif tag == 'BEGIN_CMD':
-				#assert opened_task
-				#assert opened_subtask
-				#assert not opened_cmd
-				content.append( '<div class=command>' )
-				content.append( '<span class="command_string"> %s</span>' % entry[1] )
-				opened_cmd = True						
-			elif tag == 'END_SUBTASK':
-				#assert opened_task
-				#assert opened_subtask
-				#assert not opened_cmd
-				content.append('END_SUBTASK "%s"</div>' % entry[1])
-				opened_subtask = False
-			elif tag == 'END_TASK':
-				if opened_cmd:
-					#assert opened_task
-					#assert opened_subtask
-					content.append( '<span class="command_failure">[FAILURE]</span>' )
-					content.append( '<p class="output"> command execution aborted by the client</p>')
-					content.append('</div>')
-				if opened_subtask:
-					#assert opened_task
-					content.append('</div>')
-				content.append( 'END_TASK "%s" %s %s</div>' % ( entry[1], entry[2], entry[3]) )
-				#exiting, so no need to make opened_task=False
-				return header_details + '\n'.join(content) + footer	
-			else:
-				assert tag == 'END_CMD', 'Log Parsing Error. Expected END_CMD, but was: "%s"' % tag
-				#assert opened_task
-				#assert opened_subtask
-				#assert opened_cmd
-				if entry[2]:
-					content.append( '<span class="command_ok">[OK]</span>' )
-				else:
-					content.append( '<span class="command_failure">[FAILURE]</span>' )
-					content.append( '<p id="output%d" class="output"> OUTPUT: %s </p>' % ( id_output, entry[3] ) )
-					content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % id_output )
-					id_output += 1
-				if entry[4] :
-					content.append( '<p id="info%d" class="info"> INFO: %s </p>' % ( id_info, entry[4] ) )
-					content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % id_info )
-					id_info += 1
-				if entry[5] :
-					content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(entry[5]) )
-				content.append( '</div>' )
-				opened_cmd = False
-		
+			assert tag in [
+				'BEGIN_TASK',
+				'END_TASK',
+				'BEGIN_SUBTASK',
+				'END_SUBTASK',
+				'EGIN_CMD',
+				'END_CMD',
+				], 'Log Parsing Error. Bad entry tag: "%s"' % tag
+			locals()[tag](*entry[1:])
+
 		if opened_cmd :
 			content.append( '<span class="command_inprogress">in progress ...</span>' )
 			content.append( '</div>')
@@ -582,6 +592,41 @@ class Server:
 	
 		return client_info, brief_description
 
+	def __json_data(self, clients_with_stats):
+		"Creates the js data for the project"
+		project_info, project_brief_description = self.__html_project_info()
+		executions_per_client = self.get_executions()
+		idle_per_client = self.idle()
+		content = [
+			'{',
+			'	lastupdate: Date(),'
+			'	clients: ['
+		]
+		for client in self.clients_sorted() :
+			client_info, client_brief_description = self.__html_client_info(client)
+			content.append([
+				'		{',
+				'			name: "%s",'%client_info,
+				'			name_details: "%s",'%client_brief_description,
+				'			status: "%s",'%("red" if True else ("int" if False else "green")),
+				'			doing: "%s",' %("wait" if True else ("old" if False else "run" )),
+				'			lastupdate: "%s",' % "2012/01/02 22:55:08",
+				'			failedTests: [',
+				] + [
+					'			"%s",' % task
+					for task in [] # todo
+				] + [
+				'			currentTask: "%s",' % "MyCurrentTask",
+				'		},',
+			])
+
+		executions_per_day = self.day_executions(executions_per_client)
+		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, self.clients_sorted() )
+		content.append([
+			'\t]'
+			'}',
+		])
+
 	def __html_index(self, clients_with_stats):
 		"Creates the main HTML file for the project"
 		project_info, project_brief_description = self.__html_project_info()
@@ -610,6 +655,16 @@ class Server:
 					'project_brief_description':project_brief_description
 					} + '\n'.join(content) + footer
 		
+	def __write_html_summary(self, clients_with_stats):
+		"Writes the HTML summary for the project"
+		filename = "%s/%s/testfarm-data.js" % (	
+			self.html_base_dir, 
+			self.project_name )
+		f = open( filename, 'w' )
+		f.write( self.__json_data( clients_with_stats ) )
+		f.close()
+		return filename
+
 	def __write_html_index(self, clients_with_stats):
 		"Writes the main HTML file for the project"
 		filename = "%s/%s/index.html" % (	
@@ -630,6 +685,7 @@ class Server:
 		newfiles, clients_with_stats = self.plot_stats()
 		newfiles += self.__write_last_details_static_html_file()
 		newfiles.append( self.__write_html_index( clients_with_stats ) )
+		newfiles.append( self.__write_html_summary( clients_with_stats ) )
 		# TODO: I removed the scp's here, i guess that newfiles construction is useless now
 		# TODO: ...so maybe the whole function but i don't know whether those calls have side
 		# TODO: effects. --- dgarcia
