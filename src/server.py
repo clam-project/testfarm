@@ -234,71 +234,74 @@ class Server:
 
 	def __html_single_execution_details(self, client_name, wanted_date):
 		"Creates an HTML file with the details of an execution given a date"
-		def BEGIN_TASK(taskname, begin_date) :
-			#assert not opened_task
-			#assert not opened_subtask
-			#assert not opened_cmd
-			content.append('<div class="task"> BEGIN_TASK "%s" %s' % (taskname, begin_date) )
-			opened_task = True
-		def BEGIN_SUBTASK(subtaskname) :
-			#assert opened_task
-			#assert not opened_subtask
-			#assert not opened_cmd
-			subtask_name = entry[1]
-			content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % subtaskname )
-			opened_subtask = True
-		def BEGIN_CMD(command) :
-			#assert opened_task
-			#assert opened_subtask
-			#assert not opened_cmd
-			content.append( '<div class=command>' )
-			content.append( '<span class="command_string"> %s</span>' % command )
-			opened_cmd = True						
-		def END_SUBTASK(subtask_name) :
-			#assert opened_task
-			#assert opened_subtask
-			#assert not opened_cmd
-			content.append('END_SUBTASK "%s"</div>' % subtask_name)
-			opened_subtask = False
-		def END_TASK(task_name, end_time, status) :
-			if opened_cmd:
-				#assert opened_task
-				#assert opened_subtask
-				content.append( '<span class="command_failure">[FAILURE]</span>' )
-				content.append( '<p class="output"> command execution aborted by the client</p>')
-				content.append('</div>')
-			if opened_subtask:
-				#assert opened_task
-				content.append('</div>')
-			content.append( 'END_TASK "%s" %s %s</div>' % (task_name, end_time, status) )
-			#exiting, so no need to make opened_task=False
-			return header_details + '\n'.join(content) + footer	
-		def END_CMD(command, ok, output, info, stats) :
-			#assert opened_task
-			#assert opened_subtask
-			#assert opened_cmd
-			if ok :
-				content.append( '<span class="command_ok">[OK]</span>' )
-			else:
-				content.append( '<span class="command_failure">[FAILURE]</span>' )
-				content.append( '<p id="output%d" class="output"> OUTPUT: %s </p>' % ( id_output, output ) )
-				content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % id_output )
-				id_output += 1
-			if info :
-				content.append( '<p id="info%d" class="info"> INFO: %s </p>' % ( id_info, info ) )
-				content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % id_info )
-				id_info += 1
-			if stats :
-				content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(stats) )
-			content.append( '</div>' )
-			opened_cmd = False
+		class Namespace() : pass
+		f=Namespace() # so that inner functions can modify the following vars
+		f.content = []
+		f.id_info = 1
+		f.id_output = 1
+		f.opened_task = False
+		f.opened_subtask = False
+		f.opened_cmd = False
 
-		content = []
-		id_info = 1; # auto-increment id
-		id_output = 1; # auto-increment id
-		opened_task = False
-		opened_subtask = False
-		opened_cmd = False 
+		def BEGIN_TASK(taskname, begin_date) :
+			#assert not f.opened_task
+			#assert not f.opened_subtask
+			#assert not f.opened_cmd
+			f.content.append('<div class="task"> BEGIN_TASK "%s" %s' % (taskname, begin_date) )
+			f.opened_task = True
+		def BEGIN_SUBTASK(subtaskname) :
+			#assert f.opened_task
+			#assert not f.opened_subtask
+			#assert not f.opened_cmd
+			subtask_name = entry[1]
+			f.content.append('<div class="subtask"> BEGIN_SUBTASK "%s"' % subtaskname )
+			f.opened_subtask = True
+		def BEGIN_CMD(command) :
+			#assert f.opened_task
+			#assert f.opened_subtask
+			#assert not f.opened_cmd
+			f.content.append( '<div class=command>' )
+			f.content.append( '<span class="command_string"> %s</span>' % command )
+			f.opened_cmd = True						
+		def END_SUBTASK(subtask_name) :
+			#assert f.opened_task
+			#assert f.opened_subtask
+			#assert not f.opened_cmd
+			f.content.append('END_SUBTASK "%s"</div>' % subtask_name)
+			f.opened_subtask = False
+		def END_TASK(task_name, end_time, status) :
+			if f.opened_cmd:
+				#assert f.opened_task
+				#assert f.opened_subtask
+				f.content.append( '<span class="command_failure">[FAILURE]</span>' )
+				f.content.append( '<p class="output"> command execution aborted by the client</p>')
+				f.content.append('</div>')
+			if f.opened_subtask:
+				#assert f.opened_task
+				f.content.append('</div>')
+			f.content.append( 'END_TASK "%s" %s %s</div>' % (task_name, end_time, status) )
+			#exiting, so no need to make f.opened_task=False
+			return header_details + '\n'.join(f.content) + footer	
+		def END_CMD(command, ok, output, info, stats) :
+			#assert f.opened_task
+			#assert f.opened_subtask
+			#assert f.opened_cmd
+			if ok :
+				f.content.append( '<span class="command_ok">[OK]</span>' )
+			else:
+				f.content.append( '<span class="command_failure">[FAILURE]</span>' )
+				f.content.append( '<p id="output%d" class="output"> OUTPUT: %s </p>' % ( f.id_output, output ) )
+				f.content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % f.id_output )
+				f.id_output += 1
+			if info :
+				f.content.append( '<p id="info%d" class="info"> INFO: %s </p>' % ( f.id_info, info ) )
+				f.content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % f.id_info )
+				f.id_info += 1
+			if stats :
+				f.content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(stats) )
+			f.content.append( '</div>' )
+			f.opened_cmd = False
+
 		for entry in self.single_execution_details(client_name, wanted_date ):
 			tag = entry[0].strip()
 			assert tag in [
@@ -311,15 +314,15 @@ class Server:
 				], 'Log Parsing Error. Bad entry tag: "%s"' % tag
 			locals()[tag](*entry[1:])
 
-		if opened_cmd :
-			content.append( '<span class="command_inprogress">in progress ...</span>' )
-			content.append( '</div>')
-		if opened_subtask :
-			content.append( '</div>')
-		if opened_task :	
-			content.append( '</div>')
+		if f.opened_cmd :
+			f.content.append( '<span class="command_inprogress">in progress ...</span>' )
+			f.content.append( '</div>')
+		if f.opened_subtask :
+			f.content.append( '</div>')
+		if f.opened_task :	
+			f.content.append( '</div>')
 			
-		return header_details + '\n'.join(content) + footer	
+		return header_details + '\n'.join(f.content) + footer	
 
 	#minimal version:
 #	def html_single_execution_details(self, client_name, wanted_date):
@@ -607,7 +610,7 @@ class Server:
 			content+=[
 				'		{',
 				'			name: "%s",'%client_info,
-				'			name_details: "%s",'%client_brief_description,
+				'			name_details: \'%s\','%client_brief_description,
 				'			status: "%s",'%("red" if True else ("int" if False else "green")),
 				'			doing: "%s",' %("wait" if True else ("old" if False else "run" )),
 				'			lastupdate: "%s",' % "2012/01/02 22:55:08",
@@ -616,6 +619,7 @@ class Server:
 					'			"%s",' % task
 					for task in [] # todo
 				] + [
+				'				],',
 				'			currentTask: "%s",' % "MyCurrentTask",
 				'		},',
 				]
@@ -630,21 +634,25 @@ class Server:
 		project_info, project_brief_description = self.__html_project_info()
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
-		content = ['<table>\n<tr>']
+		content = ['<table>']
+
+		# Client descriptions
+		content.append('<tr>')
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
 			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
 		content.append('</tr>')
 
+		# Stats
 		content.append('<tr>')
 		for client in self.clients_sorted():
 			if client in clients_with_stats:
 				thumb_html = '<a href="%s-stats.html"><img src="%s_1-thumb.png" /></a> <a href="%s-stats.html">more...</a>' % (client, client, client)
-				
 			else:
 				thumb_html = ''
 			content.append('<td style="text-align:center"> %s </td>' % thumb_html)
 		content.append('</tr>')	
+
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, self.clients_sorted() )
 		content.append('</table>')
