@@ -45,8 +45,7 @@ def update_projects_static_html_files():
 			server.update_static_html_files()
 			
 
-while True:
-	update_projects_static_html_files()
-	print "sleeping for some minutes..."
-	time.sleep( 60*5 )
+update_projects_static_html_files()
+
+
 
