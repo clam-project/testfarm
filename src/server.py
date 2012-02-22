@@ -335,15 +335,10 @@ class Server:
 	def __write_details_static_html_file(self, client_name, wanted_date):
 		"Writes an HTML file with the details of an execution given a date"
 		details = self.__html_single_execution_details(client_name, wanted_date)
-		filename = "%s/%s/details-%s-%s.html" % (
-			self.html_base_dir, 
-			self.project_name, 
+		filename = "details-%s-%s.html" % (
 			client_name, 
 			wanted_date )
-		f = open( filename, 'w' )
-		f.write( details )
-		f.close()
-		return filename
+		return self._write_file(filename, details)
 	
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
 		"Returns all task executions given a client name"
@@ -513,6 +508,14 @@ class Server:
 		
 		return day_executions
 
+	def __executed_subtasks(self, client_name, execution_date) :
+		return [
+			entry[1]
+			for entry in self.single_execution_details(client_name, execution_date )
+			if entry[0] == 'BEGIN_SUBTASK'
+			]
+
+
 	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day, clients): # TODO : MS Finish Implementation
 		"Generates HTML code for a client's task executions ordered by day"
 		content = []
@@ -597,17 +600,22 @@ class Server:
 			executions = sorted(executions_per_client[client])
 			if not executions: continue
 			idle_info = idle_per_client[client]
-			# TODO: implement in progress
-			start, stop, name, status = executions[-1]
+			print "new_commits_found:", idle_info['new_commits_found']
+			current_task = None
+			for start, stop, name, status in reversed(executions) :
+				if status != 'inprogress' : break # found a finished task
+				if current_task : continue # already have an inprogress task
+				subtasks = self.__executed_subtasks(client, start)
+				current_task = "Step %i: %s"%(len(subtasks),subtasks[-1]) if subtasks else "Starting up execution"
+
 			status_map = {
 				'broken': 'red',
 				'stable': 'green',
 				'aborted': 'int',
+				'inprogress': 'int', # TODO: considering single inprogress execution
 				}
 			last_update = datetime.datetime(*[int(a) for a in idle_info['date'].split('-')])
 			next_update = last_update + datetime.timedelta(seconds = idle_info['next_run_in_seconds'])
-			# TODO: compute current_task
-			current_task = None
 			# TODO: compute failed_tasks
 			failed_tasks = []
 			if status == 'broken' :
@@ -650,6 +658,7 @@ class Server:
 			self.project_name,
 			filename,
 			)
+		print "Generating '%s'..." % fullpath
 		f = open( fullpath, 'w' )
 		f.write( content )
 		f.close()
