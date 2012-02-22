@@ -345,19 +345,6 @@ class Server:
 		f.close()
 		return filename
 	
-	def __write_last_details_static_html_file(self):
-		"Writes an HTML file with the details of the last execution"
-		filenames = []
-		for client in self.clients_sorted():
-			client_log = self.load_client_log(client)
-			last_date = self.last_date(client_log)
-			filename = self.__write_details_static_html_file(client, last_date)
-			#purgue_client is still experimental:
- 			self.purge_client_logfile(client, last_date) #TODO improve purgue method
-			
-			filenames.append(filename)
-		return filenames
-
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
 		"Returns all task executions given a client name"
 		log = self.load_client_log(client_name)
@@ -607,27 +594,66 @@ class Server:
 			]
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
-			content+=[
+			executions = sorted(executions_per_client[client])
+			if not executions: continue
+			idle_info = idle_per_client[client]
+			# TODO: implement in progress
+			start, stop, name, status = executions[-1]
+			status_map = {
+				'broken': 'red',
+				'stable': 'green',
+				'aborted': 'int',
+				}
+			last_update = datetime.datetime(*[int(a) for a in idle_info['date'].split('-')])
+			next_update = last_update + datetime.timedelta(seconds = idle_info['next_run_in_seconds'])
+			# TODO: compute current_task
+			current_task = None
+			# TODO: compute failed_tasks
+			failed_tasks = []
+			if status == 'broken' :
+				pass
+				
+			doing = "run" if current_task else (
+				"old" if next_update < datetime.datetime.now() else "wait"
+				)
+			def format_date(date) :
+				return date.strftime("%Y/%m/%d %H:%M:%S")
+			content += [
 				'		{',
-				'			name: "%s",'%client_info,
-				'			name_details: \'%s\','%client_brief_description,
-				'			status: "%s",'%("red" if True else ("int" if False else "green")),
-				'			doing: "%s",' %("wait" if True else ("old" if False else "run" )),
-				'			lastupdate: "%s",' % "2012/01/02 22:55:08",
+				'			name: "%s",' % client,
+				'			description: "%s",' % client_info,
+				'			name_details: \'%s\',' % client_brief_description,
+				'			status: "%s",'% status_map[status],
+				'			doing: "%s",' % doing,
+				'			lastupdate: "%s",' % format_date(last_update),
+				] + ([
 				'			failedTests: [',
 				] + [
 					'			"%s",' % task
-					for task in [] # todo
+					for task in failed_tasks # todo
 				] + [
 				'				],',
-				'			currentTask: "%s",' % "MyCurrentTask",
+				] if failed_tasks else []) + ([
+				'			currentTask: "%s",' % current_task,
+				] if current_task else []) + [
 				'		},',
 				]
-		content +=[
-			'\t]',
+		content += [
+			'	]',
 			'}',
 		]
 		return "\n".join(content)
+
+	def _write_file(self, filename, content) :
+		fullpath = "%s/%s/%s" % (	
+			self.html_base_dir, 
+			self.project_name,
+			filename,
+			)
+		f = open( fullpath, 'w' )
+		f.write( content )
+		f.close()
+		return fullpath
 
 	def __html_index(self, clients_with_stats):
 		"Creates the main HTML file for the project"
@@ -661,26 +687,6 @@ class Server:
 					'project_brief_description':project_brief_description
 					} + '\n'.join(content) + footer
 		
-	def __write_html_summary(self, clients_with_stats):
-		"Writes the HTML summary for the project"
-		filename = "%s/%s/testfarm-data.js" % (	
-			self.html_base_dir, 
-			self.project_name )
-		f = open( filename, 'w' )
-		f.write( self.__json_data( clients_with_stats ) )
-		f.close()
-		return filename
-
-	def __write_html_index(self, clients_with_stats):
-		"Writes the main HTML file for the project"
-		filename = "%s/%s/index.html" % (	
-			self.html_base_dir, 
-			self.project_name )
-		f = open( filename, 'w' )
-		f.write( self.__html_index( clients_with_stats ) )
-		f.close()
-		return filename
-
 	def __helper_apache_log(self, msg):
 		'debugging method'
 		from mod_python import apache
@@ -689,12 +695,16 @@ class Server:
 	def update_static_html_files(self):
 		"Updates all project's HTML files"
 		newfiles, clients_with_stats = self.plot_stats()
-		newfiles += self.__write_last_details_static_html_file()
-		newfiles.append( self.__write_html_index( clients_with_stats ) )
-		newfiles.append( self.__write_html_summary( clients_with_stats ) )
-		# TODO: I removed the scp's here, i guess that newfiles construction is useless now
-		# TODO: ...so maybe the whole function but i don't know whether those calls have side
-		# TODO: effects. --- dgarcia
+		for client in self.clients_sorted():
+			client_log = self.load_client_log(client)
+			last_date = self.last_date(client_log)
+			filename = self.__write_details_static_html_file(client, last_date)
+			#purgue_client is still experimental:
+ 			self.purge_client_logfile(client, last_date) #TODO improve purgue method
+			
+			newfiles.append(filename)
+		newfiles.append(self._write_file('index.html', self.__html_index(clients_with_stats)))
+		newfiles.append(self._write_file('testfarm-data.js', self.__json_data(clients_with_stats)))
 
 	def collect_stats(self):
 		"Collect statistics for all clients"
