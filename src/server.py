@@ -335,9 +335,7 @@ class Server:
 	def __write_details_static_html_file(self, client_name, wanted_date):
 		"Writes an HTML file with the details of an execution given a date"
 		details = self.__html_single_execution_details(client_name, wanted_date)
-		filename = "details-%s-%s.html" % (
-			client_name, 
-			wanted_date )
+		filename = "details-%s-%s.html" % ( client_name, wanted_date )
 		return self._write_file(filename, details)
 	
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
@@ -514,7 +512,20 @@ class Server:
 			for entry in self.single_execution_details(client_name, execution_date )
 			if entry[0] == 'BEGIN_SUBTASK'
 			]
-
+	def __failed_subtasks(self, client_name, execution_date) :
+		failed_tasks = []
+		current_task = None
+		for entry in self.single_execution_details(client_name, execution_date ) :
+			tag = entry[0]
+			if tag == 'BEGIN_SUBTASK' :
+				current_task, = entry[1:]
+			if tag == 'END_CMD' :
+				command, ok, output, info, stats = entry[1:]
+				if ok : continue
+				if not current_task : 'ERROR DETERMINING TASK'
+				if current_task in failed_tasks : continue
+				failed_tasks.append(current_task)
+		return failed_tasks
 
 	def __html_format_clients_day_executions(self, idle_per_client, executions_per_day, clients): # TODO : MS Finish Implementation
 		"Generates HTML code for a client's task executions ordered by day"
@@ -616,11 +627,8 @@ class Server:
 				}
 			last_update = datetime.datetime(*[int(a) for a in idle_info['date'].split('-')])
 			next_update = last_update + datetime.timedelta(seconds = idle_info['next_run_in_seconds'])
-			# TODO: compute failed_tasks
-			failed_tasks = []
-			if status == 'broken' :
-				pass
-				
+			failed_tasks = self.__failed_subtasks(client, start)
+
 			doing = "run" if current_task else (
 				"old" if next_update < datetime.datetime.now() else "wait"
 				)
