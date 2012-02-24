@@ -80,9 +80,9 @@ def send_mail(color, text, debug=0):
 	server.set_debuglevel(debug)
 		
 	msg = MIMEMultipart()
-	msg['From'] = 'Testfarm Bot (do not reply)'
-	msg['To'] = mailconfig.to_email
-	msg['Subject'] = 'Testfarm is '+color
+	msg['From'] = mailconfig.from_name
+	msg['To'] = to_email
+	msg['Subject'] = mailconfig.subject%color
 	msg.attach(MIMEText(text))
 
 	try:
@@ -97,7 +97,7 @@ def send_mail(color, text, debug=0):
 				for recip in smtpresult.keys():
 					print  """Could not delivery mail to: %s Server said: %s %s"""  \
 						% (recip, smtpresult[recip][0], smtpresult[recip][1])
-	
+
 	finally:
     		server.quit()
 
