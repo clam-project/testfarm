@@ -1,0 +1,10 @@
+<RCC>
+  <qresource>
+    <file>images/failed.png</file>
+    <file>images/failed.svg</file>
+    <file>images/passed.png</file>
+    <file>images/passed.svg</file>
+    <file>images/testfarm-burning.svg</file>
+    <file>images/testfarm.svg</file>
+  </qresource>
+</RCC>
