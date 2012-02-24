@@ -180,7 +180,7 @@ class TestFarmIndicator(QtGui.QDialog) :
 		nRunning = len([client for client in clients if client.doing == 'run'])
 		oldDate = datetime.datetime.utcnow() - datetime.timedelta(hours=oldThresholdInHours)
 		oldDateString = oldDate.strftime("%Y-%m-%d %H:%M:%S")
-		nOld = len([client for client in clients if client.lastUpdate < oldDateString ])
+		nOld = len([client for client in clients if client.doing='old' or client.lastUpdate < oldDateString ])
 		print [(client.lastUpdate,oldDateString) for client in clients ]
 
 		toolTip = self.tr(
