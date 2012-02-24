@@ -74,8 +74,7 @@ def check_state_changed(color, repositories):
 	return old_color, repositories_changed
 
 
-def send_mail(color, text, debug=0):
-	print "**** sending mail to acustica-ml ****"
+def send_mail(color, message, debug=0):
 	server = smtplib.SMTP(mailconfig.server, mailconfig.port)
 	server.set_debuglevel(debug)
 		
@@ -83,6 +82,9 @@ def send_mail(color, text, debug=0):
 	msg['From'] = mailconfig.from_name
 	msg['To'] = to_email
 	msg['Subject'] = mailconfig.subject%color
+	text = message
+	if color == 'RED' and mailconfig.testfarm_page :
+		text += '\n\nCheck the testfarm page for the specific error: %s\n'%mailconfig.testfarm_page
 	msg.attach(MIMEText(text))
 
 	try:

@@ -601,10 +601,14 @@ class Server:
 		project_info, project_brief_description = self.__html_project_info()
 		executions_per_client = self.get_executions()
 		idle_per_client = self.idle()
+		def format_date(date) :
+			return date.strftime("%Y/%m/%d %H:%M:%S")
 		content = [
 			'{',
-			'	lastupdate: Date(),'
-			'	clients: ['
+			'	"project": "%s",' % self.project_name,
+			'	"lastupdate": "%s",'%format_date(datetime.datetime.now()),
+			'	"clients":',
+			'	[',
 			]
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
@@ -630,27 +634,27 @@ class Server:
 			failed_tasks = self.__failed_subtasks(client, start)
 
 			doing = "run" if current_task else (
-				"old" if next_update < datetime.datetime.now() else "wait"
+				"old" if next_update < datetime.datetime.now() else
+				"wait"
 				)
-			def format_date(date) :
-				return date.strftime("%Y/%m/%d %H:%M:%S")
 			content += [
 				'		{',
-				'			name: "%s",' % client,
-				'			description: "%s",' % client_info,
-				'			name_details: \'%s\',' % client_brief_description,
-				'			status: "%s",'% status_map[status],
-				'			doing: "%s",' % doing,
-				'			lastupdate: "%s",' % format_date(last_update),
+				'			"name": "%s",' % client,
+				'			"description": %s,' % repr(client_info),
+				'			"name_details": \'%s\',' % client_brief_description,
+				'			"status": "%s",'% status_map[status],
+				'			"doing": "%s",' % doing,
+				'			"lastupdate": "%s",' % format_date(last_update),
 				] + ([
-				'			failedTasks: [',
+				'			"failedTasks":',
+				'			[',
 				] + [
-					'			"%s",' % task
+				'				"%s",' % task
 					for task in failed_tasks # todo
 				] + [
-				'				],',
+				'			],',
 				] if failed_tasks else []) + ([
-				'			currentTask: "%s",' % current_task,
+				'			"currentTask": "%s",' % current_task,
 				] if current_task else []) + [
 				'		},',
 				]
@@ -713,7 +717,7 @@ class Server:
 		"Updates all project's HTML files"
 		newfiles, clients_with_stats = self.plot_stats()
 		for client in self.clients_sorted():
-			print 'Processing client', client
+			print 'Processing project %s, client %s', (self.project_name, client)
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)

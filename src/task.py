@@ -21,6 +21,7 @@
 import commands, os, time, sys, subprocess, tempfile
 
 from listeners import NullResultListener, ConsoleResultListener
+import mail
 
 def is_string( data ):
 	try: # TODO : find another clean way to tho this check 
@@ -196,6 +197,8 @@ class Task :
 		self.seconds_idle = 0
 		self.last_commiter=""
 		self.last_revision=""
+		self.repositories_to_check = ["clam"]
+		self.repositories = []
 		
 	def get_name(self):
 		return self.name;
@@ -207,6 +210,9 @@ class Task :
 		"Sets the checking command and seconds to idle"
 		self.not_idle_checking_cmd = checking_cmd
 		self.seconds_idle = minutes_idle * 60
+
+	def set_repositories_to_keep_state_of(self, repositories):
+		self.repositories_to_check = repositories
 
 	def add_deployment(self, commands): #TODO must be unique
 		"A separated subtask to deploy"
@@ -226,17 +232,19 @@ class Task :
 			new_commits_found = not zero_if_new_commits_found
 		if new_commits_found :
 			#TODO solve how to chdir to clam
-			cdclam = "cd ~/clam && "
-			commiter, _ = run_command( cdclam+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done", initial_working_dir )
-			self.last_commiter = commiter.strip()
-			revision, _ = run_command( cdclam+"svn info -rHEAD | grep Rev: | while read a b c d; do echo $d; done", initial_working_dir )
-			self.last_commiter = commiter.strip()
-			self.last_revision = revision.strip()
-			print "last_commiter", self.last_commiter
-			if len(self.last_commiter.split())>1 :
-				# svn command was error
-				self.last_commiter=""
-				self.last_revision=""
+			for repos in self.repositories_to_check:
+				cdclam = "cd ~/%s && " % repos
+				committer, _ =  \
+					run_command( cdclam+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done", initial_working_dir )
+				last_committer = committer.strip()
+				revision, _ = run_command( cdclam+"svn info -rHEAD | grep Rev: | while read a b c d; do echo $d; done", initial_working_dir )
+				last_revision = revision.strip()
+				if len(last_revision.split())>1 :
+					# svn command was error
+					last_commiter=""
+					last_revision=""
+				print repos, last_revision, last_committer
+				self.repositories.append((repos, last_revision, last_committer))
 
 		for listener in listeners :
 			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
@@ -259,34 +267,30 @@ class Task :
 			listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
-		if self.project.name=="CLAM":
-			#TODO this is provisional
-			color = 'green' if all_ok else 'RED!!!'
-			msg = "commited revision %s and the current state (in linux client) is %s " % (
-				self.last_revision, 
-				color
-				)
-			if not all_ok:
-				msg += "\n%s: your commit is RED. please fix it!\n" % self.last_commiter
-			"""
-			print "**** sending mail to acustica-ml ****"
-			import smtplib
-			s = smtplib.SMTP('iua-mail.upf.edu')
-			s.set_debuglevel(0)
-			mailmessage = 'From:Testfarm Bot (do not reply)\r\nTo:BM-Audio\r\nSubject:Testfarm is '+color+'\r\n'+msg
-			mailmessage += 'Check the testfarm page for the specific error:\nhttp://clam.iua.upf.edu/testfarm\n'
-			if not all_ok:
-				print 'RED - sending mail'
-				s.sendmail('parumi@iua.upf.edu', 'acustica-bm@lists.parumi.org', mailmessage)
-			else:
-				print 'GREEN - not sending mail'
-			print "**** testfarm bot hack ****"
-			import socket
-			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			s.connect(("localhost", 2222))
-			s.send(msg)
-			s.close()
-			"""
+
+		color = 'GREEN' if all_ok else 'RED'
+
+		last_color, last_commits  = mail.check_state_changed(color, self.repositories)
+
+		msg = "The current state (in linux client) is %s \n\n" % (color)
+
+		repositories = last_commits if len(last_commits) != 0 else self.repositories
+		for (repos,rev,committer) in repositories:
+			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
+
+		if not all_ok or last_color == 'RED' :
+			# whenever is red or changed from red to green
+			mail.send_mail(color, msg)
+
+		"""
+		print "**** testfarm bot hack ****"
+		import socket
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect(("localhost", 2222))
+		s.send(msg)
+		s.close()
+		"""
+
 		return all_ok
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
