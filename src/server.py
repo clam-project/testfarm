@@ -643,7 +643,7 @@ class Server:
 				'			doing: "%s",' % doing,
 				'			lastupdate: "%s",' % format_date(last_update),
 				] + ([
-				'			failedTests: [',
+				'			failedTasks: [',
 				] + [
 					'			"%s",' % task
 					for task in failed_tasks # todo
@@ -713,6 +713,7 @@ class Server:
 		"Updates all project's HTML files"
 		newfiles, clients_with_stats = self.plot_stats()
 		for client in self.clients_sorted():
+			print 'Processing client', client
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
