@@ -9,7 +9,6 @@ from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
 from email.Encoders import encode_base64
 
-import mailconfig
 
 def _get_last_committers(repositories):
 	def _run_cmd(command):
@@ -75,6 +74,10 @@ def check_state_changed(color, repositories):
 
 
 def send_mail(color, message, debug=0):
+	try:
+		import mailconfig
+	except ImportError: 
+		return
 	server = smtplib.SMTP(mailconfig.server, mailconfig.port)
 	server.set_debuglevel(debug)
 		
