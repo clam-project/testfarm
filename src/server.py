@@ -97,23 +97,36 @@ class Server:
 			self.project_name = project_name
 		else:
 			print 'Warning: html dir was not created because Server was not initialized with a project_name'
-	
-		
-	def clients_sorted(self):
-		"Returns all client's names in the project"
-		assert self.project_name, "Error, project_name was expected. But was None"
-		logfiles = glob.glob('%s/%s/*.testfarmlog' % (self.logs_base_dir, self.project_name) )
-		result = map( remove_path_and_extension, logfiles)
-		result.sort()
-		return result
 
-	def load_client_log(self, client_name):
-		filename = log_filename( self.logs_base_dir, self.project_name, client_name )
-		#print "Loading: ", filename
-		return eval("[ %s ]" % open( filename ).read() )
 
-	def load_client_idle(self, client_name):
-		filename = idle_filename( self.logs_base_dir, self.project_name, client_name )
+	def log_path(self, filename) :
+		"Builds a path name for a log file for the current project"
+		return os.path.join(
+			self.logs_base_dir,
+			self.project_name,
+			filename)
+
+	def client_log_path(self, client) :
+		return self.log_path("%s.testfarmlog"%client)
+
+	def client_idle_path(self, client) :
+		return self.log_path("%s.idle"%client)
+
+	def client_info_path(self, client) :
+		return self.log_path("%s.info"%client)
+
+	def project_info_path(self) :
+		return self.log_path("%s.info"%self.project_name)
+
+	def load_tuples(self, filename) :
+		print "Loading '%s'..."%filename
+		try :
+			return eval("[ %s ]" % open( filename ).read() )
+		except IOError:
+			return None
+
+	def load_dict(self, filename) :
+		print "Loading '%s'..."%filename
 		try :
 			content = open( filename ).read() 
 		except IOError:
@@ -122,22 +135,47 @@ class Server:
 			return {}
 		return eval( content )
 
+
+	def web_path(self, filename) :
+		"Builds a path name for a html output for the current project"
+		return os.path.join(
+			self.html_base_dir,
+			self.project_name,
+			filename)
+
+	def web_write(self, filename, content) :
+		fullpath = self.web_path(filename)
+		print "Generating '%s'..." % fullpath
+		f = open( fullpath, 'w' )
+		f.write( content )
+		f.close()
+		return fullpath
+
+
+	def clients_sorted(self):
+		"Returns all client's names in the project"
+
+		assert self.project_name, "Error, project_name was expected. But was None"
+		logfiles = glob.glob(self.client_log_path('*'))
+		result = map( remove_path_and_extension, logfiles)
+		result.sort()
+		return result
+
+	def load_client_log(self, client_name):
+		filename = self.client_log_path(client_name)
+		return self.load_tuples(filename)
+
+	def load_client_idle(self, client_name):
+		filename = self.client_idle_path(client_name)
+		return self.load_dict(filename)
+
 	def load_client_info(self, client_name):
-		filename = client_info_filename( self.logs_base_dir, self.project_name, client_name )
-		try :
-			client_info = eval("[ %s ]" % open( filename ).read() )
-			return client_info
-		except IOError:
-			return None
+		filename = self.client_info_path(client_name)
+		return self.load_tuples(filename)
 
 	def load_project_info(self):
-		filename = project_info_filename( self.logs_base_dir, self.project_name)
-		try :
-			project_info = eval("[ %s ]" % open( filename ).read() )
-			return project_info
-		except IOError:
-			return None
-
+		filename = self.project_info_path()
+		return self.load_tuples(filename)
 	
 	def last_date(self, log):
 		"Returns the date of the last task executed given a logfile"
@@ -169,8 +207,7 @@ class Server:
 		"Deletes (large) INFO and OUTPUT entries from logfile"
 		log = self.load_client_log(client_name)
 		date = ''
-		prefix = '%s/%s' % (self.logs_base_dir, self.project_name)
-		logfilename = log_filename( self.logs_base_dir, self.project_name, client_name )
+		logfilename = self.client_log_path(client_name )
 		updated_log = []
 		for entry in log :
 			tag = entry[0]
@@ -186,7 +223,7 @@ class Server:
 			# write the maybe modified entry in an auxiliar file
 			if tag == 'END_CMD' and date != last_date:
 				postfix = '%s_%s_%s' % (client_name, date, count)
-				new_entry = self.__extract_info_and_output_to_auxiliar_file(entry, prefix, postfix)
+				new_entry = self.__extract_info_and_output_to_auxiliar_file(entry, postfix)
 				updated_log.append( '%s,\n' % str(new_entry) )
 				count += 1
 			else :
@@ -198,14 +235,13 @@ class Server:
 		f.writelines( updated_log )
 		f.close()
 				
-	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, prefix, postfix ):
+	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, postfix ):
 		"Moves INFO and OUTPUT entries to separated files"
-		
 		extracted_note = '[SAVED TO FILE]'
 		output = cmd_tuple[3]
 		info = cmd_tuple[4]
 		if output and output != extracted_note :
-			filename = '%s/purged_output__%s' % (prefix, postfix)
+			filename = self.log_path('purged_output__%s' %postfix)
 			f = open(filename, 'w')
 			f.write(output)
 			f.close()
@@ -215,7 +251,7 @@ class Server:
 		#	print 'dont extract output: ', output
 
 		if False and info and info != extracted_note : #DISABLED for efficiency - Pau
-			filename = '%s/purged_info__%s' % (prefix, postfix)
+			filename = self.log_path('purged_info__%s' %postfix)
 			f = open(filename, 'w')
 			f.write( str(info) ) #non string can be passed as info. so str() is needed 
 			f.close()
@@ -336,7 +372,7 @@ class Server:
 		"Writes an HTML file with the details of an execution given a date"
 		details = self.__html_single_execution_details(client_name, wanted_date)
 		filename = "details-%s-%s.html" % ( client_name, wanted_date )
-		return self._write_file(filename, details)
+		return self.web_write(filename, details)
 	
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
 		"Returns all task executions given a client name"
@@ -400,14 +436,14 @@ class Server:
 		log.reverse()
 		missing_details_dates = []
 		begin_task_found = False
-		details_filename_tmpl = "%s/%s/details-%s-%s.html"
 		for entry in log :
 			tag = entry[0]
+			begin_date = entry[2]
 			if tag == 'BEGIN_TASK':
 				begin_task_found = True
-				details_filename = details_filename_tmpl % (self.html_base_dir, self.project_name, client_name, entry[2])
+				details_filename = self.web_path("details-%s-%s.html"%(client_name, begin_date))
 				if not os.path.isfile(details_filename):
-					missing_details_dates.append(entry[2])	
+					missing_details_dates.append(begin_date)	
 				else:
 					break
 	# TODO: why this assert? prevents starting without log files
@@ -462,16 +498,15 @@ class Server:
 		for begintime_str, endtime_str, task_name, status in client_executions:
 			name_html = "<p>%s</p>" % task_name + " - " + client_name
 			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
-			if endtime_str :					
-				if status == "aborted" :
-					endtime_html = "\n<p>Client Aborted: %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
-				else:
-					endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
-	
-				actual_status = status
-			else:
+			if not endtime_str :					
 				endtime_html = "<p>in progres...</p>"
 				actual_status = "in progress"
+			elif status == "aborted" :
+				endtime_html = "\n<p>Client Aborted: %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
+				actual_status = status
+			else:
+				endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
+				actual_status = status
 			details_filename = 'details-%s-%s.html' % (client_name, begintime_str)
 			details_html = '<p><a href="javascript:details_info(\'%s\',\'%s\')">info</a> | <a href="%s">execution log</a></p>' % (actual_status, details_filename, details_filename)
 			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
@@ -664,18 +699,6 @@ class Server:
 		]
 		return "\n".join(content)
 
-	def _write_file(self, filename, content) :
-		fullpath = "%s/%s/%s" % (	
-			self.html_base_dir, 
-			self.project_name,
-			filename,
-			)
-		print "Generating '%s'..." % fullpath
-		f = open( fullpath, 'w' )
-		f.write( content )
-		f.close()
-		return fullpath
-
 	def __html_index(self, clients_with_stats):
 		"Creates the main HTML file for the project"
 		project_info, project_brief_description = self.__html_project_info()
@@ -725,8 +748,8 @@ class Server:
  			self.purge_client_logfile(client, last_date) #TODO improve purgue method
 			
 			newfiles.append(filename)
-		newfiles.append(self._write_file('index.html', self.__html_index(clients_with_stats)))
-		newfiles.append(self._write_file('testfarm-data.js', self.__json_data(clients_with_stats)))
+		newfiles.append(self.web_write('index.html', self.__html_index(clients_with_stats)))
+		newfiles.append(self.web_write('testfarm-data.js', self.__json_data(clients_with_stats)))
 
 	def collect_stats(self):
 		"Collect statistics for all clients"
@@ -750,8 +773,6 @@ class Server:
 		allclients_stats = self.collect_stats()
 		clients = allclients_stats.keys()
 		clients_with_stats = []
-		prefix_html = '%s/%s' % (self.html_base_dir, self.project_name)
-		prefix_logs = '%s/%s' % (self.logs_base_dir, self.project_name)
 		images = []
 		pngs = []
 		pngs_thumb = []
@@ -777,7 +798,7 @@ class Server:
 
 				# 2. write a line for each item in a list
 				diagram_name = '%s_%d' % (client, diagram_count)
-				plotfilename = '%s/%s.plot' % (prefix_logs, diagram_name)
+				plotfilename = self.log_path('%s.plot' % diagram_name)
 
 				plotfile_content = ['time']
 				for key in normalizedkeys :
@@ -800,9 +821,9 @@ class Server:
 				for i in range(len(allkeys)-1): # "y=1" already in the ploticus_cmd
 					columns += " y%d=%d" % (i+2, i+3) # y2=3 y3=4, etc.
 
-				png_filename = '%s/%s.png' % (prefix_html, diagram_name)
-				png_thumbfilename = '%s/%s-thumb.png' % (prefix_html, diagram_name)
-				svg_filename = '%s/%s.svg' % (prefix_html, diagram_name)
+				png_filename = self.web_path('%s.png' % diagram_name)
+				png_thumbfilename = self.web_path('%s-thumb.png' % diagram_name)
+				svg_filename = self.web_path('%s.svg' % diagram_name)
 				
 				#maybe use: 'xrange="2006/04/04.22:00 2006/04/05.12:00"'
 				ploticus_binary = 'ploticus' #but in non-debian distros might be "pl"
@@ -825,7 +846,7 @@ title="some statistics (still experimental)" -o "%s" %s 2>/dev/null''' # + 'xran
 				svgs.append('%s.svg' % diagram_name)
 				images += [png_filename, png_thumbfilename, svg_filename]
 			# write stats client page
-			stats_html_filename = '%s/%s-stats.html' % (prefix_html, client)
+			stats_html_filename = self.web_path('%s-stats.html' %client)
 			f = open(stats_html_filename, 'w')
 			f.write('<html><body>\n')
 			for png, svg in zip(pngs, svgs):

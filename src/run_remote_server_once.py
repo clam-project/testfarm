@@ -26,8 +26,6 @@ import os, time
 _logs_base_dir = '/var/www/testfarm_logs'
 _html_base_dir = '/var/www/testfarm_html'
 
-_list_dir = []
-
 server = Server(
 	logs_base_dir = _logs_base_dir,
 	html_base_dir = _html_base_dir
