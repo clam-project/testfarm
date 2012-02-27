@@ -438,14 +438,14 @@ class Server:
 		begin_task_found = False
 		for entry in log :
 			tag = entry[0]
+			if tag != 'BEGIN_TASK': continue
 			begin_date = entry[2]
-			if tag == 'BEGIN_TASK':
-				begin_task_found = True
-				details_filename = self.web_path("details-%s-%s.html"%(client_name, begin_date))
-				if not os.path.isfile(details_filename):
-					missing_details_dates.append(begin_date)	
-				else:
-					break
+			begin_task_found = True
+			details_filename = self.web_path("details-%s-%s.html"%(client_name, begin_date))
+			if not os.path.isfile(details_filename):
+				missing_details_dates.append(begin_date)	
+			else:
+				break
 	# TODO: why this assert? prevents starting without log files
 	#	assert begin_task_found, "BEGIN_TASK not found" 
 		return missing_details_dates
