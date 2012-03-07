@@ -83,7 +83,7 @@ def send_mail(color, message, debug=0):
 		
 	msg = MIMEMultipart()
 	msg['From'] = mailconfig.from_name
-	msg['To'] = to_email
+	msg['To'] = mailconfig.to_email
 	msg['Subject'] = mailconfig.subject%color
 	text = message
 	if color == 'RED' and mailconfig.testfarm_page :
