@@ -20,6 +20,18 @@ a:visited {
 	font-weight: bold;
 }
 
+
+a .tooltip
+{
+	position: absolute;
+	display: none;
+	width: 30em;
+}
+a:hover .tooltip
+{
+	display: block;
+}
+
 .layer
 {
 	position:absolute;

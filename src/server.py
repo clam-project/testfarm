@@ -710,7 +710,17 @@ class Server:
 		content.append('<tr>')
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
-			content.append("<th> Client: <a href=\"javascript:get_info('%s')\"> %s</a>:<p width=\"100%%\">%s</p></th> " % (client_info, client, client_brief_description) )
+			content.append(
+				"<th> Client: "
+				"<a href=\"javascript:get_info('%s')\">"
+				"%s"
+				"<div class='ballon'>%s</div></a>"
+				"<p width=\"100%%\">%s</p></th> " % (
+					client_info,
+					client,
+					client_info,
+					client_brief_description,
+				))
 		content.append('</tr>')
 
 		# Stats
@@ -726,7 +736,8 @@ class Server:
 		executions_per_day = self.day_executions(executions_per_client)
 		content += self.__html_format_clients_day_executions(idle_per_client, executions_per_day, self.clients_sorted() )
 		content.append('</table>')
-		return header_index % {'project_name':self.project_name+":", 
+		return header_index % {
+					'project_name':self.project_name+":", 
 					'project_info':project_info,
 					'project_brief_description':project_brief_description
 					} + '\n'.join(content) + footer
