@@ -36,7 +36,7 @@ import datetime, os, glob, sys
 import subprocess
 from dirhelpers import *
 
-header_index = """
+header_index = """\
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
@@ -52,13 +52,14 @@ document.onclick=hideMe();
 </head>
 <body>
 <div id="theLayer" class="layer"></div>
-<h1>testfarm for project <a href="javascript:get_info('%(project_info)s')">%(project_name)s</a>
-<span class="description">%(project_brief_description)s</span>
+<h1>testfarm for project <a>%(project_name)s
+<span class='tooltip'>%(project_info)s</span></a>
+<span class='description'>%(project_brief_description)s</span>
 </h1>
 
 """
 
-header_details = """
+header_details = """\
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
@@ -72,12 +73,91 @@ header_details = """
 
 footer = """
 <div class="about">
-<p>TestFarm is free software. Learn <a href="http://www.iua.upf.es/~parumi/testfarm">about TestFarm</a>.</p>
+<p>TestFarm is free software. Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 </div>
 </body>
 </html>
 """
-			
+
+def ansiterminal2Html(text, tabstop=4) :
+	import re
+	import cgi
+
+	colorcodes =   {
+		'bold':{True:'\033[1m',False:'\033[0m'},
+		'red':{True:'\033[31m',False:'\033[0m'},
+		'green':{True:'\033[32m',False:'\033[0m'},
+		'#444400':{True:'\033[33m',False:'\033[0m'},
+		'blue':{True:'\033[34m',False:'\033[0m'},
+		'magenta':{True:'\033[35m',False:'\033[0m'},
+		'cyan':{True:'\033[36m',False:'\033[0m'},
+		'underline':{True:'\033[4m',False:'\033[0m'},
+		'lightgreen':{True:'\033[32;1m',False:'\033[0m'},
+		'#ff7777':{True:'\033[31;1m',False:'\033[0m'},
+		}
+
+	def recolor(color, text):
+		regexp = "(?:%s)(.*?)(?:%s)" % (colorcodes[color][True], colorcodes[color][False])
+		regexp = regexp.replace('[', r'\[')
+		return re.sub(regexp, r'''<span style="color: %s; font-weight:bold;">\1</span>''' % color, text)
+
+	def bold(text):
+		regexp = "(?:%s)(.*?)(?:%s)" % (colorcodes['bold'][True], colorcodes['bold'][False])
+		regexp = regexp.replace('[', r'\[')
+		return re.sub(regexp, r'<span style="font-weight:bold">\1</span>', text)
+
+	def underline(text):
+		regexp = "(?:%s)(.*?)(?:%s)" % (colorcodes['underline'][True], colorcodes['underline'][False])
+		regexp = regexp.replace('[', r'\[')
+		return re.sub(regexp, r'<span style="text-decoration: underline">\1</span>', text)
+
+	def removebells(text):
+		return text.replace('\07', '')
+
+	def removebackspaces(text):
+		backspace_or_eol = r'(.\010)|(\033\[K)'
+		n = 1
+		while n > 0:
+			text, n = re.subn(backspace_or_eol, '', text, 1)
+		return text
+	re_string = re.compile(r'(?P<htmlchars>[<&>])|(?P<space>^[ \t]+)|(?P<lineend>\r\n|\r|\n)|(?P<protocal>(^|\s)((http|ftp)://.*?))(\s|$)', re.S|re.M|re.I)
+	def do_sub(m):
+		c = m.groupdict()
+		if c['htmlchars']:
+			return cgi.escape(c['htmlchars'])
+		if c['lineend']:
+			return '<br>'
+		elif c['space']:
+			t = m.group().replace('\t', '&nbsp;'*tabstop)
+			t = t.replace(' ', '&nbsp;')
+			return t
+		elif c['space'] == '\t':
+			return ' '*tabstop;
+		else:
+			url = m.group('protocal')
+			if url.startswith(' '):
+				prefix = ' '
+				url = url[1:]
+			else:
+				prefix = ''
+			last = m.groups()[-1]
+			if last in ['\n', '\r', '\r\n']:
+				last = '<br>'
+			return '%s%s' % (prefix, url)
+#	result = re.sub(re_string, do_sub, text)
+	result = text
+	result = bold(result)
+	result = underline(result)
+	result = removebells(result)
+	result = removebackspaces(result)
+	for color in colorcodes :
+		result = recolor(color, result)
+	print result
+	return result
+
+
+
+		
 
 #
 #     SERVER
@@ -326,12 +406,14 @@ class Server:
 				f.content.append( '<span class="command_ok">[OK]</span>' )
 			else:
 				f.content.append( '<span class="command_failure">[FAILURE]</span>' )
-				f.content.append( '<p id="output%d" class="output"> OUTPUT: %s </p>' % ( f.id_output, output ) )
-				f.content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % f.id_output )
+				f.content.append( '<p id="output%d" class="output"> OUTPUT:<br /> %s </p>' % ( f.id_output, ansiterminal2Html(output) ) )
+				if output.count('\n') > 5 :
+						f.content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % f.id_output )
 				f.id_output += 1
 			if info :
-				f.content.append( '<p id="info%d" class="info"> INFO: %s </p>' % ( f.id_info, info ) )
-				f.content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % f.id_info )
+				f.content.append( '<p id="info%d" class="info"> INFO:<br />%s </p>' % ( f.id_info, ansiterminal2Html(info) ) )
+				if info.count('\n') > 5 :
+						f.content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % f.id_info )
 				f.id_info += 1
 			if stats :
 				f.content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(stats) )
@@ -591,45 +673,28 @@ class Server:
 			is_last_day = False
 		return content
 
-	def __html_project_info(self):
-		"Generates HTML code for the project information file"
+	def __description_info_to_html(self, info_tuples) :
 		project_info = ""
 		brief_description = " "
-		long_description_given = False
-		project_info_log = self.load_project_info()
-		if project_info_log :
-			for entry in project_info_log :
-				name = entry[0]
-				value = entry[1]
-				if name ==  "Long description" : long_description_given = True # a long description was given
-				if name == "Brief description" : # put the brief description aside
-					brief_description = value
-				else:
-					project_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
-		if not long_description_given :
-			project_info += '<p><span class=\\\'name\\\'>Long description:</span> no long description given</p>' 
-	
+
+		if not info_tuples : return '', ''
+		
+		for entry in info_tuples :
+			name, value = entry[:2]
+			if name == "Brief description" :
+				brief_description = value
+			if name == "Long description" :
+				project_info = value
 		return project_info, brief_description
-	
+		
+
+	def __html_project_info(self):
+		"Generates HTML code for the project information file"
+		return self.__description_info_to_html(self.load_project_info())
+
 	def __html_client_info(self, client_name): #TODO : remove code duplication
 		"Generates HTML code for the client information file"
-		client_info = ""
-		brief_description = ""
-		long_description_given = False
-		client_info_log = self.load_client_info(client_name)
-		if client_info_log :
-			for entry in client_info_log :
-				name = entry[0]
-				value = entry[1]
-				if name ==  "Long description" : long_description_given = True # a long description was given
-				if name == "Brief description" : # put the brief description aside
-					brief_description = value
-				else:
-					client_info += '<p><span class=\\\'name\\\'>%s:</span> %s</p>' % (name, value)
-		if not long_description_given :
-			client_info += '<p><span class=\\\'name\\\'>Long description:</span> no long description given</p>' 
-	
-		return client_info, brief_description
+		return self.__description_info_to_html(self.load_client_info(client_name))
 
 	def __json_data(self, clients_with_stats):
 		"Creates the js data for the project"
@@ -711,12 +776,9 @@ class Server:
 		for client in self.clients_sorted() :
 			client_info, client_brief_description = self.__html_client_info(client)
 			content.append(
-				"<th> Client: "
-				"<a href=\"javascript:get_info('%s')\">"
-				"%s"
-				"<div class='ballon'>%s</div></a>"
+				"<th> Client: <a>%s"
+				"<span class='tooltip'>%s</span></a>"
 				"<p width=\"100%%\">%s</p></th> " % (
-					client_info,
 					client,
 					client_info,
 					client_brief_description,
@@ -751,7 +813,7 @@ class Server:
 		"Updates all project's HTML files"
 		newfiles, clients_with_stats = self.plot_stats()
 		for client in self.clients_sorted():
-			print 'Processing project %s, client %s', (self.project_name, client)
+			print 'Processing project %s, client %s'% (self.project_name, client)
 			client_log = self.load_client_log(client)
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
