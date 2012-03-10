@@ -157,6 +157,7 @@ def ansiterminal2Html(text, tabstop=4) :
 
 
 
+
 		
 
 #
@@ -406,12 +407,12 @@ class Server:
 				f.content.append( '<span class="command_ok">[OK]</span>' )
 			else:
 				f.content.append( '<span class="command_failure">[FAILURE]</span>' )
-				f.content.append( '<p id="output%d" class="output"> OUTPUT:<br /> %s </p>' % ( f.id_output, ansiterminal2Html(output) ) )
+				f.content.append( '<p id="output%d" class="output"> OUTPUT:<br /> %s </p>' % ( f.id_output, deansi.deansi(output) ) )
 				if output.count('\n') > 5 :
 						f.content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % f.id_output )
 				f.id_output += 1
 			if info :
-				f.content.append( '<p id="info%d" class="info"> INFO:<br />%s </p>' % ( f.id_info, ansiterminal2Html(info) ) )
+				f.content.append( '<p id="info%d" class="info"> INFO:<br />%s </p>' % ( f.id_info, deansi.deansi(info) ) )
 				if info.count('\n') > 5 :
 						f.content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % f.id_info )
 				f.id_info += 1
@@ -590,9 +591,13 @@ class Server:
 				endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
 				actual_status = status
 			details_filename = 'details-%s-%s.html' % (client_name, begintime_str)
-			details_html = '<p><a href="javascript:details_info(\'%s\',\'%s\')">info</a> | <a href="%s">execution log</a></p>' % (actual_status, details_filename, details_filename)
+
+			details_html = "<p class='tooltip'>%s</p>" % (
+				("Status: %s<br />"%actual_status) +
+				("<a href='%s'>Log</a><br/>"%details_filename)
+			)
 			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
-				status, name_html, begintime_html, endtime_html, details_html) )
+				status, details_html, name_html, begintime_html, endtime_html) )
 		return content
 
 	"""def __initialize_clients_in_day_executions(self, day_executions, executions_per_client): #TODO: rename method
@@ -928,7 +933,7 @@ title="some statistics (still experimental)" -o "%s" %s 2>/dev/null''' # + 'xran
 			f.close()
 			images.append(stats_html_filename)
 		return images, clients_with_stats
-					
 
 
-		
+
+

@@ -107,8 +107,3 @@ function details_info(theStatus, theLink){
 	}
 }
 
-function column_width(columnId){
-	var column = document.getElementById(columnId);
-	window.alert("WIDTH = " + column.offsetWidth);
-	return  column.offsetWidth;
-}
