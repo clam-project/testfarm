@@ -1,10 +1,6 @@
 body {
 	font-family: 'Trebuchet MS', 'lucida grande', verdana, sans-serif; 
 }
-p {
-	padding: 0.3;
-	margin:0.3;
-}
 h1 {
 	color: #666;
 }
@@ -21,17 +17,18 @@ a:visited {
 }
 
 
-a > .tooltip
+.tooltip
 {
+	padding: 2em;
 	color: black;
 	font-weight: normal;
 	background: white;
 	border: 1pt black solid;
 	position: absolute;
 	display: none;
-	width: 30em;
+	max-width: 30em;
 }
-a:hover > .tooltip
+:hover > .tooltip
 {
 	display: block;
 }
@@ -44,71 +41,23 @@ a:hover > .tooltip
 	left:0;
 	top:0;
 	visibility:hidden;
-	filter: alpha(opacity=90); 
 	opacity: .9;
-}
-
-.inprogress
-{
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
-	margin-left: 0.5em;
-	margin-right: 0.5em;
-	padding: 0.3em;
-	text-align: center;
-	font-size: 0.8em;
-	color: black;
-	background-color: yellow;
-	-moz-border-radius: 0.8em; /* mozilla only */
-}
-
-.aborted
-{
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
-	margin-left: 0.5em;
-	margin-right: 0.5em;
-	padding: 0.3em;
-	text-align: center;
-	font-size: 0.8em;
-	color: black;
-	background-color: #FF9B00;
-	-moz-border-radius: 0.8em; /* mozilla only */
+	filter: alpha(opacity=90); 
 }
 
 .idle
 {
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
-	margin-left: 0.5em;
-	margin-right: 0.5em;
-	padding-top: 0.3em;
-	padding-bottom: 0.3em;
-	padding-right: 2em;
-	padding-left: 2em;
+	margin: 0.5em;
+	padding: 0.3em;
 	text-align: center;
 	font-size: 0.8em;
 	color: black;
 	background-color: #ccc;
 }
-.stable
+.execution
 {
-	margin-top: 0.5em;
-	margin-bottom: 0.5em;
-	margin-left: 0.5em;
-	margin-right: 0.5em;
-	padding-top: 0.3em;
-	padding-bottom: 0.3em;
-	padding-right: 2em;
-	padding-left: 2em;
-	text-align: center;
-	font-size: 0.8em;
-	color: white;
-	background-color: #00C200;
-	-moz-border-radius: 0.8em; /* mozilla only */
-}
-.broken
-{
+	display: block;
+	text-decoration: none;
 	margin-top: 0.5em;
 	margin-bottom: 0.5em;
 	margin-left: 0.5em;
@@ -116,10 +65,41 @@ a:hover > .tooltip
 	padding: 0.3em;
 	text-align: center;
 	font-size: 0.8em;
+	-moz-border-radius: 0.8em; /* mozilla only */
+	border-radius: 0.8em;
+}
+.execution:hover
+{
+	opacity: .7;
+}
+.execution > p
+{
+	padding: 0;
+	margin: 2pt;
+}
+.execution.inprogress
+{
+	color: black;
+	background-color: yellow;
+}
+
+.execution.aborted
+{
+	color: black;
+	background-color: #FF9B00;
+}
+
+.execution.stable
+{
+	color: white;
+	background-color: #00C200;
+}
+.execution.broken
+{
 	color: white;
 	background-color: red;
-	-moz-border-radius: 0.8em; /* mozilla only */
 }
+
 table
 {
 	border-spacing: 5px;
@@ -194,7 +174,7 @@ td
 .command
 {
 	position: relative;
-	left: 2%;
+	padding-left: 0em;
 }
 
 .command_tobedone
@@ -203,13 +183,13 @@ td
 	font-weight: bold;
 	font-family: monospace;
 	font-size: 1.2em;
-	padding-left: 3em;
+	padding-left: 1em;
 }
 
 .command_string
 {
+	padding-left: 2em;
 	position: relative;
-	left: 2%;
 	font-family: monospace;
 	font-size: 1.2em;
 	color:maroon;
@@ -242,52 +222,70 @@ td
 	padding-left: 3em;
 }
 
+.plain_text
+{
+/*	margin: 1em;*/
+	margin-top: 0;
+	margin-left: 2em;
+	white-space: pre;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding: 1em 2em 2em; 
+	overflow: visible;
+}
+.info > .plain_text
+{
+	margin: 0pt;
+	border: solid 1px #ddd;
+	color: blue;
+}
+.output > .plain_text
+{
+	margin: 0pt;
+	border: solid 3px red;
+	color: black;
+	background-color: yellow;
+}
+
+.info, .output
+{
+	margin: 1em;
+	margin-left: 2em;
+	white-space: pre;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding: 1em 2em 2em; 
+}
 
 .more
 {
-	position: absolute;
-	bottom: -10px;
+	margin-top: 0pt;
+	position: relative;
+	bottom: 5px;
+	left: 3em;
+	display: inline;
 	background: white;
 	font-weight: bold;
 	color: #9370DB;
 	padding: 5px;
 	border: 1pt solid black;
 }
-
-.info > .more
+.output_header
 {
-	color: red;
-	border: none;
-	bottom: -10px;
-}
-
-
-.output
-{
-	white-space: pre;
-	font-family: monospace;
+	display: inline;
+	margin-bottom: 0;
+	border: 2pt solid red;
+	background: yellow;
 	color: black;
-	font-size: 0.9em;
-	padding: 2em; 
-	border: solid 3px red;
-	background-color: yellow;
-	/* height and overflow-y to be changed by the 'more' button */
-	height: 8em;
-	overflow-y: hidden;
-
-	transition: height 0.3s ease-in;
-	-moz-transition: height 0.3s ease-in;
 }
-
-
-.info
+.info_header
 {
-	white-space: pre;
-	font-family: monospace;
-	color: blue;
-	font-size: 0.9em;
-	padding: 2em; 
-	border: solid 1px #ddd;
+	display: inline;
+	margin-bottom: 0;
+	padding: 0px;
+	background: #eee;
+	border: 1pt solid #ddd;
+	color: green;
 }
 
 .about
@@ -299,7 +297,7 @@ td
 {
 	white-space: pre;
 	position: relative;
-	left: 4%;
+	left: 2em;
 	color:#777A7F;
 }
 

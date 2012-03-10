@@ -35,6 +35,7 @@ TODO
 import datetime, os, glob, sys
 import subprocess
 from dirhelpers import *
+import deansi
 
 header_index = """\
 <?xml version="1.0" encoding="utf-8"?>
@@ -42,16 +43,12 @@ header_index = """\
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <meta http-equiv="refresh" content="120">
-<link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm for project %(project_name)s </title>
-<script type="text/javascript" language="JavaScript1.2" src="testfarm_info.js"></script>
-<script language="JavaScript1.2">
-document.onmousedown=ddInit;
-document.onclick=hideMe();
-</script>
+<link href="style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript" language="JavaScript1.2" src="testfarm.js"></script>
 </head>
 <body>
-<div id="theLayer" class="layer"></div>
+<div id=theLayer" class="layer"></div>
 <h1>testfarm for project <a>%(project_name)s
 <span class='tooltip'>%(project_info)s</span></a>
 <span class='description'>%(project_brief_description)s</span>
@@ -64,8 +61,8 @@ header_details = """\
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<link href="style.css" rel="stylesheet" type="text/css">
 <title>Tests Farm Details</title>
+<link href="style.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" language="JavaScript" src="testfarm.js"></script>
 </head>
 <body>
@@ -79,86 +76,6 @@ footer = """
 </html>
 """
 
-def ansiterminal2Html(text, tabstop=4) :
-	import re
-	import cgi
-
-	colorcodes =   {
-		'bold':{True:'\033[1m',False:'\033[0m'},
-		'red':{True:'\033[31m',False:'\033[0m'},
-		'green':{True:'\033[32m',False:'\033[0m'},
-		'#444400':{True:'\033[33m',False:'\033[0m'},
-		'blue':{True:'\033[34m',False:'\033[0m'},
-		'magenta':{True:'\033[35m',False:'\033[0m'},
-		'cyan':{True:'\033[36m',False:'\033[0m'},
-		'underline':{True:'\033[4m',False:'\033[0m'},
-		'lightgreen':{True:'\033[32;1m',False:'\033[0m'},
-		'#ff7777':{True:'\033[31;1m',False:'\033[0m'},
-		}
-
-	def recolor(color, text):
-		regexp = "(?:%s)(.*?)(?:%s)" % (colorcodes[color][True], colorcodes[color][False])
-		regexp = regexp.replace('[', r'\[')
-		return re.sub(regexp, r'''<span style="color: %s; font-weight:bold;">\1</span>''' % color, text)
-
-	def bold(text):
-		regexp = "(?:%s)(.*?)(?:%s)" % (colorcodes['bold'][True], colorcodes['bold'][False])
-		regexp = regexp.replace('[', r'\[')
-		return re.sub(regexp, r'<span style="font-weight:bold">\1</span>', text)
-
-	def underline(text):
-		regexp = "(?:%s)(.*?)(?:%s)" % (colorcodes['underline'][True], colorcodes['underline'][False])
-		regexp = regexp.replace('[', r'\[')
-		return re.sub(regexp, r'<span style="text-decoration: underline">\1</span>', text)
-
-	def removebells(text):
-		return text.replace('\07', '')
-
-	def removebackspaces(text):
-		backspace_or_eol = r'(.\010)|(\033\[K)'
-		n = 1
-		while n > 0:
-			text, n = re.subn(backspace_or_eol, '', text, 1)
-		return text
-	re_string = re.compile(r'(?P<htmlchars>[<&>])|(?P<space>^[ \t]+)|(?P<lineend>\r\n|\r|\n)|(?P<protocal>(^|\s)((http|ftp)://.*?))(\s|$)', re.S|re.M|re.I)
-	def do_sub(m):
-		c = m.groupdict()
-		if c['htmlchars']:
-			return cgi.escape(c['htmlchars'])
-		if c['lineend']:
-			return '<br>'
-		elif c['space']:
-			t = m.group().replace('\t', '&nbsp;'*tabstop)
-			t = t.replace(' ', '&nbsp;')
-			return t
-		elif c['space'] == '\t':
-			return ' '*tabstop;
-		else:
-			url = m.group('protocal')
-			if url.startswith(' '):
-				prefix = ' '
-				url = url[1:]
-			else:
-				prefix = ''
-			last = m.groups()[-1]
-			if last in ['\n', '\r', '\r\n']:
-				last = '<br>'
-			return '%s%s' % (prefix, url)
-#	result = re.sub(re_string, do_sub, text)
-	result = text
-	result = bold(result)
-	result = underline(result)
-	result = removebells(result)
-	result = removebackspaces(result)
-	for color in colorcodes :
-		result = recolor(color, result)
-	print result
-	return result
-
-
-
-
-		
 
 #
 #     SERVER
@@ -407,14 +324,22 @@ class Server:
 				f.content.append( '<span class="command_ok">[OK]</span>' )
 			else:
 				f.content.append( '<span class="command_failure">[FAILURE]</span>' )
-				f.content.append( '<p id="output%d" class="output"> OUTPUT:<br /> %s </p>' % ( f.id_output, deansi.deansi(output) ) )
-				if output.count('\n') > 5 :
-						f.content.append( ' <script type="text/javascript">togglesize(\'output%d\');</script> ' % f.id_output )
+				f.content.append(
+					'<div id="output%d" class="output">'
+						'<div class="output_header">OUTPUT:</div>'
+						'<div class="plain_text">%s</div>'
+					'</div>' % (f.id_output, deansi.deansi(output) )
+					)
+				if output.count('\n') > 10 :
+					f.content.append( '<script type="text/javascript">togglesize(\'output%d\');</script>' % f.id_output )
 				f.id_output += 1
 			if info :
-				f.content.append( '<p id="info%d" class="info"> INFO:<br />%s </p>' % ( f.id_info, deansi.deansi(info) ) )
-				if info.count('\n') > 5 :
-						f.content.append( ' <script type="text/javascript">togglesize(\'info%d\');</script> ' % f.id_info )
+				f.content.append(
+					'<div id="info%d" class="info">'
+					'<div class="info_header">INFO:</div>\n'
+					'<div class="plain_text">%s</div></div>' % ( f.id_info, deansi.deansi(info) ) )
+				if info.count('\n') > 10 :
+					f.content.append( '<script type="text/javascript">togglesize(\'info%d\');</script>' % f.id_info )
 				f.id_info += 1
 			if stats :
 				f.content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(stats) )
@@ -543,7 +468,7 @@ class Server:
 			for missing_date in missing_dates :
 				filename = self.__write_details_static_html_file(client, missing_date)
 				#purgue_client is still experimental:
- 				self.purge_client_logfile(client, missing_date) #TODO improve purgue method
+# 				self.purge_client_logfile(client, missing_date) #TODO improve purgue method
 				filenames.append(filename)
 		return filenames
 	
@@ -570,34 +495,41 @@ class Server:
 		if client_idle and not client_idle['new_commits_found'] :
 			idlechecktime_str = client_idle['date']
 			content_dict = {}
-			content_dict['date'] = "<p>Last check done at : %s" % self.__format_datetime(
+			content_dict['date'] = "<p>Last check at : %s" % self.__format_datetime(
 				idlechecktime_str, time_tmpl )
 			content_dict['next_run_in_seconds'] = client_idle['next_run_in_seconds']
 			content.append('''\
 <div class="idle">
 %(date)s
-<p>Next check will be in %(next_run_in_seconds)s seconds </p>
+<p>Next after %(next_run_in_seconds)s seconds </p>
 </div>''' % content_dict)
 		for begintime_str, endtime_str, task_name, status in client_executions:
-			name_html = "<p>%s</p>" % task_name + " - " + client_name
-			begintime_html = "<p>Begin time: %s </p>" % self.__format_datetime(begintime_str, time_tmpl)
+			name_html = "<p>%s</p>" % (client_name + " :: " + task_name)
+			begintime_html = "<p><b>Started:</b> %s</p>" % self.__format_datetime(begintime_str, time_tmpl)
 			if not endtime_str :					
 				endtime_html = "<p>in progres...</p>"
 				actual_status = "in progress"
 			elif status == "aborted" :
-				endtime_html = "\n<p>Client Aborted: %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
+				endtime_html = "\n<p><b>Aborted:</b> %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
 				actual_status = status
 			else:
-				endtime_html = "<p>End time: %s </p>" % self.__format_datetime(endtime_str, time_tmpl)
+				endtime_html = "<p><b>Finished:</b> %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
 				actual_status = status
 			details_filename = 'details-%s-%s.html' % (client_name, begintime_str)
 
-			details_html = "<p class='tooltip'>%s</p>" % (
-				("Status: %s<br />"%actual_status) +
+			details_html = "<span class='tooltip'>%s</span>" % (
+				("Status: %s "%actual_status) +
 				("<a href='%s'>Log</a><br/>"%details_filename)
 			)
-			content.append( '<div class="%s">\n%s\n%s\n%s\n%s\n</div>' % (
-				status, details_html, name_html, begintime_html, endtime_html) )
+			content.append( '<a href="%s" title="%s. Click to see the details" class="execution %s">\n%s\n%s\n%s\n</div>' % (
+				details_filename,
+				status.capitalize(),
+				status,
+				name_html,
+				begintime_html,
+				endtime_html,
+#				details_html,
+				) )
 		return content
 
 	"""def __initialize_clients_in_day_executions(self, day_executions, executions_per_client): #TODO: rename method
