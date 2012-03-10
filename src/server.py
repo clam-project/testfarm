@@ -342,7 +342,13 @@ class Server:
 					f.content.append( '<script type="text/javascript">togglesize(\'info%d\');</script>' % f.id_info )
 				f.id_info += 1
 			if stats :
-				f.content.append(  '<p class="stats"> STATS: {%s} </p>' % ''.join(stats) )
+				f.content.append(  
+					'<div class="stats_header">Statistics:</div>'
+					'<div class="stats">' +
+					'<br />'.join(['<b>%s:</b> %s'%(item) for item in stats.iteritems() ]) +
+					'</div>'
+					)
+				print f.content
 			f.content.append( '</div>' )
 			f.opened_cmd = False
 
@@ -497,11 +503,11 @@ class Server:
 			content_dict = {}
 			content_dict['date'] = "<p>Last check at : %s" % self.__format_datetime(
 				idlechecktime_str, time_tmpl )
-			content_dict['next_run_in_seconds'] = client_idle['next_run_in_seconds']
+			content_dict['next_run_in_minutes'] = int(client_idle['next_run_in_seconds'])/60
 			content.append('''\
 <div class="idle">
 %(date)s
-<p>Next after %(next_run_in_seconds)s seconds </p>
+<p>Next after %(next_run_in_minutes)s minutes </p>
 </div>''' % content_dict)
 		for begintime_str, endtime_str, task_name, status in client_executions:
 			name_html = "<p>%s</p>" % (client_name + " :: " + task_name)

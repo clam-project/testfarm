@@ -22,11 +22,11 @@ a:visited {
 	padding: 2em;
 	color: black;
 	font-weight: normal;
-	background: white;
-	border: 1pt black solid;
+	background: #ffa;
+	border: 1pt #ccc solid;
 	position: absolute;
 	display: none;
-	max-width: 30em;
+	max-width: 20em;
 }
 :hover > .tooltip
 {
@@ -63,6 +63,7 @@ a:visited {
 	margin-left: 0.5em;
 	margin-right: 0.5em;
 	padding: 0.3em;
+	padding-bottom: 1em;
 	text-align: center;
 	font-size: 0.8em;
 	-moz-border-radius: 0.8em; /* mozilla only */
@@ -231,7 +232,7 @@ td
 	font-family: monospace;
 	font-size: 0.9em;
 	padding: 1em 2em 2em; 
-	overflow: visible;
+	overflow-x: visible;
 }
 .info > .plain_text
 {
@@ -273,10 +274,9 @@ td
 .output_header
 {
 	display: inline;
-	margin-bottom: 0;
-	border: 2pt solid red;
-	background: yellow;
-	color: black;
+	padding: 2pt;
+	background: red;
+	color: yellow;
 }
 .info_header
 {
