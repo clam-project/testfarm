@@ -34,7 +34,8 @@ class Runner :
 		local_base_dir = None,	
 		remote_server_url = None,
 		verbose = False,
-		testinglisteners = []
+		testinglisteners = [],
+		extralisteners = [],
 	) :
 		"Runs a task defined in user's script"	
 		self.listeners = [ ConsoleResultListener() ]
@@ -65,6 +66,8 @@ class Runner :
 
 		if testinglisteners:
 			self.listeners = testinglisteners
+
+		self.listeners.append(extralisteners)
 
 		try :
 			#do_subtasks at least one time	
