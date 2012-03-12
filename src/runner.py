@@ -67,7 +67,7 @@ class Runner :
 		if testinglisteners:
 			self.listeners = testinglisteners
 
-		self.listeners.append(extralisteners)
+		self.listeners += extralisteners
 
 		try :
 			#do_subtasks at least one time	
