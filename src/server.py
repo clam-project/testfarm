@@ -62,6 +62,9 @@ header_details = """\
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Tests Farm Details</title>
+<style>
+%(deansi_style)s
+</style>
 <link href="style.css" rel="stylesheet" type="text/css">
 <script type="text/javascript" language="JavaScript" src="testfarm.js"></script>
 </head>
@@ -315,7 +318,7 @@ class Server:
 				f.content.append('</div>')
 			f.content.append( 'END_TASK "%s" %s %s</div>' % (task_name, end_time, status) )
 			#exiting, so no need to make f.opened_task=False
-			return header_details + '\n'.join(f.content) + footer	
+			return header_details%dict(deansi_style=deansi.styleSheet()) + '\n'.join(f.content) + footer	
 		def END_CMD(command, ok, output, info, stats) :
 			#assert f.opened_task
 			#assert f.opened_subtask
@@ -348,7 +351,6 @@ class Server:
 					'<br />'.join(['<b>%s:</b> %s'%(item) for item in stats.iteritems() ]) +
 					'</div>'
 					)
-				print f.content
 			f.content.append( '</div>' )
 			f.opened_cmd = False
 
@@ -372,7 +374,7 @@ class Server:
 		if f.opened_task :	
 			f.content.append( '</div>')
 			
-		return header_details + '\n'.join(f.content) + footer	
+		return header_details%dict(deansi_style=deansi.styleSheet()) + '\n'.join(f.content) + footer	
 
 	#minimal version:
 #	def html_single_execution_details(self, client_name, wanted_date):
@@ -507,7 +509,7 @@ class Server:
 			content.append('''\
 <div class="idle">
 %(date)s
-<p>Next after %(next_run_in_minutes)s minutes </p>
+<p>Next one %(next_run_in_minutes)s minutes later</p>
 </div>''' % content_dict)
 		for begintime_str, endtime_str, task_name, status in client_executions:
 			name_html = "<p>%s</p>" % (client_name + " :: " + task_name)
