@@ -525,9 +525,6 @@ class Server:
 				actual_status = status
 			details_filename = 'details-%s-%s.html' % (client_name, begintime_str)
 
-			details_html = "<span class='tooltip'>%s</span>" % (
-				# TODO: Revision and failed tests if any
-			)
 			content.append( '<a href="%s" title="%s. Click to see the details" class="execution %s">\n%s\n%s\n%s\n</div>' % (
 				details_filename,
 				status.capitalize(),
@@ -535,7 +532,6 @@ class Server:
 				name_html,
 				begintime_html,
 				endtime_html,
-#				details_html,
 				) )
 		return content
 
