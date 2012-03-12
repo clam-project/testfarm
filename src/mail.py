@@ -37,6 +37,25 @@ def _get_last_committers(repositories):
 
 	return last_commits
 
+class MailReporter(NullResultListener) :
+	def __init__(repositories) :
+		self.repositories = repositories
+
+	def listen_end_task(self, taskname, all_ok):
+		color = 'GREEN' if all_ok else 'RED'
+		last_color, last_commits  = check_state_changed(color, self.repositories)
+		msg = "The current state is %s \n\n" % (color)
+		
+
+		repositories = last_commits if len(last_commits) != 0 else self.repositories
+		for (repos,rev,committer) in repositories:
+			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
+
+		if not all_ok or last_color == 'RED' :
+			# whenever is red or changed from red to green
+			send_mail(color, msg)
+
+
 # returns true if state changed
 def check_state_changed(color, repositories):
 	def write_state(current_time, filename, color, repositories):

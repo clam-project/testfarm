@@ -123,9 +123,9 @@ class SubTask:
 		temp_file_name = temp_file.name
 		if sys.platform =='win32':
 			temp_file_name = 'C:\\testfarmtemp.txt'
-		for maybe_dict in self.commands :
+		for command_definition in self.commands :
 			# 1 : Create a temp file to save working directory
-			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(maybe_dict)
+			cmd, info_parser, stats_parser, status_ok_parser = get_command_and_parsers(command_definition)
 			pwd_cmd = 'pwd'
 			if sys.platform == 'win32' : pwd_cmd = 'cd'
 			cmd_with_pwd = cmd + " && %s > '%s'" %(pwd_cmd, temp_file_name)
@@ -215,10 +215,11 @@ class Task :
 			#TODO solve how to chdir to clam
 			for repos in self.repositories_to_check:
 				cdclam = "cd ~/%s && " % repos
-				committer, _ =  \
-					run_command( cdclam+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done", initial_working_dir )
+				committer, _ =  run_command(
+					cdclam+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done", initial_working_dir )
 				last_committer = committer.strip()
-				revision, _ = run_command( cdclam+"svn info -rHEAD | grep Rev: | while read a b c d; do echo $d; done", initial_working_dir )
+				revision, _ = run_command(
+					cdclam+"svn info -rHEAD | grep Rev: | while read a b c d; do echo $d; done", initial_working_dir )
 				last_revision = revision.strip()
 				if len(last_revision.split())>1 :
 					# svn command was error
@@ -234,32 +235,21 @@ class Task :
 		"Executes all subtasks and sends results"
 		listener = MultiListener(listeners)
 		all_ok = True
+		failed_subtasks = []
 		listener.listen_task_info(self)
 		listener.listen_begin_task( self.name )
 		for subtask in self.subtasks :
-			current_result = subtask.do_subtask(listener, server_to_push, verbose=verbose)
-			all_ok = all_ok and current_result
-			if not current_result and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
-				break 
+			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)
+			all_ok = all_ok and subtask_ok
+			if not subtask_ok and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
+				break
+			if not subtask_ok :
+				failed_subtasks.append(subtask.name) # TODO
 			if server_to_push :
 				server_to_push.update_static_html_files()
 		listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
-
-		color = 'GREEN' if all_ok else 'RED'
-
-		last_color, last_commits  = mail.check_state_changed(color, self.repositories)
-
-		msg = "The current state (in linux client) is %s \n\n" % (color)
-
-		repositories = last_commits if len(last_commits) != 0 else self.repositories
-		for (repos,rev,committer) in repositories:
-			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
-
-		if not all_ok or last_color == 'RED' :
-			# whenever is red or changed from red to green
-			mail.send_mail(color, msg)
 
 		"""
 		print "**** testfarm bot hack ****"
