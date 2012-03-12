@@ -512,22 +512,21 @@ class Server:
 <p>Next one %(next_run_in_minutes)s minutes later</p>
 </div>''' % content_dict)
 		for begintime_str, endtime_str, task_name, status in client_executions:
-			name_html = "<p>%s</p>" % (client_name + " :: " + task_name)
-			begintime_html = "<p><b>Started:</b> %s</p>" % self.__format_datetime(begintime_str, time_tmpl)
+			name_html = "<div>%s</div>" % (client_name + " :: " + task_name)
+			begintime_html = "<div><b>Started:</b> %s</div>" % self.__format_datetime(begintime_str, time_tmpl)
 			if not endtime_str :					
-				endtime_html = "<p>in progres...</p>"
+				endtime_html = "<div>in progres...</div>"
 				actual_status = "in progress"
 			elif status == "aborted" :
-				endtime_html = "\n<p><b>Aborted:</b> %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
+				endtime_html = "\n<div><b>Aborted:</b> %s</div>" % self.__format_datetime(endtime_str, time_tmpl)
 				actual_status = status
 			else:
-				endtime_html = "<p><b>Finished:</b> %s</p>" % self.__format_datetime(endtime_str, time_tmpl)
+				endtime_html = "<div><b>Finished:</b> %s</div>" % self.__format_datetime(endtime_str, time_tmpl)
 				actual_status = status
 			details_filename = 'details-%s-%s.html' % (client_name, begintime_str)
 
 			details_html = "<span class='tooltip'>%s</span>" % (
-				("Status: %s "%actual_status) +
-				("<a href='%s'>Log</a><br/>"%details_filename)
+				# TODO: Revision and failed tests if any
 			)
 			content.append( '<a href="%s" title="%s. Click to see the details" class="execution %s">\n%s\n%s\n%s\n</div>' % (
 				details_filename,
