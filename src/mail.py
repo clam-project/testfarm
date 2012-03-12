@@ -8,6 +8,7 @@ from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
 from email.Encoders import encode_base64
+from listeners import NullResultListener
 
 
 def _get_last_committers(repositories):
@@ -36,24 +37,6 @@ def _get_last_committers(repositories):
 		last_commits.append((repos,rev,last_committer))
 
 	return last_commits
-
-class MailReporter(NullResultListener) :
-	def __init__(repositories) :
-		self.repositories = repositories
-
-	def listen_end_task(self, taskname, all_ok):
-		color = 'GREEN' if all_ok else 'RED'
-		last_color, last_commits  = check_state_changed(color, self.repositories)
-		msg = "The current state is %s \n\n" % (color)
-		
-
-		repositories = last_commits if len(last_commits) != 0 else self.repositories
-		for (repos,rev,committer) in repositories:
-			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
-
-		if not all_ok or last_color == 'RED' :
-			# whenever is red or changed from red to green
-			send_mail(color, msg)
 
 
 # returns true if state changed
@@ -124,6 +107,25 @@ def send_mail(color, message, debug=0):
 
 	finally:
     		server.quit()
+
+class MailReporter(NullResultListener) :
+	def __init__(self, repositories) :
+		self.repositories = repositories
+
+	def listen_end_task(self, taskname, all_ok):
+		color = 'GREEN' if all_ok else 'RED'
+		last_color, last_commits  = check_state_changed(color, self.repositories)
+		msg = "The current state is %s \n\n" % (color)
+		
+
+		repositories = last_commits if len(last_commits) != 0 else self.repositories
+		for (repos,rev,committer) in repositories:
+			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
+
+		if not all_ok or last_color == 'RED' :
+			# whenever is red or changed from red to green
+			send_mail(color, msg)
+
 
 if __name__ == "__main__":
 	send_mail('GREEN', 'this is a test message', 1)
