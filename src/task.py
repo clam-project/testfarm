@@ -117,7 +117,7 @@ class SubTask:
 
 		listener.listen_begin_subtask( self.name )
 		if server_to_push:
-				server_to_push.update_static_html_files()
+			server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		temp_file = tempfile.NamedTemporaryFile()
 		temp_file_name = temp_file.name
@@ -211,6 +211,7 @@ class Task :
 		else :
 			output, zero_if_new_commits_found = run_command( self.not_idle_checking_cmd, initial_working_dir, verbose=verbose )
 			new_commits_found = not zero_if_new_commits_found
+
 		if new_commits_found :
 			#TODO solve how to chdir to clam
 			for repos in self.repositories_to_check:
@@ -229,6 +230,7 @@ class Task :
 				self.repositories.append((repos, last_revision, last_committer))
 
 		listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
+
 		return new_commits_found
 
 	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
@@ -250,15 +252,6 @@ class Task :
 		listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
-
-		"""
-		print "**** testfarm bot hack ****"
-		import socket
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.connect(("localhost", 2222))
-		s.send(msg)
-		s.close()
-		"""
 
 		return all_ok
 
