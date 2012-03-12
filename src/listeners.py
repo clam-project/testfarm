@@ -20,6 +20,35 @@
 
 import sys
 
+
+class MultiListener(object) :
+	"Forwards method calls to a set of added objects"
+
+	class wrapper(object) :
+		def __init__(self, wrapped, method) :
+			self.wrapped = wrapped
+			self.method = method
+		def __call__(self, *args, **keyw) :
+			self.wrapped._multicall(self.method, *args, **keyw)
+
+	def __init__(self, subs=[]) :
+		self._added = subs[:]
+
+	def add(self, sub) :
+		self._added.append(sub)
+
+	def __getattr__(self, method ) :
+		"Whenever you access an non-existing attribute or method"
+		return MultiListener.wrapper(self, method)
+
+	def _multicall(self, method, *args, **keyw) :
+		"Not to be called directly"
+		return [ 
+			getattr(sub,method) (*args, **keyw)
+			for sub in self._added
+		]
+
+
 class NullResultListener : #TODO base class
 	"Discards messages"
 	def listen_end_command(self, command, ok, output, info, stats):

@@ -20,7 +20,7 @@
 
 import commands, os, time, sys, subprocess, tempfile
 
-from listeners import NullResultListener, ConsoleResultListener
+from listeners import NullResultListener, MultiListener, ConsoleResultListener
 import mail
 
 def is_string( data ):
@@ -108,33 +108,14 @@ class SubTask:
 		self.commands = commands
 		self.mandatory = mandatory
 
-	def __begin_subtask(self, listeners):
-		for listener in listeners :
-			listener.listen_begin_subtask( self.name )
-
-	def __end_subtask(self, listeners):
-		for listener in listeners :
-			listener.listen_end_subtask( self.name )
-
-	def __begin_command(self, cmd, listeners):
-		for listener in listeners : 
-			listener.listen_begin_command( cmd )
-
-	#def __end_command(self, cmd, listeners):
-	#	for listener in listeners :
-	#		listener.listen_end_command( cmd )
-	
-	def __end_command(self, listeners, cmd, status, output, info, stats):		
-		for listener in listeners :
-			listener.listen_end_command( cmd, status, output, info, stats )
-
 	def is_mandatory(self):
 		"Returns if the subtask is mandatory or not"
 		return self.mandatory
 
-	def do_subtask(self, listeners = [ NullResultListener() ] , server_to_push = None, verbose=False): #TODO : Refactor
+	def do_subtask(self, listener, server_to_push = None, verbose=False): #TODO : Refactor
 		"Executes the subtask and all its commands"
-		self.__begin_subtask(listeners)
+
+		listener.listen_begin_subtask( self.name )
 		if server_to_push:
 				server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
@@ -149,7 +130,7 @@ class SubTask:
 			if sys.platform == 'win32' : pwd_cmd = 'cd'
 			cmd_with_pwd = cmd + " && %s > '%s'" %(pwd_cmd, temp_file_name)
 			# 2 : Begin command run 
-			self.__begin_command(cmd, listeners)
+			listener.listen_begin_command( cmd )
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			output, exit_status = run_command(cmd_with_pwd, initial_working_dir, verbose=verbose)
@@ -158,27 +139,26 @@ class SubTask:
 			info  = info_parser(output)  if info_parser  else ''
 			stats = stats_parser(output) if stats_parser else {}
 			if status_ok : output = ''
-			#self.__send_result(listeners, cmd, status_ok, output, info, stats)
-						
+
 			f = open( temp_file_name )
 			current_dir = f.read().strip()
 			f.close()
 
 			if not status_ok :
 				os.chdir ( initial_working_dir )
-				self.__end_command(listeners, cmd, status_ok, output, info, stats)
-				self.__end_subtask(listeners)
+				listener.listen_end_command( cmd, status_ok, output, info, stats )
+				listener.listen_end_subtask( self.name )
 				temp_file.close()
 				return False
 			# 3: End command run 
 			os.chdir ( initial_working_dir )
-			self.__end_command(listeners, cmd, status_ok, output, info, stats)
+			listener.listen_end_command( cmd, status_ok, output, info, stats )
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
 			if current_dir:
 				os.chdir( current_dir )
 		os.chdir ( initial_working_dir )
-		self.__end_subtask(listeners)
+		listener.listen_end_subtask( self.name )
 		temp_file.close()
 		return True
 
@@ -224,6 +204,7 @@ class Task :
 
 	def do_checking_for_new_commits(self, listeners, verbose=False):
 		"Checks if there is a new commit in the version control system"
+		listener = MultiListener(listeners)
 		initial_working_dir = os.path.abspath(os.curdir)
 		if not self.not_idle_checking_cmd :
 			new_commits_found = True #default
@@ -246,25 +227,23 @@ class Task :
 				print repos, last_revision, last_committer
 				self.repositories.append((repos, last_revision, last_committer))
 
-		for listener in listeners :
-			listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
+		listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
 		return new_commits_found
 
 	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
 		"Executes all subtasks and sends results"
+		listener = MultiListener(listeners)
 		all_ok = True
-		for listener in listeners:
-			listener.listen_task_info(self)
-			listener.listen_begin_task( self.name )
+		listener.listen_task_info(self)
+		listener.listen_begin_task( self.name )
 		for subtask in self.subtasks :
-			current_result = subtask.do_subtask(listeners, server_to_push, verbose=verbose)
+			current_result = subtask.do_subtask(listener, server_to_push, verbose=verbose)
 			all_ok = all_ok and current_result
 			if not current_result and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
 				break 
 			if server_to_push :
 				server_to_push.update_static_html_files()
-		for listener in listeners:
-			listener.listen_end_task( self.name, all_ok )
+		listener.listen_end_task( self.name, all_ok )
 		if server_to_push : 
 			server_to_push.update_static_html_files()
 
@@ -295,11 +274,10 @@ class Task :
 
 	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
 		"Asks listeners to stop the task execution gently if the execution was aborted by user"
-		for listener in listeners:
-			listener.listen_end_task_gently(self.name)
+		listener = MultiListener(listeners)
+		listener.listen_end_task_gently(self.name)
 		if server_to_push :
 			server_to_push.update_static_html_files()
-		pass 
 
 CMD = 1
 INFO = 2

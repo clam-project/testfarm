@@ -21,6 +21,7 @@
 
 from task import *
 from server import Server
+from listeners import ConsoleResultListener, MultiListener
 from serverlistener import ServerListener 
 from serverlistenerproxy import ServerListenerProxy
 
