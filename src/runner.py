@@ -35,7 +35,7 @@ class Runner :
 		remote_server_url = None,
 		verbose = False,
 		testinglisteners = [],
-		extralisteners = [],
+		extra_listeners = [],
 	) :
 		"Runs a task defined in user's script"	
 		self.listeners = [ ConsoleResultListener() ]
