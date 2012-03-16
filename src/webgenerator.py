@@ -21,7 +21,7 @@
 """
 TODO
 * separate html formatting code in a different class/source file
-* Server should become a LogsFormatter something that on construction
+* Server should become a WebGenerator something that on construction
   takes the filesystem logs state and writes html. But should not persist 
   in memory (as now remote_server_timer does)
 * clients glob should be done only once (at constructor)
@@ -80,11 +80,9 @@ footer = """
 """
 
 
-#
-#     SERVER
-#
-class Server:
-	"Reads the logs from a directory defined by the project name, structures the data and prints it as HTML pages"
+class WebGenerator:
+	"Reads the logs from a directory defined by the project name, "
+	"structures the data and prints it as HTML pages"
 	def __init__(self, 
 		logs_base_dir = '/tmp/testfarm_tests',
 		html_base_dir = '/tmp/testfarm_html',
@@ -97,7 +95,7 @@ class Server:
 			create_dir_if_needed( '%s/%s' % (html_base_dir, project_name) )
 			self.project_name = project_name
 		else:
-			print 'Warning: html dir was not created because Server was not initialized with a project_name'
+			print 'Warning: html dir was not created because WebGenerator was not initialized with a project_name'
 
 
 	def log_path(self, filename) :

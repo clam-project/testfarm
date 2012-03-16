@@ -137,7 +137,7 @@ class MailReporter(NullResultListener) :
 				smtpresult = server.sendmail(self.from_email, self.to_email, msg.as_string())
 				if smtpresult:
 					for recip in smtpresult.keys():
-						print  """Could not delivery mail to: %s Server said: %s %s"""  \
+						print  """Could not delivery mail to: %s, server said: %s %s"""  \
 							% (recip, smtpresult[recip][0], smtpresult[recip][1])
 
 		finally:

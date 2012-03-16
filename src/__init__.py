@@ -25,7 +25,7 @@ __all__ = [ "client",
 	"runner",
 	"serverlistenerproxy",
 	"serverlistener",
-	"server",
+	"webgenerator",
 	#"server_side_logger",
 	"service_proxy",
 	"task"

@@ -20,13 +20,13 @@
 #
 #
 
-from server import Server
+from webgenerator import WebGenerator
 import os, time
 
 _logs_base_dir = '/var/www/testfarm_logs'
 _html_base_dir = '/var/www/testfarm_html'
 
-server = Server(
+webgenerator = WebGenerator(
 	logs_base_dir = _logs_base_dir,
 	html_base_dir = _html_base_dir
 )
@@ -38,9 +38,9 @@ def update_projects_static_html_files():
 	for entry in list_dir:
 		entry_path = os.path.join(_html_base_dir, entry)
 		if os.path.isdir(entry_path):
-			server.project_name = entry
-			server.write_missing_details_static_html()
-			server.update_static_html_files()
+			webgenerator.project_name = entry
+			webgenerator.write_missing_details_static_html()
+			webgenerator.update_static_html_files()
 			
 
 update_projects_static_html_files()

@@ -39,7 +39,8 @@ class ServerListenerProxy(NullResultListener):
 	def __create_dirs(self):
 		print self.webservice.remote_call(
 			"create_dirs", 
-			project_name=self.project.name) 
+			project_name=self.project.name,
+			) 
 			
 	def __append_log_entry(self, entry) :
 		"Appends an entry to logfile"
@@ -47,14 +48,16 @@ class ServerListenerProxy(NullResultListener):
 			"append_log_entry", 
 			project_name=self.project.name, 
 			client_name=self.client.name, 
-			entry=entry )
+			entry=entry,
+			)
 
 	def __write_idle_info(self, idle_info ):
 		print self.webservice.remote_call(
 			"write_idle_info",
 			project_name=self.project.name, 
 			client_name=self.client.name, 
-			idle_info=idle_info )
+			idle_info=idle_info,
+			)
 			
 	def __write_client_info(self, client):
 		if client.brief_description or client.long_description :
@@ -73,7 +76,8 @@ class ServerListenerProxy(NullResultListener):
 				"write_client_info",
 				client_name=self.client.name,
 				project_name=self.project.name,
-				client_info = entries) 
+				client_info = entries,
+				) 
 
 	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION 
 		if project.brief_description or project.long_description :
@@ -91,7 +95,8 @@ class ServerListenerProxy(NullResultListener):
 			print self.webservice.remote_call(
 				"write_project_info",
 				project_name=self.project.name,
-				project_info=entries) 
+				project_info=entries,
+				) 
 
 	def __write_task_info(self, task):	
 		entries = "('BEGIN_TASK', '%s'),\n" % task.name
@@ -107,7 +112,8 @@ class ServerListenerProxy(NullResultListener):
 			project_name = task.project.name,
 			client_name = task.client.name,
 			task_name = task.name,
-			task_info = entries)
+			task_info = entries,
+			)
  
 	def current_time(self):
 		"Returns the current local time"

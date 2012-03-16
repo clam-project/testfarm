@@ -177,7 +177,7 @@ class Task :
 		self.seconds_idle = 0
 		self.last_commiter=""
 		self.last_revision=""
-		self.repositories_to_check = ["clam"]
+		self.repositories_to_check = []
 		self.repositories = []
 		
 	def get_name(self):
@@ -239,7 +239,7 @@ class Task :
 		all_ok = True
 		failed_subtasks = []
 		listener.listen_task_info(self)
-		listener.listen_begin_task( self.name )
+		listener.listen_begin_task( self.name, self.repositories )
 		for subtask in self.subtasks :
 			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)
 			all_ok = all_ok and subtask_ok
