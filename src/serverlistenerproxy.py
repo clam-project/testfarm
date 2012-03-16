@@ -36,7 +36,7 @@ class ServerListenerProxy(NullResultListener):
 		self._write_project_info(self.project)
 		self._write_client_info(self.client)
 
-	def _remote_call(method, **kwds) :
+	def _remote_call(self, method, **kwds) :
 		result = self.webservice.remote_call(method, **kwds)
 		if str(result) == '0' : return
 		print "Remote error:", result
