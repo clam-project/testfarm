@@ -75,46 +75,29 @@ def check_state_changed(color, repositories):
 	return old_color, repositories_changed
 
 
-def send_mail(color, message, debug=0):
-	try:
-		import mailconfig
-	except ImportError: 
-		return
-	server = smtplib.SMTP(mailconfig.server, mailconfig.port)
-	server.set_debuglevel(debug)
-		
-	msg = MIMEMultipart()
-	msg['From'] = mailconfig.from_name
-	msg['To'] = mailconfig.to_email
-	msg['Subject'] = mailconfig.subject%color
-	text = message
-	if color == 'RED' and mailconfig.testfarm_page :
-		text += '\n\nCheck the testfarm page for the specific error: %s\n'%mailconfig.testfarm_page
-	msg.attach(MIMEText(text))
-
-	try:
-		server.ehlo()
-		# If we can encrypt this session, do it
-		if server.has_extn('STARTTLS'):
-			server.starttls()
-			server.ehlo() # re-identify ourselves over TLS connection
-			server.login(mailconfig.username, mailconfig.password)
-			smtpresult = server.sendmail(mailconfig.from_email, mailconfig.to_email, msg.as_string())
-			if smtpresult:
-				for recip in smtpresult.keys():
-					print  """Could not delivery mail to: %s Server said: %s %s"""  \
-						% (recip, smtpresult[recip][0], smtpresult[recip][1])
-
-	finally:
-    		server.quit()
-
 class MailReporter(NullResultListener) :
-	def __init__(self, repositories) :
-		self.repositories = repositories
+	def __init__(self,
+		) :
+		try:
+			import mailconfig
+		except ImportError: 
+			return
+		self.server = mailconfig.server
+		self.port = mailconfig.server
+		self.username = mailconfig.username
+		self.password = mailconfig.password
+		self.from_email = mailconfig.from_email
+		self.from_name = mailconfig.from_name
+		self.to_email = mailconfig.to_email
+		self.testfarm_page = mailconfig.testfarm_page
+
+	def listen_task_info(self, task):
+		self.task = task
+
 
 	def listen_end_task(self, taskname, all_ok):
 		color = 'GREEN' if all_ok else 'RED'
-		last_color, last_commits  = check_state_changed(color, self.repositories)
+		last_color, last_commits  = check_state_changed(color, self.task.repositories)
 		msg = "The current state is %s \n\n" % (color)
 		
 
@@ -124,7 +107,41 @@ class MailReporter(NullResultListener) :
 
 		if not all_ok or last_color == 'RED' :
 			# whenever is red or changed from red to green
-			send_mail(color, msg)
+			self.send_mail(color, msg)
+
+	def send_mail(self, color, message, debug=0):
+		try:
+			import mailconfig
+		except ImportError: 
+			return
+
+		server = smtplib.SMTP(self.server, self.port)
+		server.set_debuglevel(debug)
+			
+		msg = MIMEMultipart()
+		msg['From'] = self.from_name
+		msg['To'] = self.to_email
+		msg['Subject'] = self.subject%color
+		text = message
+		if color == 'RED' and self.testfarm_page :
+			text += '\n\nCheck the testfarm page for the specific error: %s\n'%self.testfarm_page
+		msg.attach(MIMEText(text))
+
+		try:
+			server.ehlo()
+			# If we can encrypt this session, do it
+			if server.has_extn('STARTTLS'):
+				server.starttls()
+				server.ehlo() # re-identify ourselves over TLS connection
+				server.login(self.username, self.password)
+				smtpresult = server.sendmail(self.from_email, self.to_email, msg.as_string())
+				if smtpresult:
+					for recip in smtpresult.keys():
+						print  """Could not delivery mail to: %s Server said: %s %s"""  \
+							% (recip, smtpresult[recip][0], smtpresult[recip][1])
+
+		finally:
+			server.quit()
 
 
 if __name__ == "__main__":
