@@ -29,7 +29,6 @@ from task import get_command_and_parsers
 class ServerListenerProxy(NullResultListener):
 	"Receives and sends results to a remote server logger"
 	def __init__(self, client, service_url, project) : # TODO: control project and client if None
-		self.iterations_needs_update = True
 		self.client = client
 		self.webservice = ServiceProxy(service_url)
 		self.project = project
@@ -133,18 +132,16 @@ class ServerListenerProxy(NullResultListener):
 	def listen_begin_task(self, task_name):
 		entry = "('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
 		self.__append_log_entry('\n' + entry)
-		self.iterations_needs_update = True
 
 	def listen_end_task(self, task_name, status):
 		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
-		self.iterations_needs_update = True
 
 	def listen_task_info(self, task):
 		self.__write_task_info(task)	
 
 	def iterations_updated(self):
-		self.iterations_needs_update = False
+		pass
 	
 	def listen_found_new_commits(self,  new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
