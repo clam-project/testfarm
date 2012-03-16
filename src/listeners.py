@@ -51,17 +51,16 @@ class MultiListener(object) :
 
 class NullResultListener : #TODO base class
 	"Discards messages"
+
 	def listen_end_command(self, command, ok, output, info, stats):
 		pass
 	def listen_begin_command(self, cmd):
 		pass
-#	def listen_end_command(self, cmd):
-#		pass
 	def listen_begin_subtask(self, subtaskname):
 		pass	
 	def listen_end_subtask(self, subtaskname):
 		pass	
-	def listen_begin_task(self, taskname):
+	def listen_begin_task(self, taskname, snapshot=""):
 		pass
 	def listen_end_task(self, taskname, status):
 		pass
@@ -90,9 +89,6 @@ class DummyResultListener(NullResultListener) :
 	def listen_begin_command(self, cmd):
 		#self.results.append("BEGIN_CMD %s" % cmd)
 		pass
-	
-#	def listen_end_command(self, cmd):
-#		self.results.append("END_CMD %s" % cmd)
 
 	def listen_begin_subtask(self, subtaskname):
 		self.results.append( "BEGIN_SUBTASK %s" % subtaskname )
@@ -100,7 +96,7 @@ class DummyResultListener(NullResultListener) :
 	def listen_end_subtask(self, subtaskname):
 		self.results.append( "END_SUBTASK %s" % subtaskname )
 	
-	def listen_begin_task(self, taskname):
+	def listen_begin_task(self, taskname, snapshot=""):
 		self.results.append( "BEGIN_TASK %s" % taskname )
 
 	def listen_end_task(self, taskname, status):
@@ -128,9 +124,7 @@ class ConsoleResultListener(NullResultListener) :
 			}
 			
 	def color(self, name):
-		if sys.platform == 'win32':
-			return ""
-	
+		if sys.platform == 'win32': return ""
 		try:
 			return self.colors[name]
 		except:
@@ -176,17 +170,16 @@ class ConsoleResultListener(NullResultListener) :
 	#	self.pprint('BOLD', "    BEGIN_CMD %s" % cmd )
 		self.pprint_begin_cmd(cmd)	
 	
-#	def listen_end_command(self, cmd):
-#		self.pprint ('BOLD', "    END_CMD %s\n" % cmd )
-	
 	def listen_begin_subtask(self, subtaskname):
 		self.pprint('BOLD', "  BEGIN_SUBTASK %s" % subtaskname )
 
 	def listen_end_subtask(self, subtaskname):
 		self.pprint('BOLD', "  END_SUBTASK %s\n" % subtaskname )
 	
-	def listen_begin_task(self, taskname):
+	def listen_begin_task(self, taskname, snapshot=""):
 		self.pprint('BOLD', "BEGIN_TASK %s\n" % taskname )
+		if snapshot :
+			self.pprint('BOLD', "%s\n" % snapshots )
 
 	def listen_end_task(self, taskname, status):
 		self.pprint('BOLD', "END_TASK %s --> %s" % (taskname, status) )
