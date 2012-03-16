@@ -32,34 +32,39 @@ class ServerListenerProxy(NullResultListener):
 		self.client = client
 		self.webservice = ServiceProxy(service_url)
 		self.project = project
-		self.__create_dirs()
-		self.__write_project_info(self.project)
-		self.__write_client_info(self.client)
+		self._create_dirs()
+		self._write_project_info(self.project)
+		self._write_client_info(self.client)
+
+	def _remote_call(method, **kwds) :
+		result = self.webservice.remote_call(method, **kwds)
+		if str(result) == '0' : return
+		print "Remote error:", result
 	
-	def __create_dirs(self):
-		print self.webservice.remote_call(
+	def _create_dirs(self):
+		self._remote_call(
 			"create_dirs", 
 			project_name=self.project.name,
 			) 
 			
-	def __append_log_entry(self, entry) :
+	def _append_log_entry(self, entry) :
 		"Appends an entry to logfile"
-		print self.webservice.remote_call(
+		self._remote_call(
 			"append_log_entry", 
 			project_name=self.project.name, 
 			client_name=self.client.name, 
 			entry=entry,
 			)
 
-	def __write_idle_info(self, idle_info ):
-		print self.webservice.remote_call(
+	def _write_idle_info(self, idle_info ):
+		self._remote_call(
 			"write_idle_info",
 			project_name=self.project.name, 
 			client_name=self.client.name, 
 			idle_info=idle_info,
 			)
 			
-	def __write_client_info(self, client):
+	def _write_client_info(self, client):
 		if client.brief_description or client.long_description :
 			entries = ""
 			if client.brief_description :
@@ -72,14 +77,14 @@ class ServerListenerProxy(NullResultListener):
 				attribute_value = client.attributes[attribute_name] 
 				entries += "('%s', '%s'),\n" % (attribute_name,attribute_value)
 			
-			print self.webservice.remote_call(
+			self._remote_call(
 				"write_client_info",
-				client_name=self.client.name,
 				project_name=self.project.name,
+				client_name=self.client.name,
 				client_info = entries,
 				) 
 
-	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION 
+	def _write_project_info(self, project):# TODO : remove CODE DUPLICATION 
 		if project.brief_description or project.long_description :
 			entries = ""
 			if project.brief_description :
@@ -92,7 +97,7 @@ class ServerListenerProxy(NullResultListener):
 				attribute_value = project.attributes[attribute_name] 
 				entries += "('%s', '%s'),\n" % (attribute_name,attribute_value)
 
-			print self.webservice.remote_call(
+			self._remote_call(
 				"write_project_info",
 				project_name=self.project.name,
 				project_info=entries,
@@ -107,7 +112,7 @@ class ServerListenerProxy(NullResultListener):
 				entries += "('CMD', '%s'),\n" % cmd
 			entries += "('END_SUBTASK', '%s'),\n" % subtask.name 
 		entries += "('END_TASK', '%s'),\n" % task.name
-		print self.webservice.remote_call(
+		self._remote_call(
 			"write_task_info",
 			project_name = task.project.name,
 			client_name = task.client.name,
@@ -121,27 +126,27 @@ class ServerListenerProxy(NullResultListener):
 
 	def listen_end_command(self, command, ok, output, info, stats):
 		entry = str( ('END_CMD', command, ok, output, info, stats) ) + ',\n'
-		self.__append_log_entry('\t\t' + entry)
+		self._append_log_entry('\t\t' + entry)
 
 	def listen_begin_command(self, cmd):
 		entry = "('BEGIN_CMD', '%s'),\n" % cmd 
-		self.__append_log_entry('\t\t' + entry)
+		self._append_log_entry('\t\t' + entry)
 
 	def listen_begin_subtask(self, subtaskname):
 		entry = "('BEGIN_SUBTASK', '%s'),\n" % subtaskname 
-		self.__append_log_entry('\t' + entry)
+		self._append_log_entry('\t' + entry)
 
 	def listen_end_subtask(self, subtaskname):
 		entry = "('END_SUBTASK', '%s'),\n" % subtaskname
-		self.__append_log_entry('\t' + entry)
+		self._append_log_entry('\t' + entry)
 	
 	def listen_begin_task(self, task_name):
 		entry = "('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
-		self.__append_log_entry('\n' + entry)
+		self._append_log_entry('\n' + entry)
 
 	def listen_end_task(self, task_name, status):
 		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
-		self.__append_log_entry(entry)
+		self._append_log_entry(entry)
 
 	def listen_task_info(self, task):
 		self.__write_task_info(task)	
@@ -154,9 +159,9 @@ class ServerListenerProxy(NullResultListener):
 		idle_dict['new_commits_found'] = new_commits_found
 		idle_dict['date'] = self.current_time()
 		idle_dict['next_run_in_seconds']=next_run_in_seconds
-		self.__write_idle_info( str(idle_dict) )
+		self._write_idle_info( str(idle_dict) )
 
 	def listen_end_task_gently(self, task_name):
 		"Ends task gently when a client aborts the execution, i.e, closes the logfile whith an 'END_TASK aborted' tuple"
 		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, self.current_time())
-		self.__append_log_entry(append_entry)	
+		self._append_log_entry(append_entry)	
