@@ -179,7 +179,7 @@ class ConsoleResultListener(NullResultListener) :
 	def listen_begin_task(self, taskname, snapshot=""):
 		self.pprint('BOLD', "BEGIN_TASK %s\n" % taskname )
 		if snapshot :
-			self.pprint('BOLD', "%s\n" % snapshots )
+			self.pprint('BOLD', "%s\n" % snapshot )
 
 	def listen_end_task(self, taskname, status):
 		self.pprint('BOLD', "END_TASK %s --> %s" % (taskname, status) )
