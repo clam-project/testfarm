@@ -140,7 +140,7 @@ class ServerListener(NullResultListener):
 		entry = "('END_SUBTASK', '%s'),\n" % taskname
 		self.__append_log_entry(entry)
 	
-	def listen_begin_task(self, task_name):
+	def listen_begin_task(self, task_name, snapshot=""):
 		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
 		self.executions_needs_update = True
 		self.__append_log_entry(entry)
