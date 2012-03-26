@@ -91,6 +91,7 @@ class MailReporter(NullResultListener) :
 		self.from_name = mailconfig.from_name
 		self.to_email = mailconfig.to_email
 		self.testfarm_page = mailconfig.testfarm_page
+		self.subject = mailconfig.subject
 
 	def listen_task_info(self, task):
 		self.task = task
