@@ -81,9 +81,10 @@ class MailReporter(NullResultListener) :
 		try:
 			import mailconfig
 		except ImportError: 
+			print "No mailconfig.py file, skipping mailing"
 			return
 		self.server = mailconfig.server
-		self.port = mailconfig.server
+		self.port = mailconfig.port
 		self.username = mailconfig.username
 		self.password = mailconfig.password
 		self.from_email = mailconfig.from_email
@@ -107,45 +108,45 @@ class MailReporter(NullResultListener) :
 
 		if not all_ok or last_color == 'RED' :
 			# whenever is red or changed from red to green
-			self.send_mail(color, msg)
+			if color == 'RED' and self.testfarm_page :
+				msg += '\n\nCheck the testfarm page for the specific error: %s\n'%self.testfarm_page
+			self.send_mail(self.subject%color, msg)
 
-	def send_mail(self, color, message, debug=0):
+	def send_mail(self, subject, message, debug=0):
 		try:
 			import mailconfig
 		except ImportError: 
 			return
 
-		server = smtplib.SMTP(self.server, self.port)
-		server.set_debuglevel(debug)
-			
 		msg = MIMEMultipart()
 		msg['From'] = self.from_name
 		msg['To'] = self.to_email
-		msg['Subject'] = self.subject%color
-		text = message
-		if color == 'RED' and self.testfarm_page :
-			text += '\n\nCheck the testfarm page for the specific error: %s\n'%self.testfarm_page
-		msg.attach(MIMEText(text))
+		msg['Subject'] = subject
+		msg.attach(MIMEText(message))
 
+		server = smtplib.SMTP(self.server, self.port)
+		server.set_debuglevel(debug)
+			
 		try:
 			server.ehlo()
 			# If we can encrypt this session, do it
 			if server.has_extn('STARTTLS'):
 				server.starttls()
 				server.ehlo() # re-identify ourselves over TLS connection
-				server.login(self.username, self.password)
-				smtpresult = server.sendmail(self.from_email, self.to_email, msg.as_string())
-				if smtpresult:
-					for recip in smtpresult.keys():
-						print  """Could not delivery mail to: %s, server said: %s %s"""  \
-							% (recip, smtpresult[recip][0], smtpresult[recip][1])
+			server.login(self.username, self.password)
+			smtpresult = server.sendmail(self.from_email, self.to_email, msg.as_string())
+			if not smtpresult : return # ok!
+			for recipient, error in smtpresult.iteritems():
+				print  """Could not delivery mail to: %s, server said: %s %s"""  \
+					% (recip, smtpresult[recip][0], smtpresult[recip][1])
 
 		finally:
 			server.quit()
 
 
 if __name__ == "__main__":
-	send_mail('GREEN', 'this is a test message', 1)
+	m=MailReporter()
+	m.send_mail('GREEN', 'this is a test message', 1)
 
 	#import time
 	#time.sleep(1)
