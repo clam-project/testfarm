@@ -1,7 +1,7 @@
 #
-#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
+#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo
 #  and Universitat Pompeu Fabra
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -24,20 +24,20 @@ from listeners import NullResultListener, MultiListener, ConsoleResultListener
 import mail
 
 def is_string( data ):
-	try: # TODO : find another clean way to tho this check 
+	try: # TODO : find another clean way to tho this check
 		data.isalpha()
 		return True
 	except AttributeError:
-		return False		
+		return False
 
 def get_command_and_parsers(maybe_dict):
 	info_parser = None
 	stats_parser = None
-	status_ok_parser = None 
+	status_ok_parser = None
 	try:
 		cmd = 'echo no command specified'
 		if maybe_dict.has_key(CMD) :
-			cmd = maybe_dict[CMD] 
+			cmd = maybe_dict[CMD]
 		if maybe_dict.has_key(INFO) :
 			info_parser = maybe_dict[INFO]
 		if maybe_dict.has_key(STATS) :
@@ -66,25 +66,25 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 			logFile.write("output:\n")
 		logFile.flush()
 	else:
-		logFile = None	
-	output = []	 
+		logFile = None
+	output = []
 	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 
 	while True:
-		tmp = pipe.stdout.readline()	
+		tmp = pipe.stdout.readline()
 		output.append( tmp )
 		if tmp:
 			if verbose:
-				print tmp.strip()				
+				print tmp.strip()
 			if verbose and logFile:
 				logFile.write(tmp)
-				logFile.flush()						
+				logFile.flush()
 		if pipe.poll() is not None:
 			for line in pipe.stdout :
 				output.append(line)
-			break	
+			break
 	status = pipe.wait()
-	
+
 	if verbose and logFile:
 		if write_as_html:
 			logFile.write("</pre><p><span style=\"color:red\">status</span>: %d</p>" % status)
@@ -92,10 +92,10 @@ def run_command_with_log(command, verbose = True, logfilename = None, write_as_h
 			logFile.write("status: %d\n" % status)
 		logFile.flush()
 		logFile.close()
-	
+
 	return (''.join(output), status)
-	
-	
+
+
 def run_command(command, initial_working_dir, verbose=False):
 	logfile = initial_working_dir + "/command_log.html"
 	return run_command_with_log(command, verbose=verbose, logfilename=logfile, write_as_html=True)
@@ -129,7 +129,7 @@ class SubTask:
 			pwd_cmd = 'pwd'
 			if sys.platform == 'win32' : pwd_cmd = 'cd'
 			cmd_with_pwd = cmd + " && %s > '%s'" %(pwd_cmd, temp_file_name)
-			# 2 : Begin command run 
+			# 2 : Begin command run
 			listener.listen_begin_command( cmd )
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
@@ -150,7 +150,7 @@ class SubTask:
 				listener.listen_end_subtask( self.name )
 				temp_file.close()
 				return False
-			# 3: End command run 
+			# 3: End command run
 			os.chdir ( initial_working_dir )
 			listener.listen_end_command( cmd, status_ok, output, info, stats )
 			if server_to_push: #TODO
@@ -163,9 +163,9 @@ class SubTask:
 		return True
 
 class Task :
-	# Attributes : name, subtasks[], deployment[] 
+	# Attributes : name, subtasks[], deployment[]
 	"Defines a task, with a set of subtasks"
-	def __init__(self, project, client, task_name = '-- unnamed task --'): 
+	def __init__(self, project, client, task_name = '-- unnamed task --'):
 		self.name = task_name;
 		assert is_string(project.name), '< %s > is not a valid project name (should be a string)' % str(project_name)
 		self.project = project
@@ -179,13 +179,13 @@ class Task :
 		self.last_revision=""
 		self.repositories_to_check = []
 		self.repositories = []
-		
+
 	def get_name(self):
 		return self.name;
-		
+
 	def get_num_subtasks(self): # Note : Deployment task is considered as a separated task
 		return len( self.subtasks )
-	
+
 	def set_check_for_new_commits(self, checking_cmd, minutes_idle = 5 ):
 		"Sets the checking command and seconds to idle"
 		self.not_idle_checking_cmd = checking_cmd
@@ -233,7 +233,7 @@ class Task :
 
 		return new_commits_found
 
-	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False): 
+	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False):
 		"Executes all subtasks and sends results"
 		listener = MultiListener(listeners)
 		all_ok = True
@@ -243,14 +243,14 @@ class Task :
 		for subtask in self.subtasks :
 			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)
 			all_ok = all_ok and subtask_ok
-			if not subtask_ok and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository  
+			if not subtask_ok and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository
 				break
 			if not subtask_ok :
 				failed_subtasks.append(subtask.name) # TODO
 			if server_to_push :
 				server_to_push.update_static_html_files()
 		listener.listen_end_task( self.name, all_ok )
-		if server_to_push : 
+		if server_to_push :
 			server_to_push.update_static_html_files()
 
 		return all_ok
