@@ -21,6 +21,7 @@
 import commands, os, time, sys, subprocess, tempfile
 
 from listeners import NullResultListener, MultiListener, ConsoleResultListener
+from SvnSandbox import SvnSandbox
 import mail
 
 def is_string( data ):
@@ -213,21 +214,13 @@ class Task :
 			new_commits_found = not zero_if_new_commits_found
 
 		if new_commits_found :
-			#TODO solve how to chdir to clam
+			#TODO supposes that sandboxes are in ~!!!
 			for repos in self.repositories_to_check:
-				cdclam = "cd ~/%s && " % repos
-				committer, _ =  run_command(
-					cdclam+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done", initial_working_dir )
-				last_committer = committer.strip()
-				revision, _ = run_command(
-					cdclam+"svn info -rHEAD | grep Rev: | while read a b c d; do echo $d; done", initial_working_dir )
-				last_revision = revision.strip()
-				if len(last_revision.split())>1 :
-					# svn command was error
-					last_commiter=""
-					last_revision=""
-				print repos, last_revision, last_committer
-				self.repositories.append((repos, last_revision, last_committer))
+				sandbox = SvnSandbox("~/%s"%repos)
+				for author, revision, msg in s.guilty() :
+					self.repositories.append(
+						(repos, revision, author))
+					print repos, last_revision, last_committer
 
 		listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
 
