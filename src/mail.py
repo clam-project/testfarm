@@ -11,33 +11,6 @@ from email.Encoders import encode_base64
 from listeners import NullResultListener
 
 
-def _get_last_committers(repositories):
-	def _run_cmd(command):
-		output = []
-		pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-		while True:
-			tmp = pipe.stdout.readline()	
-			output.append( tmp )
-			if pipe.poll() is not None:
-				for line in pipe.stdout :
-					output.append(line)
-				break	
-		status = pipe.wait()
-	
-		return (''.join(output), status)
-
-	last_commits = []
-	for repos,rev,_ in repositories:
-		cdrepos = "cd ~/%s && "%repos
-		committer, _ = _run_cmd(cdrepos+"svn info -rHEAD | grep Author: | while read a b c d; do echo $d; done")
-		last_committer = committer.strip()
-		if last_committer is not None and len(last_committer.split())>1 : # svn command was error
-			last_committer=""
-
-		last_commits.append((repos,rev,last_committer))
-
-	return last_commits
-
 
 # returns true if state changed
 def check_state_changed(color, repositories):
@@ -47,26 +20,22 @@ def check_state_changed(color, repositories):
 		file.write(current_time+'\n')
 		file.write(color+'\n')
 		file.write("%s"%repositories+'\n')
-		
+
 	base_path = os.path.expanduser("~")
 	file_name = base_path+"/.testfarm_state"
 	current_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
 	if not os.path.exists(file_name) :
 		write_state(current_time, file_name, color, repositories)
-		
+
 	file = open(file_name, 'r')
 	old_values = file.readlines()
-	
+
 	repositories_changed = []
 	repositories_changed = set(eval(old_values[2])) - set(repositories)
 
 	if len(repositories_changed) == 0: # nothing changed, so use the current one
 		repositories_changed = repositories
-
-	#last_commits = []
-	#if len(repositories_changed) != 0:
-	#	last_commits = _get_last_committers(repositories_changed)
 
 	write_state(current_time, file_name, color, repositories)
 
@@ -101,7 +70,7 @@ class MailReporter(NullResultListener) :
 		color = 'GREEN' if all_ok else 'RED'
 		last_color, last_commits  = check_state_changed(color, self.task.repositories)
 		msg = "The current state is %s \n\n" % (color)
-		
+
 
 		repositories = last_commits if len(last_commits) != 0 else self.repositories
 		for (repos,rev,committer) in repositories:
@@ -116,7 +85,7 @@ class MailReporter(NullResultListener) :
 	def send_mail(self, subject, message, debug=0):
 		try:
 			import mailconfig
-		except ImportError: 
+		except ImportError:
 			return
 
 		msg = MIMEMultipart()
@@ -127,7 +96,7 @@ class MailReporter(NullResultListener) :
 
 		server = smtplib.SMTP(self.server, self.port)
 		server.set_debuglevel(debug)
-			
+
 		try:
 			server.ehlo()
 			# If we can encrypt this session, do it

@@ -1,7 +1,7 @@
- #
-#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
+#
+#  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo
 #  and Universitat Pompeu Fabra
-# 
+#
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
@@ -26,9 +26,9 @@ class Client :
 		self.brief_description = brief_description
 		self.long_description = long_description
 		self.attributes = {}
-	
+
 	def set_attribute(self, attribute_name, attribute_value):
 		"Adds an attribute defined by user"
-		self.attributes[attribute_name] = attribute_value	
+		self.attributes[attribute_name] = attribute_value
 
-	
+
