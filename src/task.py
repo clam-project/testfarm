@@ -217,7 +217,7 @@ class Task :
 			#TODO supposes that sandboxes are in ~!!!
 			for repos in self.repositories_to_check:
 				sandbox = SvnSandbox("~/%s"%repos)
-				for author, revision, msg in s.guilty() :
+				for author, revision, msg in sandbox.guilty() :
 					self.repositories.append(
 						(repos, revision, author))
 					print repos, last_revision, last_committer
