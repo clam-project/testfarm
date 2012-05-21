@@ -47,6 +47,7 @@ def check_state_changed(color, repositories):
 class MailReporter(NullResultListener) :
 	def __init__(self,
 		) :
+		self.repositories = []
 		try:
 			import mailconfig
 		except ImportError: 
@@ -65,10 +66,13 @@ class MailReporter(NullResultListener) :
 	def listen_task_info(self, task):
 		self.task = task
 
+	def listen_begin_task(self, taskname, snapshot) :
+		self.repositories = snapshot
+
 
 	def listen_end_task(self, taskname, all_ok):
 		color = 'GREEN' if all_ok else 'RED'
-		last_color, last_commits  = check_state_changed(color, self.task.repositories)
+		last_color, last_commits  = check_state_changed(color, self.repositories)
 		msg = "The current state is %s \n\n" % (color)
 
 
@@ -77,6 +81,11 @@ class MailReporter(NullResultListener) :
 			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
 
 		if not all_ok or last_color == 'RED' :
+			try:
+				import mailconfig
+			except ImportError:
+				print "No mailconfig.py file, skipping mailing"
+				return
 			# whenever is red or changed from red to green
 			if color == 'RED' and self.testfarm_page :
 				msg += '\n\nCheck the testfarm page for the specific error: %s\n'%self.testfarm_page
@@ -86,6 +95,7 @@ class MailReporter(NullResultListener) :
 		try:
 			import mailconfig
 		except ImportError:
+			print "No mailconfig.py file, skipping mailing"
 			return
 
 		msg = MIMEMultipart()
