@@ -179,7 +179,17 @@ class Task :
 		self.last_commiter=""
 		self.last_revision=""
 		self.repositories_to_check = []
-		self.repositories = []
+		self.changes = []
+		self.sandboxes = []
+
+	# Deprecated: use add_sandbox with an XSandbox object
+	def set_repositories_to_keep_state_of(self, sandboxes):
+		#TODO supposes that sandboxes are in ~!!!
+		for repo in sandboxes :
+			self.sandboxes.append(SvnSandbox("~/%s"%repo))
+
+	def add_sandbox(self, sandbox) :
+		self.sandboxes.append(sandbox)
 
 	def get_name(self):
 		return self.name;
@@ -192,9 +202,6 @@ class Task :
 		self.not_idle_checking_cmd = checking_cmd
 		self.seconds_idle = minutes_idle * 60
 
-	def set_repositories_to_keep_state_of(self, repositories):
-		self.repositories_to_check = repositories
-
 	def add_deployment(self, commands): #TODO must be unique
 		"A separated subtask to deploy"
 		self.add_subtask("Deployment", commands, mandatory = True)
@@ -203,28 +210,40 @@ class Task :
 		"Adds a subtask"
 		self.subtasks.append(SubTask(subtaskname, commands, mandatory))
 
+	def _has_new_commits(self, verbose) :
+		if self.not_idle_checking_cmd and not self.sandboxes :
+			# No way of knowing whether has new commits, suppose always needs to be run
+			return True
+		# TODO: early return
+		new_commits_found = False
+		if self.not_idle_checking_cmd :
+			working_dir = os.path.abspath(os.curdir)
+			output, clean = run_command( self.not_idle_checking_cmd, working_dir, verbose=verbose )
+			if not clean :
+				print "Pending commits found"
+				new_commits_found = True
+		for sandbox in self.sandboxes :
+			if sandbox.hasPendingChanges() :
+				print "Dirty: ", sandbox.sandbox
+				new_commits_found = True
+		return new_commits_found
+
 	def do_checking_for_new_commits(self, listeners, verbose=False):
 		"Checks if there is a new commit in the version control system"
 		listener = MultiListener(listeners)
-		initial_working_dir = os.path.abspath(os.curdir)
-		if not self.not_idle_checking_cmd :
-			new_commits_found = True #default
-		else :
-			output, zero_if_new_commits_found = run_command( self.not_idle_checking_cmd, initial_working_dir, verbose=verbose )
-			new_commits_found = not zero_if_new_commits_found
 
-		if new_commits_found :
-			#TODO supposes that sandboxes are in ~!!!
-			for repos in self.repositories_to_check:
-				sandbox = SvnSandbox("~/%s"%repos)
-				for author, revision, msg in sandbox.guilty() :
-					self.repositories.append(
-						(repos, revision, author))
-					print repos, last_revision, last_committer
+		if not self._has_new_commits(verbose) :
+			listener.listen_found_new_commits( False, self.seconds_idle )
+			return False
 
-		listener.listen_found_new_commits( new_commits_found, self.seconds_idle )
+		for sandbox in self.sandboxes :
+			for author, revision, msg in sandbox.guilty() :
+				self.changes.append(
+					(os.path.basename(sandbox.sandbox), revision, author))
+				print os.path.basename(sandbox.sandbox), revision, author
 
-		return new_commits_found
+		listener.listen_found_new_commits( True, self.seconds_idle )
+		return True
 
 	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False):
 		"Executes all subtasks and sends results"
@@ -232,7 +251,11 @@ class Task :
 		all_ok = True
 		failed_subtasks = []
 		listener.listen_task_info(self)
-		listener.listen_begin_task( self.name, self.repositories )
+		listener.listen_begin_task( self.name, self.changes )
+
+		for sandbox in self.sandboxes :
+			sandbox.update()
+			
 		for subtask in self.subtasks :
 			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)
 			all_ok = all_ok and subtask_ok
