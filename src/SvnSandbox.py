@@ -10,6 +10,10 @@ class SvnSandbox(object) :
 		self.sandbox = sandbox
 		self.conflictResolution = 'postpone'
 
+	# TODO: Not unit tested
+	def location(self) :
+		return self.sandbox
+
 	def state(self) :
 		xml = utils.output("svn --xml info %(sandbox)s"%self.__dict__)
 		info = ET.fromstring(xml)

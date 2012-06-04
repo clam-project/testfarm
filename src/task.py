@@ -252,9 +252,26 @@ class Task :
 		failed_subtasks = []
 		listener.listen_task_info(self)
 		listener.listen_begin_task( self.name, self.changes )
-
-		for sandbox in self.sandboxes :
-			sandbox.update()
+		if self.sandboxes :
+			sub_task_name = "Update Sandbox"
+			listener.listen_begin_subtask(sub_task_name)
+			for sandbox in self.sandboxes :
+				fake_command = "Change log for %s"%sandbox.location()
+				listener.listen_begin_command(fake_command)
+				output = ''.join([
+					":: %s - %s\n%s\n\n"%(revision, author, message)
+					for revision, author, message in sandbox.guilty()])
+				listener.listen_end_command(fake_command, True, '', output, {})
+			for sandbox in self.sandboxes :
+				fake_command = "Updating %s, %s -> %s"%(
+					sandbox.location(),
+					sandbox.state(),
+					sandbox.remoteState(),
+					)
+				listener.listen_begin_command(fake_command)
+				sandbox.update()
+				listener.listen_end_command(fake_command, True, '', '', {})
+			listener.listen_end_subtask(sub_task_name)
 			
 		for subtask in self.subtasks :
 			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)

@@ -10,6 +10,10 @@ class GitSandbox(object) :
 	def __init__(self, sandbox ) :
 		self.sandbox = sandbox
 
+	# TODO: Not unit tested
+	def location(self) :
+		return self.sandbox
+
 	def state(self) :
 		return utils.output("cd %(sandbox)s && git  log --pretty=format:'%%H' -n 1 HEAD"%self.__dict__)
 
