@@ -36,6 +36,17 @@ class tee :
 		self.f1.write(content)
 		self.f2.write(content)
 
+class buffer :
+	""" Output file decorator that memorizes the output so you can retrieve it later. """
+	def __init__(self) :
+		self._output = []
+	def flush(self):
+		pass
+	def write(self, content) :
+		self._output.append(content)
+	def output(self) :
+		return ''.join(self._output)
+
 class quotedFile :
 	""" Output file decorator that, surrounds the content of each write
 	in between 'incode' and 'outcode'. """
@@ -44,6 +55,7 @@ class quotedFile :
 		self.outcode = outcode
 		self.f = aFile
 	def write(self,content) :
+		if not content : return
 		self.f.write(self.incode)
 		self.f.write(content)
 		self.f.write(self.outcode)
@@ -62,8 +74,9 @@ class ansi2html :
 		self.f.write(content)
 
 def run(command, message=None, log=sys.stdout, err=None, fatal=True) :
-	if not message : message = "Running: " + command
-	print "\033[32m== %s\033[0m"%(message)
+	if message is None : message = "Running: " + command
+	if message :
+		print "\033[32m== %s\033[0m"%(message)
 	if err is None :
 		err = quotedFile(log, "\033[31m", "\033[0m")
 	process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -81,7 +94,7 @@ def run(command, message=None, log=sys.stdout, err=None, fatal=True) :
 	log.write(process.stdout.read())
 	err.write(process.stderr.read())
 	if fatal and process.returncode : die("Failed, exit code %i"%process.returncode, process.returncode)
-	return process.returncode != 0
+	return process.returncode == 0
 
 def output(command, message=None, fatal=True) :
 	print "\033[32m== Output of: %s\033[0m"%(message or command)

@@ -19,10 +19,10 @@
 #
 
 import commands, os, time, sys, subprocess, tempfile
-
 from listeners import NullResultListener, MultiListener, ConsoleResultListener
 from SvnSandbox import SvnSandbox
 import mail
+import utils
 
 def is_string( data ):
 	try: # TODO : find another clean way to tho this check
@@ -53,53 +53,18 @@ def get_command_and_parsers(maybe_dict):
 	return (cmd, info_parser, stats_parser, status_ok_parser)
 
 
-def run_command_with_log(command, verbose = True, logfilename = None, write_as_html = False):
+def run_command(command, verbose=False):
+	log = utils.buffer()
+	out = log
+	error = utils.quotedFile(log, "\033[31m", "\033[0m")
+	message=''
+	if verbose:
+		message = "Running: '%s'"%command
+		out = utils.tee(log, sys.stdout)
+		error = utils.tee(error, sys.stderr)
 
-	if verbose and logfilename:
-		logFile = open(logfilename, "a")
-		if write_as_html:
-			logFile.write("<hr/>")
-			logFile.write("<p><span style=\"color:red\">command</span>: %s</p>" % command)
-			logFile.write("<p><span style=\"color:red\">output</span>:</p><pre>\n")
-		else:
-			logFile.write("-" * 60 + "\n")
-			logFile.write("command: %s\n" % command)
-			logFile.write("output:\n")
-		logFile.flush()
-	else:
-		logFile = None
-	output = []
-	pipe = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-
-	while True:
-		tmp = pipe.stdout.readline()
-		output.append( tmp )
-		if tmp:
-			if verbose:
-				print tmp.strip()
-			if verbose and logFile:
-				logFile.write(tmp)
-				logFile.flush()
-		if pipe.poll() is not None:
-			for line in pipe.stdout :
-				output.append(line)
-			break
-	status = pipe.wait()
-
-	if verbose and logFile:
-		if write_as_html:
-			logFile.write("</pre><p><span style=\"color:red\">status</span>: %d</p>" % status)
-		else:
-			logFile.write("status: %d\n" % status)
-		logFile.flush()
-		logFile.close()
-
-	return (''.join(output), status)
-
-
-def run_command(command, initial_working_dir, verbose=False):
-	logfile = initial_working_dir + "/command_log.html"
-	return run_command_with_log(command, verbose=verbose, logfilename=logfile, write_as_html=True)
+	ok = utils.run(command, log=out, err=error, fatal=False, message=message)
+	return log.output(), ok
 
 
 class SubTask:
@@ -134,9 +99,9 @@ class SubTask:
 			listener.listen_begin_command( cmd )
 			if server_to_push: #TODO
 				server_to_push.update_static_html_files()
-			output, exit_status = run_command(cmd_with_pwd, initial_working_dir, verbose=verbose)
+			output, command_ok = run_command(cmd_with_pwd, verbose=verbose)
 
-			status_ok = status_ok_parser( output ) if status_ok_parser else (exit_status==0)
+			status_ok = status_ok_parser( output ) if status_ok_parser else command_ok
 			info  = info_parser(output)  if info_parser  else ''
 			stats = stats_parser(output) if stats_parser else {}
 			if status_ok : output = ''
@@ -217,9 +182,8 @@ class Task :
 		# TODO: early return
 		new_commits_found = False
 		if self.not_idle_checking_cmd :
-			working_dir = os.path.abspath(os.curdir)
-			output, clean = run_command( self.not_idle_checking_cmd, working_dir, verbose=verbose )
-			if not clean :
+			output, has_changes = run_command( self.not_idle_checking_cmd, verbose=verbose )
+			if has_changes :
 				print "Pending commits found"
 				new_commits_found = True
 		for sandbox in self.sandboxes :

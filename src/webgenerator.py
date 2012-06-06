@@ -512,7 +512,7 @@ class WebGenerator:
 		for begintime_str, endtime_str, task_name, status in client_executions:
 			name_html = "<div>%s</div>" % (client_name + " :: " + task_name)
 			begintime_html = "<div><b>Started:</b> %s</div>" % self.__format_datetime(begintime_str, time_tmpl)
-			if not endtime_str :					
+			if not endtime_str :
 				endtime_html = "<div>in progres...</div>"
 				actual_status = "in progress"
 			elif status == "aborted" :
@@ -539,7 +539,7 @@ class WebGenerator:
 			day_clients = day_executions[day]
 			for client in executions_per_client.keys():
 				if client not in day_clients:
-					day_clients[client] = []	
+					day_clients[client] = []
 		return day_executions
 	"""
 

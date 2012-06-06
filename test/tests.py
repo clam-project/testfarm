@@ -25,7 +25,7 @@ import unittest
 from test_subtask import Tests_SubTask
 from test_task import Tests_Task
 from test_runner import Tests_Runner
-from test_server import Tests_Server, Tests_ServerListener	
+from test_webgenerator import Tests_WebGenerator, Tests_ServerListener	
 
 def main():
 	unittest.main()

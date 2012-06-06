@@ -102,7 +102,7 @@ END_TASK task name""", listener.log() )
 		self.assertEquals(  """\
 BEGIN_TASK task name
 BEGIN_SUBTASK subtask1
-('non-existing-command', 'failure', '/bin/sh: non-existing-command: not found\\n', '', {})
+('non-existing-command', 'failure', '\\x1b[31m/bin/sh: 1: non-existing-command: not found\\n\\x1b[0m', '', {})
 END_SUBTASK subtask1
 BEGIN_SUBTASK subtask2
 ('echo foo', 'ok', '', '', {})
@@ -125,7 +125,7 @@ BEGIN_SUBTASK subtask1
 END_SUBTASK subtask1
 BEGIN_SUBTASK subtask2
 ('echo something echoed', 'ok', '', '', {})
-('lsss gh', 'failure', '/bin/sh: lsss: not found\\n', '', {})
+('lsss gh', 'failure', '\\x1b[31m/bin/sh: 1: lsss: not found\\n\\x1b[0m', '', {})
 END_SUBTASK subtask2
 END_TASK task""", listener.log() )
 

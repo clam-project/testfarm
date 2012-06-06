@@ -1,5 +1,6 @@
 #! /usr/bin/python
-
+import sys
+sys.path.append("../src")
 from testfarm import *
 
 dollar_euro = Task( project = Project("Conversio"),

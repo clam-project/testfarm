@@ -26,10 +26,10 @@ from task import * # TODO : is necessary ?
 from runner import *
 from client import Client
 from project import Project
-from server import Server
+from webgenerator import WebGenerator
 from serverlistener import ServerListener
 
-class Tests_Server(ColoredTestCase):
+class Tests_WebGenerator(ColoredTestCase):
 
 	def tearDown(self):
 		a_project = Project('project name')
@@ -45,21 +45,21 @@ class Tests_Server(ColoredTestCase):
 		a_project = Project('project name')
 		listener = ServerListener( project = a_project)
 		listener.current_time = lambda : "a date"	
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		a_client = Client('client name')
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener])
 		self.assertEquals(
 			{'testing_client' : [('a date', 'a date', 'task', 'stable')]}, 
-			server.get_executions() )
+			generator.get_executions() )
 
 	def test_executions__day_executions__single_client(self):
 		a_project = Project('project name')
 		listener = ServerListener( project = a_project)
 		listener.current_time = lambda : "2006-04-29-12-00-00"
 		a_project = Project('project name')
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		a_client = Client('client name')
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])	
@@ -71,7 +71,7 @@ class Tests_Server(ColoredTestCase):
 				 {'testing_client': [('2006-04-30-12-00-00', '2006-04-30-12-00-00', 'task', 'stable')]},
 			'2006-04-29':
 				{'testing_client': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'task', 'stable')]}
-			}, server.day_executions(server.get_executions()) )
+			}, generator.day_executions(generator.get_executions()) )
 
 	def test_executions__day_executions__multiple_clients__first_client_with_last_day_empty(self):
 		a_project = Project('project name')
@@ -81,7 +81,7 @@ class Tests_Server(ColoredTestCase):
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
 		listener2 = ServerListener( client=a_client2, project=a_project )
 		listener2.current_time = lambda : "2006-04-29-12-00-00"
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])
 		Runner(task, testinglisteners=[listener1])
@@ -97,7 +97,7 @@ class Tests_Server(ColoredTestCase):
 				{'a_client2': [('2006-04-29-12-00-00', '2006-04-29-12-00-00', 'task', 'stable')],
 				'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'task', 'stable')]
 				}
-			}, server.day_executions(server.get_executions()) )
+			}, generator.day_executions(generator.get_executions()) )
 
 	def test_executions__day_executions__multiple_clients__last_client_with_first_day_empty(self):
 		a_project = Project('project name')
@@ -105,7 +105,7 @@ class Tests_Server(ColoredTestCase):
 		a_client2 = Client('a_client2')
 		listener1 = ServerListener( client=a_client, project=a_project )
 		listener1.current_time = lambda : "2006-04-29-12-12-00"
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		task = Task(a_project, a_client, 'task')	
 		task.add_subtask('subtask1', [])	
 		Runner(task, testinglisteners=[listener1])
@@ -123,14 +123,14 @@ class Tests_Server(ColoredTestCase):
 				},
 			'2006-04-29':
 				{'a_client': [('2006-04-29-12-12-00', '2006-04-29-12-12-00', 'task', 'stable')]}
-			}, server.day_executions(server.get_executions()) )
+			}, generator.day_executions(generator.get_executions()) )
 
 
 	def test_details(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		listener.current_time = lambda : "2004-03-17-13-26-20"
 		listener.listen_begin_task("not wanted")
 		listener.listen_begin_subtask("subtask")
@@ -157,13 +157,13 @@ class Tests_Server(ColoredTestCase):
 ('END_SUBTASK', 'subtask'),
 ('END_TASK', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
-		self.assertEquals( expected, server.single_execution_details('a_client', '1999-99-99-99-99-99') )
+		self.assertEquals( expected, generator.single_execution_details('a_client', '1999-99-99-99-99-99') )
 
 	def test_purged_details(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		listener.current_time = lambda : "1999-99-99-99-99-99"
 		listener.listen_begin_task("we want this one")
 		listener.listen_begin_subtask("subtask")
@@ -184,8 +184,8 @@ class Tests_Server(ColoredTestCase):
 ('END_SUBTASK', 'subtask'),
 ('END_TASK', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
-		server.purge_client_logfile('a_client','1999-99-99-99-99-99')
-		self.assertEquals( expected, server.single_execution_details('a_client', '1999-99-99-99-99-99') )		
+		generator.purge_client_logfile('a_client','1999-99-99-99-99-99')
+		self.assertEquals( expected, generator.single_execution_details('a_client', '1999-99-99-99-99-99') )		
 
 	def test_two_clients(self):
 		a_project = Project('project name')
@@ -201,7 +201,7 @@ class Tests_Server(ColoredTestCase):
 			project=a_project)
 		listener1.current_time = lambda : "some date"
 		listener2.current_time = lambda : "some other date"
-		server = Server(logs_base_dir='/tmp/clients_testdir', project_name= a_project.name)	
+		generator = WebGenerator(logs_base_dir='/tmp/clients_testdir', project_name= a_project.name)	
 		task = Task(a_project, a_client, 'task')	
 		task.add_subtask('subtask1', [])
 
@@ -212,7 +212,7 @@ class Tests_Server(ColoredTestCase):
 		self.assertEquals( 
 			{'client 1':[('some date', 'some date', 'task', 'stable')],
 			 'client 2':[('some other date', 'some other date', 'task', 'stable')]}, 
-			server.get_executions() )
+			generator.get_executions() )
 		listener1.clean_log_files()
 		listener2.clean_log_files()
 
@@ -221,7 +221,7 @@ class Tests_Server(ColoredTestCase):
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
 		listener.current_time = lambda : "a date"
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 		task = Task(a_project, a_client, 'task')
 		task.set_check_for_new_commits( checking_cmd="echo P patched_file | grep ^[UP]", minutes_idle=1 )
 		Runner(task, testinglisteners=[listener])
@@ -232,13 +232,13 @@ class Tests_Server(ColoredTestCase):
 				'next_run_in_seconds':60
 				}
 			}, 
-			server.idle() )
+			generator.idle() )
 
 	def test_stats_single_client_single_key(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task(a_project, a_client, 'task')
@@ -259,26 +259,26 @@ class Tests_Server(ColoredTestCase):
 					('2006-04-05-00-00-00', {'key': 1})
 					]
 				}
-			}, server.collect_stats() )
+			}, generator.collect_stats() )
 
 	def test_no_stats(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask("subtask", ["echo no stats"] )
 		Runner(task, testinglisteners=[listener])
 		
-		self.assertEquals( {'a_client': {} }, server.collect_stats() )
+		self.assertEquals( {'a_client': {} }, generator.collect_stats() )
 
 	def test_stats_single_client_multiple_key(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task(a_project, a_client, 'task')	
@@ -300,7 +300,7 @@ class Tests_Server(ColoredTestCase):
 					('2006-04-05-00-00-00', {'key2': 4, 'key1': -1})
 					]
 				}
-			}, server.collect_stats() )
+			}, generator.collect_stats() )
 
 
 	def test_stats_multiple_client_single_key(self):
@@ -309,7 +309,7 @@ class Tests_Server(ColoredTestCase):
 		a_client2 = Client('client2')
 		listener1 = ServerListener( client=a_client, project=a_project )
 		listener2 = ServerListener( client=a_client2, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 
 		listener1.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task(a_project, a_client, 'task')	
@@ -343,7 +343,7 @@ class Tests_Server(ColoredTestCase):
 					('1000-00-00-00-00-00', {'clau': 0})
 					]
 				}
-			}, server.collect_stats() )
+			}, generator.collect_stats() )
 
 	def test_plot_data_file(self):
 		a_project = Project('project name')
@@ -351,7 +351,7 @@ class Tests_Server(ColoredTestCase):
 		a_client2 = Client('client2')
 		listener1 = ServerListener( client=a_client, project=a_project )
 		listener2 = ServerListener( client=a_client2, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 
 		listener1.current_time = lambda : "2006-04-04-00-00-00"
 		task = Task(a_project, a_client, 'task')	
@@ -369,30 +369,30 @@ class Tests_Server(ColoredTestCase):
 		task.add_subtask("another subtask", [{STATS:lambda x: {'clau 1':2, 'clau 2':13} }] )
 		Runner(task, testinglisteners=[listener2])
 		
-		server.plot_stats()
+		generator.plot_stats()
 
 		self.assertEquals('''\
 time	kk	key2	key
 2006/04/04.00:00	-	-	5
 2006/04/05.00:00	3	-	-
 2006/04/05.00:00	-	2	1
-''', open("%s/%s/client1_1.plot" % (server.logs_base_dir, server.project_name)).read() )
+''', open("%s/%s/client1_1.plot" % (generator.logs_base_dir, generator.project_name)).read() )
 
 		self.assertEquals('''\
 time	clau_1	clau_2
 2000/01/01.12:54	0	10
-''', open("%s/%s/client2_1.plot" % (server.logs_base_dir, server.project_name)).read() )
+''', open("%s/%s/client2_1.plot" % (generator.logs_base_dir, generator.project_name)).read() )
 		self.assertEquals('''\
 time	clau_1	clau_2
 2000/01/01.12:54	2	13
-''', open("%s/%s/client2_2.plot" % (server.logs_base_dir, server.project_name)).read() )
+''', open("%s/%s/client2_2.plot" % (generator.logs_base_dir, generator.project_name)).read() )
 
 
 	def test_plotdata_no_stats(self):
 		a_project = Project('project name')
 		a_client = Client('a_client')
 		listener = ServerListener( client=a_client, project=a_project )
-		server = Server(project_name= a_project.name)
+		generator = WebGenerator(project_name= a_project.name)
 
 		listener.current_time = lambda : "2006-04-04-00-00-00"
 		a_client = Client('a_client')
@@ -400,14 +400,14 @@ time	clau_1	clau_2
 		task.add_subtask("subtask", ["echo no stats"] )
 		Runner(task, testinglisteners=[listener])
 		
-		server.plot_stats()
+		generator.plot_stats()
 
 	def test_client_info__only_name(self):
 		a_project = Project('project name')
 		a_client = Client('client name')
 		listener = ServerListener( client = a_client, project = a_project)
-		server = Server(project_name = a_project.name)
-		self.assertEquals(None, server.load_client_info(a_client.name))
+		generator = WebGenerator(project_name = a_project.name)
+		self.assertEquals(None, generator.load_client_info(a_client.name))
 
 	def test_client_info__more_info(self):
 		a_project = Project('project name')
@@ -417,20 +417,20 @@ time	clau_1	clau_2
 		a_client.set_attribute('one more attribute', 'one_more_value')
 		a_client.set_attribute('another_attribute', 'another value')
 		listener = ServerListener( client = a_client, project = a_project)
-		server = Server(project_name = a_project.name)
+		generator = WebGenerator(project_name = a_project.name)
 		self.assertEquals( 
 [('Brief description', 'a brief description'),
 ('Long description', 'a long description'),
 ('another_attribute', 'another value'),
 ('one more attribute', 'one_more_value')]
-, server.load_client_info(a_client.name))
+, generator.load_client_info(a_client.name))
 
 	def test_project_info__only_name(self):
 		a_project = Project('project name')
 		a_client = Client('client name')
 		listener = ServerListener( client = a_client, project = a_project)
-		server = Server(project_name = a_project.name)
-		self.assertEquals(None, server.load_project_info())
+		generator = WebGenerator(project_name = a_project.name)
+		self.assertEquals(None, generator.load_project_info())
 	
 	def test_project_info__more_info(self):
 		a_project = Project('project name')
@@ -439,18 +439,18 @@ time	clau_1	clau_2
 		a_project.set_attribute('one more attribute', 'one_more_value')
 		a_project.set_attribute('another_attribute', 'another value')
 		listener = ServerListener( client = a_client, project = a_project)
-		server = Server(project_name = a_project.name)
+		generator = WebGenerator(project_name = a_project.name)
 		self.assertEquals(
 [('Brief description', 'a brief description'),
 ('another_attribute', 'another value'),
 ('one more attribute', 'one_more_value')]
-, server.load_project_info())
+, generator.load_project_info())
 
 	def test_send_task_info(self):
 		a_project = Project('project name')
 		a_client = Client('client name')
 		listener = ServerListener( client = a_client, project = a_project)
-		server = Server(project_name = a_project.name)
+		generator = WebGenerator(project_name = a_project.name)
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', ["echo subtask1"])	
 		task.add_subtask('subtask2', [{CMD:"echo something echoed", INFO: lambda x:x}])	
@@ -464,7 +464,7 @@ time	clau_1	clau_2
 ('CMD', 'echo something echoed'),
 ('END_SUBTASK', 'subtask2'),
 ('END_TASK', 'task'),]
-		, server.load_task_info(a_client.name))#, task.name))
+		, generator.load_task_info(a_client.name))#, task.name))
 
 
 
@@ -511,7 +511,7 @@ class Tests_ServerListener(ColoredTestCase):
 ('BEGIN_CMD', 'echo something echoed'),
 ('END_CMD', 'echo something echoed', True, '', 'something echoed\\n', {}),
 ('BEGIN_CMD', './lalala gh'),
-('END_CMD', './lalala gh', False, '/bin/sh: ./lalala: not found\\n', '', {}),
+('END_CMD', './lalala gh', False, '\\x1b[31m/bin/sh: 1: ./lalala: not found\\n\\x1b[0m', '', {}),
 ('END_SUBTASK', 'subtask2'),
 ('END_TASK', 'task', '2006-03-17-13-26-20', 'False'),
 
