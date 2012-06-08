@@ -37,6 +37,7 @@ import subprocess
 from dirhelpers import *
 import deansi
 
+
 header_index = """\
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -653,7 +654,6 @@ class WebGenerator:
 			executions = sorted(executions_per_client[client])
 			if not executions: continue
 			idle_info = idle_per_client[client]
-			print "new_commits_found:", idle_info['new_commits_found']
 			current_task = None
 			for start, stop, name, status in reversed(executions) :
 				if status != 'inprogress' : break # found a finished task
@@ -691,7 +691,9 @@ class WebGenerator:
 					for task in failed_tasks # todo
 				] + [
 				'			],',
-				] if failed_tasks else []) + ([
+				] if failed_tasks else []) + [
+				'			"lastExecution": "%s",' % start,
+				] + ([
 				'			"currentTask": "%s",' % current_task,
 				] if current_task else []) + [
 				'		},',
@@ -756,11 +758,18 @@ class WebGenerator:
 			last_date = self.last_date(client_log)
 			filename = self.__write_details_static_html_file(client, last_date)
 			#purgue_client is still experimental:
- 			self.purge_client_logfile(client, last_date) #TODO improve purgue method
+# 			self.purge_client_logfile(client, last_date) #TODO improve purgue method
 			
 			newfiles.append(filename)
 		newfiles.append(self.web_write('index.html', self.__html_index(clients_with_stats)))
-		newfiles.append(self.web_write('testfarm-data.js', self.__json_data(clients_with_stats)))
+		json_data = self.__json_data(clients_with_stats)
+		newfiles.append(self.web_write('testfarm-data.js', json_data))
+		newfiles.append(self.web_write('testfarm-data.jsond',"callme(%s)"%json_data))
+		base = os.path.join(os.path.dirname(__file__))
+		for nongenerated in "style.css testfarm.js summary.html".split() :
+			newfiles.append(self.web_write(nongenerated, file(os.path.join(base,"..",nongenerated)).read()))
+
+
 
 	def collect_stats(self):
 		"Collect statistics for all clients"
@@ -866,7 +875,6 @@ title="some statistics (still experimental)" -o "%s" %s 2>/dev/null''' # + 'xran
 			f.close()
 			images.append(stats_html_filename)
 		return images, clients_with_stats
-
 
 
 
