@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <title>Testfarm summary</title>
+  <script type="text/javascript">
+// You should set those variables to point to your testfarm web
+	testfarmUrl = "http://clam-project.org/testfarm/";
+	testfarmDataUrl = "http://clam-project.org/testfarm/testfarm-data.js";
+	testfarmDataUrl = "http://clam-project.org/testfarm/testfarm-json-wrap.php";
+//	testfarmDataUrl = "testfarm-data-example.js" // Uncomment for testing
+  </script>
+</head>
+
+<body>
+
+<style type='text/css'>
+/* div { border: 2pt solid blue; } */
+
+#tfupdated
+{
+	color: green;
+}
+.powered
+{
+	text-align: right;
+	font-size: smaller;
+}
+
+#tferror
+{
+	color: #ff0;
+	background: red;
+	font-weight: bold;
+	padding-left: 4pt;
+}
+div.tfdetails
+{
+	display: none;
+	border: 1pt solid blue;
+	background: white;
+	color: black;
+	text-align: left;
+	font-weight: normal;
+	padding: 3pt;
+	position: absolute;
+}
+
+td:hover > .tfdetails
+{
+	display: block;
+}
+td.tfred
+{
+	background: red;
+	color: white;
+}
+table.tfclients tr:nth-child(even)
+{
+	background: #DDD;
+}
+table.tfclients tr:nth-child(odd)
+{
+	background: #FFF;
+}
+table.tfclients
+{
+	background: #eee;
+	border: 1pt solid #888;
+	margin-left: auto;
+	margin-right: auto;
+	width: 100%;
+}
+table.tfclients td
+{
+	padding: 1ex;
+}
+table.tfclients th
+{
+	background: #fd8;
+}
+
+.tfclients .tfint
+{
+	font-weight: bold;
+	background-color: #f80;
+	color: white;
+	text-align: center;
+}
+.tfclients .tfred
+{
+	font-weight: bold;
+	background-color: red;
+	color: white;
+	text-align: center;
+}
+.tfclients .tfgreen
+{
+	font-weight: bold;
+	background-color: green;
+	color: white;
+	text-align: center;
+}
+.tfold
+{
+	font-weight: bold;
+	color: purple;
+}
+.tfrun
+{
+	font-weight: bold;
+	color: #f82;
+}
+#tfgreen
+{
+	padding: 2ex;
+	font-weight: bold;
+	color: green;
+}
+#tfrun
+{
+	padding: 2ex;
+	font-weight: bold;
+	color: #f82;
+}
+#tfred
+{
+	padding:2ex;
+	font-weight: bold;
+	color: red;
+}
+#tfold
+{
+	padding:2ex;
+	font-weight: bold;
+	color: purple;
+}
+</style>
+
+
+<h1>TESTFARM</h1>
+<h2>Clients status summary</h2>
+
+<p><b>Status:</b>
+<span id='tfred'></span>
+<span id='tfold'></span>
+<span id='tfgreen'></span>
+<span id='tfrun'></span>
+</p>
+
+<div id='tferror'></div>
+<table class='tfclients'>
+<tr>
+	<th>Client</th>
+	<th>Updated</th>
+	<th>Building</th>
+	<th>Last build</th>
+	<th></th>
+</tr>
+<script id="testfarmrowTempl" type="text/x-jsrender">
+<tr>
+	<td>{{:name}}
+	{{if name_details}}
+		<div class='tfdetails'>{{:name_details}}</div>
+	{{/if}}
+	</td>
+	<td>{{formatDate lastupdate /}}</td>
+	<td class='tf{{:doing}}'>{{doingString doing /}}
+		{{if currentTask }}
+		<div class='tfdetails'>Current tasks: {{:currentTask}}</div>
+		{{/if}}
+	</td>
+	<td class='tf{{:status}}'>{{statusString status /}}
+		<div class='tfdetails'>
+		{{if failedTasks }}
+			Failed tasks:
+			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
+		{{/if}}
+		<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Execution details</a>
+		</div>
+	</td>
+	<td>
+		<a href="{{testfarmUrl /}}index.html" title="History">History</a>
+	</td>
+</tr>
+</script>
+<tbody id="testfarmrowTarget" >
+<tr><td colspan=6>Loading...</td></tr>
+</tbody>
+<tr>
+</tr>
+</table>
+<div style="width:100%">
+<div class='powered'>Powered by <a href='http://sourceforge.net/projects/testfarm/'>TestFarm</a>.</div>
+<div id='tfupdated'>
+</div>
+</div>
+
+
+<script src="http://code.jquery.com/jquery-latest.min.js"></script>
+<script src="http://borismoore.github.com/jsrender/jsrender.js"></script>
+<script type="text/javascript">
+function formatDate(d)
+{
+	function pad(n, padding)
+	{
+		if (isNaN(n)) return padding;
+		return (padding+n).slice(-(padding.length))
+	}
+	if( !(d instanceof Date))
+		d = new Date(d)
+	return (
+		pad(d.getFullYear(),"0000")+"-"+
+		pad(d.getMonth(),"00")+"-"+
+		pad(d.getDate(),"00")+" "+
+		pad(d.getHours(),"00")+":"+
+		pad(d.getMinutes(),"00")+":"+
+		pad(d.getSeconds(),"00") )
+}
+
+function formatDetailsDate(d)
+{
+	function pad(n, padding)
+	{
+		if (isNaN(n)) return padding;
+		return (padding+n).slice(-(padding.length))
+	}
+	if( !(d instanceof Date))
+		d = new Date(d)
+	return (
+		pad(d.getFullYear(),"0000")+"-"+
+		pad(d.getMonth(),"00")+"-"+
+		pad(d.getDate(),"00")+"-"+
+		pad(d.getHours(),"00")+"-"+
+		pad(d.getMinutes(),"00")+"-"+
+		pad(d.getSeconds(),"00") )
+}
+
+$.views.tags({
+	formatDate: formatDate,
+	formatDetailsDate: formatDetailsDate,
+	each_in: function(data)
+	{
+		result = ""
+		for (key in data)
+			result += this.tmpl.render(data[key]);
+		return result;
+	},
+	doingString: function( key )
+	{
+		return {
+			wait: "Waiting",
+			old: "Not responding",
+			run: "Running",
+		}[key] || "Error";
+	},
+	statusString: function( key )
+	{
+		return {
+			red: "Failed",
+			green: "Ok",
+			int: "Interrupted",
+		}[key] || "Error";
+	},
+	testfarmUrl: function() { return testfarmUrl; }
+});
+
+testfarmData = { lastupdate : null, clients : [] };
+/*
+	$.ajaxSetup({
+		error: function(jqXHR, exception) {
+			if (jqXHR.status === 0) {
+				$("#tferror").html('Not connect.\n Verify Network.');
+			} else if (jqXHR.status == 404) {
+				$("#tferror").html('Requested page not found. [404]');
+			} else if (jqXHR.status == 500) {
+				$("#tferror").html('Internal Server Error [500].');
+			} else if (exception === 'parsererror') {
+				$("#tferror").html('Requested JSON parse failed.');
+			} else if (exception === 'timeout') {
+				$("#tferror").html('Time out error.');
+			} else if (exception === 'abort') {
+				$("#tferror").html('Ajax request aborted.');
+			} else {
+				$("#tferror").html('Uncaught Error.\n' + jqXHR.responseText);
+			}
+		}
+	});
+*/
+function reloadData()
+{
+	function countClients(key, value, suffix)
+	{
+		var n = 0;
+		for (i in testfarmData.clients)
+			if (testfarmData.clients[i][key]==value) n++;
+		if (! n) return "";
+		return n+suffix;
+	}
+	function fillAndReprogram()
+	{
+		$("#tfupdated").html(
+			"Data updated at "+
+			formatDate(testfarmData.lastupdate)
+			);
+		$("#tfred").html(countClients("status", "red", " failed!!!"));
+		$("#tfgreen").html(countClients("status", "green", " passed."));
+		$("#tfold").html(countClients("doing", "old", " irresponsive!"));
+		$("#tfrun").html(countClients("doing", "run", " running."));
+		$("tbody#testfarmrowTarget").html(
+			$("#testfarmrowTempl").render(testfarmData.clients)
+		);
+		var dataUpdate = setTimeout("reloadData()",3000);
+	}
+	$.ajax({
+		type: "GET",
+		url: testfarmDataUrl,
+		accepts: "application/javascript",
+		dataType: "jsonp",
+		crossDomain: true,
+		cache: true,
+		callback: false,
+		jsonpCallback: "callme",
+		converters: {
+			"text script": function(data) { return {}; }
+		},
+		error: function(query, status, httpError) {
+			$("#tferror").html(
+				"Error getting testarm data: "+status+" ("+query.status+ ") " + httpError+"<br/>"
+			);
+		},
+		success: function(data, status, tres) {
+			$("#tferror").empty();
+			testfarmData = data;
+		},
+		complete: fillAndReprogram
+		});
+	return;
+}
+$(document).ready(reloadData)
+</script>
+
+</body>
+</html>
