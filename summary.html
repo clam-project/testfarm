@@ -4,11 +4,12 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
   <title>Testfarm summary</title>
   <script type="text/javascript">
-// You should set those variables to point to your testfarm web
-	testfarmUrl = "http://clam-project.org/testfarm/";
-	testfarmDataUrl = "http://clam-project.org/testfarm/testfarm-data.js";
-	testfarmDataUrl = "http://clam-project.org/testfarm/testfarm-json-wrap.php";
-//	testfarmDataUrl = "testfarm-data-example.js" // Uncomment for testing
+	// Taking the data from the same place where the page is
+	testfarmUrl = "";
+	testfarmDataUrl = "testfarm-data.jsond";
+	// Remote usage, uncomment and edit this to see a remote data
+//	testfarmUrl = "http://clam-project.org/testfarm/";
+//	testfarmDataUrl = "http://clam-project.org/testfarm/testfarm-data.jsond";
   </script>
 </head>
 
@@ -44,6 +45,7 @@ div.tfdetails
 	font-weight: normal;
 	padding: 3pt;
 	position: absolute;
+	margin-left: 10px;
 }
 
 td:hover > .tfdetails
@@ -151,14 +153,23 @@ table.tfclients th
 <div id='tferror'></div>
 <table class='tfclients'>
 <tr>
+	<th>Last build</th>
 	<th>Client</th>
 	<th>Updated</th>
-	<th>Building</th>
-	<th>Last build</th>
+	<th>Currently</th>
 	<th></th>
 </tr>
 <script id="testfarmrowTempl" type="text/x-jsrender">
 <tr>
+	<td class='tf{{:status}}'>{{statusString status /}}
+		<div class='tfdetails'>
+		{{if failedTasks }}
+			Failed tasks:
+			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
+		{{/if}}
+		<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Execution details</a>
+		</div>
+	</td>
 	<td>{{:name}}
 	{{if name_details}}
 		<div class='tfdetails'>{{:name_details}}</div>
@@ -169,15 +180,6 @@ table.tfclients th
 		{{if currentTask }}
 		<div class='tfdetails'>Current tasks: {{:currentTask}}</div>
 		{{/if}}
-	</td>
-	<td class='tf{{:status}}'>{{statusString status /}}
-		<div class='tfdetails'>
-		{{if failedTasks }}
-			Failed tasks:
-			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
-		{{/if}}
-		<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Execution details</a>
-		</div>
 	</td>
 	<td>
 		<a href="{{testfarmUrl /}}index.html" title="History">History</a>
@@ -218,27 +220,8 @@ function formatDate(d)
 		pad(d.getSeconds(),"00") )
 }
 
-function formatDetailsDate(d)
-{
-	function pad(n, padding)
-	{
-		if (isNaN(n)) return padding;
-		return (padding+n).slice(-(padding.length))
-	}
-	if( !(d instanceof Date))
-		d = new Date(d)
-	return (
-		pad(d.getFullYear(),"0000")+"-"+
-		pad(d.getMonth(),"00")+"-"+
-		pad(d.getDate(),"00")+"-"+
-		pad(d.getHours(),"00")+"-"+
-		pad(d.getMinutes(),"00")+"-"+
-		pad(d.getSeconds(),"00") )
-}
-
 $.views.tags({
 	formatDate: formatDate,
-	formatDetailsDate: formatDetailsDate,
 	each_in: function(data)
 	{
 		result = ""
@@ -266,27 +249,7 @@ $.views.tags({
 });
 
 testfarmData = { lastupdate : null, clients : [] };
-/*
-	$.ajaxSetup({
-		error: function(jqXHR, exception) {
-			if (jqXHR.status === 0) {
-				$("#tferror").html('Not connect.\n Verify Network.');
-			} else if (jqXHR.status == 404) {
-				$("#tferror").html('Requested page not found. [404]');
-			} else if (jqXHR.status == 500) {
-				$("#tferror").html('Internal Server Error [500].');
-			} else if (exception === 'parsererror') {
-				$("#tferror").html('Requested JSON parse failed.');
-			} else if (exception === 'timeout') {
-				$("#tferror").html('Time out error.');
-			} else if (exception === 'abort') {
-				$("#tferror").html('Ajax request aborted.');
-			} else {
-				$("#tferror").html('Uncaught Error.\n' + jqXHR.responseText);
-			}
-		}
-	});
-*/
+
 function reloadData()
 {
 	function countClients(key, value, suffix)
