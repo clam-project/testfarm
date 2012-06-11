@@ -109,9 +109,12 @@ class TestFarmIndicator(QtGui.QDialog) :
 		QtCore.QCoreApplication.setApplicationName("TestFarmIndicator")
 
 		self.loadSources()
-		if not self.sources : self.sources = [
-			('http://clam-project.org/testfarm',),
-			]
+		if not self.sources :
+			self.sources = [
+				('http://clam-project.org/testfarm',),
+				]
+			self.saveSources()
+			
 		self.reloadData()
 
 	def getUrl(self, url, username=None, password=None) :
@@ -172,10 +175,11 @@ class TestFarmIndicator(QtGui.QDialog) :
 				clients.append(clientStatus)
 		print clients
 		self.updateSummary(clients)
+		# TODO: if sensitiveInfo(clients) != sensitiveInfo(self.clients) : notifyChange()
+		self.clients = clients
 
 
 	def updateSummary(self, clients) :
-
 		nRed = len([client for client in clients if client.status == 'red'])
 		nRunning = len([client for client in clients if client.doing == 'run'])
 		oldDate = datetime.datetime.utcnow() - datetime.timedelta(hours=oldThresholdInHours)
