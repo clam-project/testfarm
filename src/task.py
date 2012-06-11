@@ -236,7 +236,7 @@ class Task :
 				sandbox.update()
 				listener.listen_end_command(fake_command, True, '', '', {})
 			listener.listen_end_subtask(sub_task_name)
-			
+
 		for subtask in self.subtasks :
 			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)
 			all_ok = all_ok and subtask_ok

@@ -1,4 +1,4 @@
- #
+#
 #  Copyright (c) 2006 Pau Arumi, Bram de Jong, Mohamed Sordo 
 #  and Universitat Pompeu Fabra
 # 
@@ -38,7 +38,7 @@ class ServerListener(NullResultListener):
 		self.logs_base_dir = logs_base_dir
 		self.logfile = None
 		self.idle_file = None
-		
+
 		assert project.name, "Error, project name was expected"
 
 		create_dir_if_needed( "%s/%s" % (self.logs_base_dir, project.name) ) 
@@ -48,18 +48,18 @@ class ServerListener(NullResultListener):
 		self.project_info_file = project_info_filename(self.logs_base_dir, project.name)
 		self.__write_client_info(client)
 		self.__write_project_info(project)
-	
+
 	def __append_log_entry(self, entry) :
 		"Appends an entry to logfile"
 		f = open(self.logfile, 'a+')
 		f.write( entry )
 		f.close()
-		
+
 	def __write_idle_info(self, idle_info) :
 		f = open(self.idle_file, 'w')
 		f.write( idle_info )
 		f.close()
-		
+
 	def __write_client_info(self, client): # TODO what if a client needs to delete the descriptions from info file in another execution?
 		if client.brief_description or client.long_description :
 			f = open(self.client_info_file, 'w')
@@ -77,30 +77,30 @@ class ServerListener(NullResultListener):
 				f.write( entry )
 			f.close()
 
-	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION 
+	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION
 		if project.brief_description or project.long_description :
 			f = open(self.project_info_file, 'w')
 			if project.brief_description :
 				entry = "('Brief description', '%s'),\n" % project.brief_description
 				f.write( entry )
 			if project.long_description :
-				entry = "('Long description', '%s'),\n" % project.long_description	
+				entry = "('Long description', '%s'),\n" % project.long_description
 				f.write( entry )
 			attributes_sorted = project.attributes.keys()
 			attributes_sorted.sort()
 			for attribute_name in attributes_sorted:
-				attribute_value = project.attributes[attribute_name] 
+				attribute_value = project.attributes[attribute_name]
 				entry = "('%s', '%s'),\n" % (attribute_name,attribute_value)
 				f.write( entry )
 			f.close()
 
-	def __write_task_info(self, task):	
+	def __write_task_info(self, task):
 		task_info_file = task_info_filename(self.logs_base_dir, task.project.name, task.client.name, task.name)
 		f = open(task_info_file, 'w')
 		entry = "('BEGIN_TASK', '%s'),\n" % task.name
 		f.write(entry)
 		for subtask in task.subtasks :
-			entry = "('BEGIN_SUBTASK', '%s'),\n" % subtask.name 
+			entry = "('BEGIN_SUBTASK', '%s'),\n" % subtask.name
 			f.write(entry)
 			for maybe_dict in subtask.commands :
 				cmd, _, _, _ = get_command_and_parsers(maybe_dict)
@@ -111,7 +111,7 @@ class ServerListener(NullResultListener):
 		entry = "('END_TASK', '%s'),\n" % task.name
 		f.write(entry)
 		f.close()
-	
+
 	def clean_log_files(self):
 		"Deletes all log files"
 		subprocess.call('rm -rf %s' % self.logs_base_dir, shell=True)
@@ -127,19 +127,19 @@ class ServerListener(NullResultListener):
 	def listen_begin_command(self, cmd):
 		entry = "('BEGIN_CMD', %s),\n" % repr(cmd)
 		self.__append_log_entry(entry)
-	
+
 	#def listen_end_command(self, cmd):
 	#	entry = "('END_CMD', '%s'),\n" % cmd
 	#	self.__append_log_entry(entry)
 
 	def listen_begin_subtask(self, taskname):
-		entry = "('BEGIN_SUBTASK', '%s'),\n" % taskname 
+		entry = "('BEGIN_SUBTASK', '%s'),\n" % taskname
 		self.__append_log_entry(entry)
 
 	def listen_end_subtask(self, taskname):
 		entry = "('END_SUBTASK', '%s'),\n" % taskname
 		self.__append_log_entry(entry)
-	
+
 	def listen_begin_task(self, task_name, snapshot=""):
 		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
 		self.executions_needs_update = True
@@ -149,21 +149,21 @@ class ServerListener(NullResultListener):
 		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
 		self.__append_log_entry(entry)
 		self.executions_needs_update = True
-	
+
 	def listen_task_info(self, task):
-		self.__write_task_info(task)	
+		self.__write_task_info(task)
 
 	def executions_updated(self):
 		self.executions_needs_update = False
-	
+
 	def listen_found_new_commits(self,  new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
 		idle_dict['new_commits_found'] = new_commits_found
 		idle_dict['date'] = self.current_time()
-		idle_dict['next_run_in_seconds']=next_run_in_seconds	
+		idle_dict['next_run_in_seconds']=next_run_in_seconds
 		self.__write_idle_info( str( idle_dict ) )
-			
-	def listen_end_task_gently(self, task_name): #TODO: Refactor 
+
+	def listen_end_task_gently(self, task_name): #TODO: Refactor
 		"Ends task gently when a client aborts the execution, i.e, closes the logfile whith an 'END_TASK aborted' tuple"
 		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, self.current_time())
-		self.__append_log_entry(append_entry)	
+		self.__append_log_entry(append_entry)

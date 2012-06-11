@@ -41,7 +41,6 @@ def update_projects_static_html_files():
 			webgenerator.project_name = entry
 			webgenerator.write_missing_details_static_html()
 			webgenerator.update_static_html_files()
-			
 
 update_projects_static_html_files()
 
