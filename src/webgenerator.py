@@ -231,10 +231,10 @@ class WebGenerator:
 		#TODO writing the log files is potentially  dangerous !! (if somebody else is reading at the moment)
 		#     actually, another client might be reading it through the serverproxy / server_side_logger
 		#     a solution seems to be blocking the file access
-		f = open(logfilename, 'w') 	
+		f = open(logfilename, 'w')
 		f.writelines( updated_log )
 		f.close()
-				
+
 	def __extract_info_and_output_to_auxiliar_file( self, cmd_tuple, postfix ):
 		"Moves INFO and OUTPUT entries to separated files"
 		extracted_note = '[SAVED TO FILE]'
@@ -260,13 +260,13 @@ class WebGenerator:
 			pass
 		#	print 'dont extract output: ', output
 		return (
-			cmd_tuple[0], # tag END_CMD 
+			cmd_tuple[0], # tag END_CMD
 			cmd_tuple[1], # "the" cmd
 			cmd_tuple[2], # status
 			output,
 			info,
 			cmd_tuple[5] # stats
-			)	
+			)
 
 	def __html_single_execution_details(self, client_name, wanted_date):
 		"Creates an HTML file with the details of an execution given a date"
@@ -298,7 +298,7 @@ class WebGenerator:
 			#assert not f.opened_cmd
 			f.content.append( '<div class=command>' )
 			f.content.append( '<span class="command_string"> %s</span>' % command )
-			f.opened_cmd = True						
+			f.opened_cmd = True
 		def END_SUBTASK(subtask_name) :
 			#assert f.opened_task
 			#assert f.opened_subtask
@@ -370,10 +370,10 @@ class WebGenerator:
 			f.content.append( '</div>')
 		if f.opened_subtask :
 			f.content.append( '</div>')
-		if f.opened_task :	
+		if f.opened_task :
 			f.content.append( '</div>')
-			
-		return header_details%dict(deansi_style=deansi.styleSheet()) + '\n'.join(f.content) + footer	
+
+		return header_details%dict(deansi_style=deansi.styleSheet()) + '\n'.join(f.content) + footer
 
 	#minimal version:
 #	def html_single_execution_details(self, client_name, wanted_date):
@@ -388,7 +388,7 @@ class WebGenerator:
 		details = self.__html_single_execution_details(client_name, wanted_date)
 		filename = "details-%s-%s.html" % ( client_name, wanted_date )
 		return self.web_write(filename, details)
-	
+
 	def __get_client_executions(self, client_name): #TODO: MS - Refactor
 		"Returns all task executions given a client name"
 		log = self.load_client_log(client_name)

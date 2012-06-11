@@ -32,7 +32,6 @@ class ServerListener(NullResultListener):
 		logs_base_dir = '/tmp/testfarm_tests',
 		project=None # TODO: project_name must not be None
 	) :
-		self.executions_needs_update = True
 		self.client = client
 		self.project = project
 		self.logs_base_dir = logs_base_dir
@@ -46,21 +45,21 @@ class ServerListener(NullResultListener):
 		self.idle_file = idle_filename( self.logs_base_dir, project.name, self.client.name )
 		self.client_info_file = client_info_filename(self.logs_base_dir, project.name, self.client.name )
 		self.project_info_file = project_info_filename(self.logs_base_dir, project.name)
-		self.__write_client_info(client)
-		self.__write_project_info(project)
+		self._write_client_info(client)
+		self._write_project_info(project)
 
-	def __append_log_entry(self, entry) :
+	def _append_log_entry(self, entry) :
 		"Appends an entry to logfile"
 		f = open(self.logfile, 'a+')
 		f.write( entry )
 		f.close()
 
-	def __write_idle_info(self, idle_info) :
+	def _write_idle_info(self, idle_info) :
 		f = open(self.idle_file, 'w')
 		f.write( idle_info )
 		f.close()
 
-	def __write_client_info(self, client): # TODO what if a client needs to delete the descriptions from info file in another execution?
+	def _write_client_info(self, client): # TODO what if a client needs to delete the descriptions from info file in another execution?
 		if client.brief_description or client.long_description :
 			f = open(self.client_info_file, 'w')
 			if client.brief_description :
@@ -77,7 +76,7 @@ class ServerListener(NullResultListener):
 				f.write( entry )
 			f.close()
 
-	def __write_project_info(self, project):# TODO : remove CODE DUPLICATION
+	def _write_project_info(self, project):# TODO : remove CODE DUPLICATION
 		if project.brief_description or project.long_description :
 			f = open(self.project_info_file, 'w')
 			if project.brief_description :
@@ -122,48 +121,40 @@ class ServerListener(NullResultListener):
 
 	def listen_end_command(self, command, ok, output, info, stats):
 		entry = str( ('END_CMD', command, ok, output, info, stats) ) + ',\n'
-		self.__append_log_entry(entry)
+		self._append_log_entry(entry)
 
 	def listen_begin_command(self, cmd):
 		entry = "('BEGIN_CMD', %s),\n" % repr(cmd)
-		self.__append_log_entry(entry)
+		self._append_log_entry(entry)
 
-	#def listen_end_command(self, cmd):
-	#	entry = "('END_CMD', '%s'),\n" % cmd
-	#	self.__append_log_entry(entry)
+	def listen_begin_subtask(self, subtaskname):
+		entry = "('BEGIN_SUBTASK', '%s'),\n" % subtaskname
+		self._append_log_entry(entry)
 
-	def listen_begin_subtask(self, taskname):
-		entry = "('BEGIN_SUBTASK', '%s'),\n" % taskname
-		self.__append_log_entry(entry)
-
-	def listen_end_subtask(self, taskname):
-		entry = "('END_SUBTASK', '%s'),\n" % taskname
-		self.__append_log_entry(entry)
+	def listen_end_subtask(self, subtaskname):
+		entry = "('END_SUBTASK', '%s'),\n" % subtaskname
+		self._append_log_entry(entry)
 
 	def listen_begin_task(self, task_name, snapshot=""):
-		entry = "\n('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
-		self.executions_needs_update = True
-		self.__append_log_entry(entry)
+		entry = "('BEGIN_TASK', '%s', '%s'),\n" % (task_name, self.current_time())
+		self._append_log_entry('\n' + entry)
 
 	def listen_end_task(self, task_name, status):
 		entry = "('END_TASK', '%s', '%s', '%s'),\n" % (task_name, self.current_time(), status)
-		self.__append_log_entry(entry)
-		self.executions_needs_update = True
+		self._append_log_entry(entry)
 
 	def listen_task_info(self, task):
 		self.__write_task_info(task)
-
-	def executions_updated(self):
-		self.executions_needs_update = False
 
 	def listen_found_new_commits(self,  new_commits_found, next_run_in_seconds ):
 		idle_dict = {}
 		idle_dict['new_commits_found'] = new_commits_found
 		idle_dict['date'] = self.current_time()
 		idle_dict['next_run_in_seconds']=next_run_in_seconds
-		self.__write_idle_info( str( idle_dict ) )
+		self._write_idle_info( str(idle_dict) )
 
-	def listen_end_task_gently(self, task_name): #TODO: Refactor
+	def listen_end_task_gently(self, task_name):
 		"Ends task gently when a client aborts the execution, i.e, closes the logfile whith an 'END_TASK aborted' tuple"
 		append_entry = "('END_TASK', '%s', '%s', 'Aborted'),\n" % (task_name, self.current_time())
-		self.__append_log_entry(append_entry)
+		self._append_log_entry(append_entry)
+
