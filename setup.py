@@ -13,20 +13,18 @@ datafiles=[
 ]
 datapath='share/testfarm'
 
-modules = [
-	os.path.splitext(os.path.basename(f))[0]
-	for f in glob('src/*py')
-	if "Test" not in f
-	]
-
-setup(name='bmaudio',
+setup(
+	name='testfarm',
 	version='1.0',
-	description='Testfarm modules',
-	author='CLAM Project',
+	description = 'Testfarm, a continuous integration tool',
+#	home_page = 'http://sourceforge.net/projects/testfarm/',
+	author = 'CLAM Project',
 	author_email='info@clam-project.org',
-	packages = ['testfarm'],
+	license = 'GPL v2 or later',
+	packages = ['testfarm', 'testfarm_indicator'],
 	package_dir = {
 		'testfarm': 'src',
+		'testfarm_indicator': 'indicator',
 		},
 	data_files=[ ( datapath, datafiles ), ],
 	)
