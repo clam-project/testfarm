@@ -22,7 +22,6 @@ import unittest
 import datetime
 from coloredtest import ColoredTestCase
 from listeners import *
-from task import * # TODO : is necessary ? 
 from runner import *
 from client import Client
 from project import Project
@@ -185,24 +184,24 @@ class Tests_WebGenerator(ColoredTestCase):
 ('END_TASK', 'we want this one', '2000-00-00-00-00-00', 'False'),
 ]
 		generator.purge_client_logfile('a_client','1999-99-99-99-99-99')
-		self.assertEquals( expected, generator.single_execution_details('a_client', '1999-99-99-99-99-99') )		
+		self.assertEquals( expected, generator.single_execution_details('a_client', '1999-99-99-99-99-99') )
 
 	def test_two_clients(self):
 		a_project = Project('project name')
 		a_client = Client('client 1')
 		a_client2 = Client('client 2')
 		listener1 = ServerListener(
-			client=a_client, 
-			logs_base_dir='/tmp/clients_testdir', 
+			client=a_client,
+			logs_base_dir='/tmp/clients_testdir',
 			project=a_project)
 		listener2 = ServerListener(
-			client=a_client2, 
-			logs_base_dir='/tmp/clients_testdir', 
+			client=a_client2,
+			logs_base_dir='/tmp/clients_testdir',
 			project=a_project)
 		listener1.current_time = lambda : "some date"
 		listener2.current_time = lambda : "some other date"
-		generator = WebGenerator(logs_base_dir='/tmp/clients_testdir', project_name= a_project.name)	
-		task = Task(a_project, a_client, 'task')	
+		generator = WebGenerator(logs_base_dir='/tmp/clients_testdir', project_name= a_project.name)
+		task = Task(a_project, a_client, 'task')
 		task.add_subtask('subtask1', [])
 
 		Runner(task, testinglisteners=[listener1])
@@ -244,7 +243,7 @@ class Tests_WebGenerator(ColoredTestCase):
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':5} }] )
 		Runner(task, testinglisteners=[listener])
-		
+
 		listener.current_time = lambda : "2006-04-05-00-00-00"
 		task = Task(a_project, a_client, 'task')
 		task.add_subtask("subtask", [{STATS:lambda x: {'key':1} }] )
@@ -534,6 +533,12 @@ class Tests_ServerListener(ColoredTestCase):
 			open(listener.idle_file).read())
 
 
+
+def main():
+	unittest.main()
+
+if __name__ == '__main__':
+	main()
 
 
 
