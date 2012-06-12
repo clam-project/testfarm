@@ -35,7 +35,6 @@ class ProjectListEditor(QtGui.QDialog) :
 			button = self._buttons.addButton( text, QtGui.QDialogButtonBox.ActionRole)
 			button.setIcon(QtGui.QIcon.fromTheme(icon))
 			button.clicked.connect(callback)
-			return button
 
 		self._buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
 		self.layout().addWidget(self._buttons)
@@ -45,7 +44,7 @@ class ProjectListEditor(QtGui.QDialog) :
 		newButton(self.tr("Remove"), 'list-remove', self.removeProject)
 		newButton(self.tr("Edit"), 'list-edit', self.editProject)
 
-		self.sources = sources[:]
+		self.sources = sources[:] # clone
 		self.reloadSources()
 
 	def reloadSources(self) :
@@ -178,6 +177,8 @@ class TestFarmIndicator(QtGui.QDialog) :
 
 		self.loadSources()
 
+		self.clients = []
+
 		self.reloadData()
 
 	def getUrl(self, url, username=None, password=None) :
@@ -219,7 +220,11 @@ class TestFarmIndicator(QtGui.QDialog) :
 	def reloadData(self) :
 		clients = []
 		for source in self.sources :
-			jsonData = self.getUrl(*source)
+			try :
+				jsonData = self.getUrl(*source)
+			except ValueError :
+				print >> sys.stderr, "Error fetching Project from '%s'"%source[0]
+				continue
 			data = ast.literal_eval(jsonData)
 			server = source[0]
 			project = data['project']
@@ -236,11 +241,21 @@ class TestFarmIndicator(QtGui.QDialog) :
 					runningTask = client['currentTask'] if 'currentTask' in client else '',
 					)
 				clients.append(clientStatus)
-		print clients
+#		print clients
 		self.updateSummary(clients)
-		# TODO: if sensitiveInfo(clients) != sensitiveInfo(self.clients) : notifyChange()
+		if self.clients and self.sensitiveInfo(clients) != self.sensitiveInfo(self.clients) : self.notifyChange(clients)
 		self.clients = clients
 
+	def sensitiveInfo(self, clients) :
+		return [(c.client,c.status) for c in clients]
+	def notifyChange(self, clients) :
+		changes = "\n".join([
+			self.tr("%1 is %2")%(c1.client,c2.staus)
+			for c1, c2 in zip(self.clients, clients)
+			if c1.status != c2.status
+			])
+		print changes
+		self._tray.showMessage(self.tr("Status changed"),changes,QtGui.QSystemTrayIcon.Critical,2000)
 
 	def updateSummary(self, clients) :
 		nRed = len([client for client in clients if client.status == 'red'])
