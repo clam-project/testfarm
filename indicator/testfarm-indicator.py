@@ -20,6 +20,83 @@ app = QtGui.QApplication(sys.argv)
 
 import urllib2
 
+class ProjectListEditor(QtGui.QDialog) :
+	def __init__(self, sources) :
+		super(ProjectListEditor,self).__init__()
+		self.setLayout(QtGui.QVBoxLayout())
+
+		self.layout().addWidget(QtGui.QLabel("Tracked projects:"))
+		self.sourceList = QtGui.QListWidget()
+		self.sourceList.itemDoubleClicked.connect(self.editProject)
+
+		self.layout().addWidget(self.sourceList)
+
+		def newButton(text, icon, callback) :
+			button = self._buttons.addButton( text, QtGui.QDialogButtonBox.ActionRole)
+			button.setIcon(QtGui.QIcon.fromTheme(icon))
+			button.clicked.connect(callback)
+			return button
+
+		self._buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+		self.layout().addWidget(self._buttons)
+		self._buttons.rejected.connect(self.reject)
+		self._buttons.accepted.connect(self.accept)
+		newButton(self.tr("Add"), 'list-add', self.addProject)
+		newButton(self.tr("Remove"), 'list-remove', self.removeProject)
+		newButton(self.tr("Edit"), 'list-edit', self.editProject)
+
+		self.sources = sources[:]
+		self.reloadSources()
+
+	def reloadSources(self) :
+		self.sourceList.clear()
+		def sourceItem(url, user=None, password=None) :
+			icon = 'emblem-locked' if user or password else 'emblem-mounted'
+			return QtGui.QListWidgetItem(QtGui.QIcon.fromTheme(icon), url)
+		for source in self.sources :
+			self.sourceList.addItem(sourceItem(*source))
+
+	def editProject(self, item=None) :
+		i = self.sourceList.row(item) if item else self.sourceList.currentRow()
+		source = self.projectDialog("Editing a tracked project", *self.sources[i])
+		if source is None : return
+		self.sources[i]=source
+		self.reloadSources()
+
+	def removeProject(self) :
+		i = self.sourceList.currentRow()
+		del self.sources[i]
+		self.reloadSources()
+
+	def addProject(self) :
+		source = self.projectDialog("Adding a new tracked project", "")
+		if source is None : return
+		self.sources.append(source)
+		self.reloadSources()
+
+	def projectDialog(self, title, url, user=None, password=None) :
+		dialog = QtGui.QDialog()
+		dialog.setWindowTitle(title)
+		layout = QtGui.QFormLayout(dialog)
+		urlEditor = QtGui.QLineEdit(url)
+		urlEditor.setMinimumSize(urlEditor.minimumSize()+QtCore.QSize(400,0))
+		layout.addRow("Project URL:", urlEditor)
+		userEditor = QtGui.QLineEdit(user)
+		layout.addRow("User (if needed):", userEditor)
+		passwordEditor = QtGui.QLineEdit(password)
+		passwordEditor.setEchoMode(QtGui.QLineEdit.Password)
+		layout.addRow("Password (if needed):", passwordEditor)
+
+		def check() :
+			# TODO: Check that it works
+			dialog.accept()
+
+		buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok | QtGui.QDialogButtonBox.Cancel)
+		buttons.rejected.connect(dialog.reject)
+		buttons.accepted.connect(check)
+		layout.addRow(buttons)
+		if not dialog.exec_() : return None
+		return str(urlEditor.text()), str(userEditor.text()) or None, str(passwordEditor.text()) or None
 
 class ClientStatus(object) :
 	__slots__ = (
@@ -34,28 +111,6 @@ class ClientStatus(object) :
 	def __repr__(self) :
 		return str(self)
 
-clients = [
-	ClientStatus(
-		server = "http://clam-project.org/testfarm",
-		project = "CLAM",
-		platform = "Ubuntu Natty",
-		client = "Barcelona Media",
-		lastUpdate = "2012-01-03 23:46:02",
-		failedTasks = "Compiling Network Editor",
-		doing = "run",
-		runningTask = "Compiling plugins",
-		),
-	ClientStatus(
-		server = "http://clam-project.org/testfarm",
-		project = "CLAM",
-		platform = "Windows (crosscompiled)",
-		client = "Barcelona Media",
-		lastUpdate = "2012-02-03 23:46:02",
-		failedTasks = "Compiling Network Editor",
-		doing = "wait",
-		runningTask = "Compiling plugins",
-		),
-	]
 
 oldThresholdInHours = 20
 
@@ -74,14 +129,16 @@ class TestFarmIndicator(QtGui.QDialog) :
 		trayMenu = QtGui.QMenu(self)
 		trayMenu.setSeparatorsCollapsible(False)
 		trayMenu.addAction(self._greenIcon, self.tr("Test Farm Indicator")).setSeparator(True)
+
 		trayMenu.addAction(
 			self.tr("Restore"),
 			self.show,
 			)
+
 		trayMenu.addAction(
 			QtGui.QIcon.fromTheme("preferences-system"),
 			self.tr("Preferences"),
-			self.show,
+			self.showConfig,
 			)
 		trayMenu.addSeparator()
 		self._quitAction = trayMenu.addAction(
@@ -93,12 +150,23 @@ class TestFarmIndicator(QtGui.QDialog) :
 
 		self.setLayout(QtGui.QVBoxLayout())
 		self._statusLabel = QtGui.QLabel()
-		self.layout().addWidget(self._statusLabel)
+#		self.layout().addWidget(self._statusLabel)
+		infoScroll = QtGui.QScrollArea()
+		self._info = QtGui.QLabel()
+		self._info.setAlignment(QtCore.Qt.AlignTop)
+		infoScroll.setWidgetResizable(True)
+		infoScroll.setWidget(self._info)
+		self.layout().addWidget(infoScroll)
+
 		self._list = QtGui.QListView()
-		self.layout().addWidget(self._list)
+		infoScroll.setMinimumSize(700,50)
+#		self.layout().addWidget(self._list)
 		self._buttons = QtGui.QDialogButtonBox(QtGui.QDialogButtonBox.Ok)
 		self._buttons.rejected.connect(self.reject)
 		self._buttons.accepted.connect(self.accept)
+		configButton = self._buttons.addButton( self.tr("Configure"), QtGui.QDialogButtonBox.ActionRole)
+		configButton.setIcon(QtGui.QIcon.fromTheme('preferences-system'))
+		configButton.clicked.connect(self.showConfig)
 		quitButton = self._buttons.addButton(self.tr("Quit"), QtGui.QDialogButtonBox.DestructiveRole)
 		quitButton.clicked.connect(self._quitAction.trigger)
 		quitButton.setIcon(QtGui.QIcon.fromTheme("application-exit"))
@@ -109,12 +177,7 @@ class TestFarmIndicator(QtGui.QDialog) :
 		QtCore.QCoreApplication.setApplicationName("TestFarmIndicator")
 
 		self.loadSources()
-		if not self.sources :
-			self.sources = [
-				('http://clam-project.org/testfarm',),
-				]
-			self.saveSources()
-			
+
 		self.reloadData()
 
 	def getUrl(self, url, username=None, password=None) :
@@ -147,9 +210,9 @@ class TestFarmIndicator(QtGui.QDialog) :
 		for i in xrange(n) :
 			settings.setArrayIndex(i)
 			source = [
-					str(settings.value(key).toString())
-					for key in ["url", "username", "password"]
-					if key in settings.childKeys() ]
+				str(settings.value(key).toString())
+				for key in ["url", "username", "password"]
+				if key in settings.childKeys() ]
 			self.sources.append(source)
 		settings.endArray()
 
@@ -221,6 +284,7 @@ class TestFarmIndicator(QtGui.QDialog) :
 			(self.tr("<li><span style='color: green'>%0 clients ok</li>").arg(len(clients)) if nOld + nRed == 0 else "") +
 			(self.tr("<li><span style='color: orange'>%0 clients running</li>").arg(nRunning) if nRunning else "")
 			)
+		self._info.setText(toolTip)
 
 		QtCore.QTimer.singleShot(4000, self.reloadData)
 
@@ -243,11 +307,17 @@ class TestFarmIndicator(QtGui.QDialog) :
 		if reason == QtGui.QSystemTrayIcon.DoubleClick :
 			self._tray.showMessage("Hey!","Tu",QtGui.QSystemTrayIcon.Critical,2000)
 
-
+	def showConfig(self) :
+		dialog = ProjectListEditor(self.sources)
+		dialog.setWindowTitle("TestFarm Indicator Preferences")
+		if not dialog.exec_() : return
+		self.sources = dialog.sources
+		self.saveSources()
+		self.reloadData()
 
 
 w = TestFarmIndicator()
-
+app.setQuitOnLastWindowClosed(False);
 app.exec_()
 
 
