@@ -21,7 +21,6 @@
 import commands, os, time, sys, subprocess, tempfile
 from listeners import NullResultListener, MultiListener, ConsoleResultListener
 from SvnSandbox import SvnSandbox
-import mail
 import utils
 
 def is_string( data ):
