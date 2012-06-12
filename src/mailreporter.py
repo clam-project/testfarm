@@ -46,22 +46,28 @@ def check_state_changed(color, repositories):
 
 class MailReporter(NullResultListener) :
 	def __init__(self,
+		recipients,
+		server,
+		username,
+		password,
+		testfarm_page=None,
+		port=587,
+		from_email = 'noreply@nodomain.com',
+		from_name = 'Testfarm Report',
+		subject = 'Testfarm is %s',
+		**kwd
 		) :
 		self.repositories = []
-		try:
-			import mailconfig
-		except ImportError: 
-			print "No mailconfig.py file, skipping mailing"
-			return
-		self.server = mailconfig.server
-		self.port = mailconfig.port
-		self.username = mailconfig.username
-		self.password = mailconfig.password
-		self.from_email = mailconfig.from_email
-		self.from_name = mailconfig.from_name
-		self.to_email = mailconfig.to_email
-		self.testfarm_page = mailconfig.testfarm_page
-		self.subject = mailconfig.subject
+
+		self.server = server
+		self.port = port
+		self.username = username
+		self.password = password
+		self.from_email = from_email
+		self.from_name = from_name
+		self.recipients = recipients
+		self.testfarm_page = testfarm_page
+		self.subject = subject
 
 	def listen_task_info(self, task):
 		self.task = task
@@ -81,26 +87,15 @@ class MailReporter(NullResultListener) :
 			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
 
 		if not all_ok or last_color == 'RED' :
-			try:
-				import mailconfig
-			except ImportError:
-				print "No mailconfig.py file, skipping mailing"
-				return
 			# whenever is red or changed from red to green
 			if color == 'RED' and self.testfarm_page :
 				msg += '\n\nCheck the testfarm page for the specific error: %s\n'%self.testfarm_page
 			self.send_mail(self.subject%color, msg)
 
 	def send_mail(self, subject, message, debug=0):
-		try:
-			import mailconfig
-		except ImportError:
-			print "No mailconfig.py file, skipping mailing"
-			return
-
 		msg = MIMEMultipart()
 		msg['From'] = self.from_name
-		msg['To'] = self.to_email
+		msg['To'] = self.recipients
 		msg['Subject'] = subject
 		msg.attach(MIMEText(message))
 
@@ -114,7 +109,8 @@ class MailReporter(NullResultListener) :
 				server.starttls()
 				server.ehlo() # re-identify ourselves over TLS connection
 			server.login(self.username, self.password)
-			smtpresult = server.sendmail(self.from_email, self.to_email, msg.as_string())
+			recipient_list = [r.strip() for r in self.recipients.split(",") ]
+			smtpresult = server.sendmail(self.from_email, recipient_list, msg.as_string())
 			if not smtpresult : return # ok!
 			for recipient, error in smtpresult.iteritems():
 				print  """Could not delivery mail to: %s, server said: %s %s"""  \
