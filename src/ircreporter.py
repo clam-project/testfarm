@@ -1,7 +1,7 @@
 
 from listeners import NullResultListener
 
-class IrcBotReporter(NullResultListener) :
+class IrcReporter(NullResultListener) :
 	"""This listener sends reports to an ircbot which is listening
 	at the provided address and port."""
 
@@ -21,7 +21,7 @@ class IrcBotReporter(NullResultListener) :
 
 
 if __name__ == "__main__":
-	botReporter = IrcBotReporter('localhost', 2222)
-	botReporter.listen_end_task('mytask', True)
+	ircReporter = IrcReporter('localhost', 2222)
+	ircReporter.listen_end_task('mytask', True)
 
 
