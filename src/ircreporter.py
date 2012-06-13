@@ -1,4 +1,4 @@
-
+import sys
 from listeners import NullResultListener
 
 class IrcReporter(NullResultListener) :
@@ -14,10 +14,13 @@ class IrcReporter(NullResultListener) :
 		color = 'GREEN' if all_ok else 'RED'
 		msg = "TestFarm is %s \n\n" % (color)
 		import socket
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.connect((self.address, self.port))
-		s.send(msg)
-		s.close()
+		try :
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect((self.address, self.port))
+			s.send(msg)
+			s.close()
+		except socket.error, e :
+			print >> sys.stderr, "Error connecting to irc deamon at", self.address, self.port
 
 
 if __name__ == "__main__":
