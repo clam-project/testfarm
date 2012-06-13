@@ -27,84 +27,20 @@ http://localhost/testfarm_server/version
 Setting up the client
 =====================
 
-How To Install Testfarm modules for testfarm clients?
------------------------------------------------------
+You can take a look at the one for the CLAM project that Can be found here:
+http://clam-project.org/clam/trunk/CLAM/scripts/clam_testfarm_client.py
 
-Run testfarm/install.py with root privileges:
-$ sudo ./install.py
+Requires creating a file in ~/.config/testfarmrc with
+	name="YourClientId"
+	description= "The description of your client"a
 
-To import testfarm classes from a testfarm client script import this:
-from task import *
-from project import Project
-from client import Client
-from runner import Runner
-
-How To Install Testfarm modules for testfarm clients? -- Alternative
---------------------------------------------------------------------
-
-As an alternative, you can choose not to install them system-wide. 
-For that, just specify the testfarm module path in your 
-testfarm client sript. 
-An example: say you have the testfarm source in your home dir. 
-Then just begin your testfarm client adding the path to the sys.path,
-and doing these imports:
-
-import os, sys, time
-sys.path.append('%s/testfarm/src' % os.environ['HOME'])
-from task import *
-from project import Project
-from client import Client
-from runner import Runner
-
-A Testfarm client script example
----------------------------------
-
-Can be found here:
-https://iua-share.upf.edu/svn/clam/trunk/CLAM/scripts/clam_testfarm_client.py
-
-
-
-How To Install a TestFarm Server ?
----------------------------------------
-
-(UNIX like Systems)
-- install libapache2-mod-python ( version >= 3.1 )
-- install ploticus
-
-- $ cd /etc/apache2/conf.d 
-
-- $ sudo ln -s /path/to/testfarm/mod_python_testfarm.conf
-
-- edit mod_python_testfarm.conf 
-  change the Alias /testfarm_server to point to  /path/to/testfarm/src/server_side.py
-  change DirectoryMatch to point to /path/to/testfarm/src/
-
-- check that the testfarm/src/server_side.py file and its parent directories are
-  accessible by a different user. Tip check this: 
-    $ sudo su nobody
-    $ ls -l /path/to/testfarm/server_side_logger.py
-    $ exit
-
-- $ sudo /etc/init.d/apache2 restart
-
-- set up the logs and html dirs :
-  $ sudo mkdir /var/www/testfarm_logs
-  $ sudo mkdir /var/www/testfarm_html
-  $ sudo chown www-data /var/www/testfarm_logs
-  $ sudo chown www-data /var/www/testfarm_html
-  
-
-- launch server process (deamon) as www-data. maybe in a new terminal.
-  $ cd path/to/testfarm/src
-  $ sudo su www-data
-  $ ./remote_server_timer.py
-
-
-
+If you want your client to check periodically for your repository updates,
+edit 'testfarm-client.cron', to match your dirs and scripts and copy it to
+/etc/cront.d
 
 
 SF project administration  
-----------------------------
+=========================
 
 (not interesting for users, just for sourceforge project admins. 
 SF is slow and its help is over verbose :-( )
