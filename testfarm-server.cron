@@ -1,0 +1,28 @@
+# Testfam crontab file
+# To be copied in unix systems into /etc/cron.d/
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Force english messages regardless of the system or user locale
+LC_ALL="en_US.UTF-8"
+
+# m h dom mon dow user	command
+
+# Testfarm server 
+#################
+
+# periodically regenerates the website from the logs that the clients send
+# ~testfarm/testfarm/
+
+#2-59/5 * * * *	www-data	(date; cd ~testfarm/testfarm/src; ~testfarm/testfarm/src/run_once.py /tmp/testfarm.web.lock ./generate_web.py ) 2>&1 | cat > /tmp/testfarm-web.err
+
+
+# If the server is not the public web page, this is a suggestion on how
+# you can upload the pages with rsync.
+# As is, it requires passwordless ssh keys from myuser to the webserver
+# Notice that this cron line is for a single testfarm project,'CLAM' and a server could have many
+
+#3-59/5 * * * *	myuser	(date; rsync -e ssh -rz /var/www/testfarm_html/CLAM/ clamadm@clam-project.org:clam-project.org/testfarm/  && echo Done. || echo Failed.) 2>&1 > /tmp/testfarm-clam-upload.err
+
+

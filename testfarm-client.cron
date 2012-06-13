@@ -1,0 +1,35 @@
+# Testfam crontab file
+# To be copied in unix systems into /etc/cron.d/
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# Force english messages regardless of the system or user locale
+LC_ALL="en_US.UTF-8"
+
+# m h dom mon dow user	command
+
+# Testfarm client cron lines
+############################
+
+# Copy this file to /etc/cron.d/ and adapt it to your own client
+
+# client example 1: This is a continuously checking client to have fast feedback
+# It suposes several things that you may want to change
+# - running user is myuser
+# - testfarm is installed in ~/testfarm/
+# - the client script is ~/clam/CLAM/scripts/clam_testfarm_client.py
+# execution is controled by run_once in order to avoid succesive wakeups
+# to overlap if the run takes longer
+
+#1-59/5 * * * *	myuser	(date; cd ~/clam/CLAM/scripts && svn up clam_testfarm_client.py &&  ~/testfarm/src/run_once.py /tmp/testfarm.clam.lock ./clam_testfarm_client.py) 2>&1 | cat > /tmp/testfarm-clam.err
+
+# client example 2: This is an example of long full executions that are run nightly
+# - the lock file is the same, than for client 1
+# - i
+# - Uses a different log file
+
+#0      0 * * *	myuser	(date; cd ~/clam/CLAM/scripts && svn up clam_testfarm_client.py &&  ~/testfarm/src/run_once.py /tmp/testfarm.clam.lock ./clam_testfarm_client.py --slow-tests) 2>&1 | cat > /tmp/testfarm-slow-clam.err
+
+
+
