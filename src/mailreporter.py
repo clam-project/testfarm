@@ -81,10 +81,8 @@ class MailReporter(NullResultListener) :
 		last_color, last_commits  = check_state_changed(color, self.repositories)
 		msg = "The current state is %s \n\n" % (color)
 
-
-		repositories = last_commits if len(last_commits) != 0 else self.repositories
-		for (repos,rev,committer) in repositories:
-			msg += "- repository: \'%s\', last commit by %s \n" % (repos,committer)
+		for (repos,committer,rev) in self.repositories:
+			msg += "- repository: \'%s\', commit %s by %s \n" % (repos,rev,committer)
 
 		if not all_ok or last_color == 'RED' :
 			# whenever is red or changed from red to green
