@@ -1,9 +1,31 @@
-Testfarm dependencies
-----------------------
+Setting up the server
+=====================
 
+Dependencies
 - python >= 2.4
 - libapache2-mod-python >= 3.1
 - ploticus
+
+# Define this to your Testfarm source path, just for installing
+
+cd /path/to/testfarm
+
+export TESTFARMPATH=$(pwd)
+sudo mkdir /var/www/testfarm_logs
+sudo mkdir /var/www/testfarm_html
+sudo chown www-data /var/www/testfarm_logs
+sudo chown www-data /var/www/testfarm_html
+
+sudo cp testfarm-server-cron /etc/cron.d/
+sudo ln -s $(pwd)/mod_python_testfarm.conf /etc/apache2/conf.d/
+sed -i s+/home/testfarm/testfarm+$TESTFARMPATH+  mod_python_testfarm.conf
+sudo /etc/init.d/apache2 restart
+
+To see whether the server works go to
+http://localhost/testfarm_server/version
+
+Setting up the client
+=====================
 
 How To Install Testfarm modules for testfarm clients?
 -----------------------------------------------------
@@ -76,14 +98,6 @@ How To Install a TestFarm Server ?
   $ cd path/to/testfarm/src
   $ sudo su www-data
   $ ./remote_server_timer.py
-
-- add styles and javascript files to html project dirs. 
-  do this when the <PROJECT NAME> dir has already been created by the server.
-  $ sudo mkdir /var/www/testfarm_html/<PROJECT NAME>/
-  $ cd /path/to/testfarm
-  $ sudo cp style.css testfarm.js testfarm_info.js /var/www/testfarm_html/<PROJECT NAME>/
-
-
 
 
 
