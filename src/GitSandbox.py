@@ -24,7 +24,7 @@ class GitSandbox(object) :
 	def update(self) :
 		utils.run('cd %(sandbox)s && git stash'%self.__dict__)
 		utils.run('cd %(sandbox)s && git pull'%self.__dict__)
-		utils.run('cd %(sandbox)s && git stash apply || true'%self.__dict__)
+		utils.run('cd %(sandbox)s && git stash pop || true'%self.__dict__)
 
 	def pendingUpdates(self) :
 		utils.run('cd %(sandbox)s && git fetch'%self.__dict__)
