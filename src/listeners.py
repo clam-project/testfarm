@@ -130,11 +130,11 @@ class ConsoleResultListener(NullResultListener) :
 		except:
 			return ""
 
-	def pprint(self, col, str, label=''):
+	def _pprint(self, col, str, label=''):
 		mycol = self.color(col)
 		print "%s%s%s %s" % (mycol, str, self.color('NORMAL'), label)
 
-	def pprint_cmd_result(self, cmd, status_ok, output, info, stats):
+	def _pprint_cmd_result(self, cmd, status_ok, output, info, stats):
 		normal = self.color('NORMAL')
 		yellow = self.color('YELLOW')
 		red = self.color('RED')
@@ -156,7 +156,7 @@ class ConsoleResultListener(NullResultListener) :
 			"%s    |"% (ending),
 			]))
 
-	def pprint_begin_cmd(self, cmd):
+	def _pprint_begin_cmd(self, cmd):
 		cmd_color = self.color('CYAN')
 		yellow = self.color('YELLOW')
 		normal = self.color('NORMAL')
@@ -164,30 +164,30 @@ class ConsoleResultListener(NullResultListener) :
 		sys.stdout.flush()
 	
 	def listen_end_command(self, cmd, ok, output, info, stats):
-		self.pprint_cmd_result( cmd, ok, output, info, stats )
+		self._pprint_cmd_result( cmd, ok, output, info, stats )
 
 	def listen_begin_command(self, cmd):
-	#	self.pprint('BOLD', "    BEGIN_CMD %s" % cmd )
-		self.pprint_begin_cmd(cmd)	
+	#	self._pprint('BOLD', "    BEGIN_CMD %s" % cmd )
+		self._pprint_begin_cmd(cmd)	
 	
 	def listen_begin_subtask(self, subtaskname):
-		self.pprint('BOLD', "  BEGIN_SUBTASK %s" % subtaskname )
+		self._pprint('BOLD', "  BEGIN_SUBTASK %s" % subtaskname )
 
 	def listen_end_subtask(self, subtaskname):
-		self.pprint('BOLD', "  END_SUBTASK %s\n" % subtaskname )
+		self._pprint('BOLD', "  END_SUBTASK %s\n" % subtaskname )
 	
 	def listen_begin_task(self, taskname, snapshot=""):
-		self.pprint('BOLD', "BEGIN_TASK %s\n" % taskname )
+		self._pprint('BOLD', "BEGIN_TASK %s\n" % taskname )
 		if snapshot :
-			self.pprint('BOLD', "%s\n" % snapshot )
+			self._pprint('BOLD', "%s\n" % snapshot )
 
 	def listen_end_task(self, taskname, status):
-		self.pprint('BOLD', "END_TASK %s --> %s" % (taskname, status) )
+		self._pprint('BOLD', "END_TASK %s --> %s" % (taskname, status) )
 
 	def listen_found_new_commits( self, new_commits_found, seconds_idle ):
-		self.pprint('MAGENTA', 'New commits found, or No checks specified :', new_commits_found)
-		self.pprint('MAGENTA', 'New check in %d seconds.' % seconds_idle)
+		self._pprint('MAGENTA', 'New commits found, or No checks specified :', new_commits_found)
+		self._pprint('MAGENTA', 'New check in %d seconds.' % seconds_idle)
 
 	def listen_end_task_gently(self, taskname):
-		self.pprint('MAGENTA', 'Keyboard Interrupt. Stopping execution gently') 
+		self._pprint('MAGENTA', 'Keyboard Interrupt. Stopping execution gently') 
 
