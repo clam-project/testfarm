@@ -14,7 +14,6 @@ class ServerTest(unittest.TestCase) :
 			print e
 
 	def tearDown(self) :
-		return
 		os.system("rm -rf fixture")
 
 	def assertFileContent(self, filename, expectedContent) :
@@ -401,8 +400,6 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(task.running, False)
 		self.assertEqual(task.commands, [])
 
-		self.assertEqual(execution.failedTasks, [])
-
 	def test_currentTask(self) :
 		s = self.setUpExecution("fixture",
 			"myproject","myclient","2013-03-23-20-10-40")
@@ -457,6 +454,45 @@ class ServerTest(unittest.TestCase) :
 			(2, "Second task"),
 			(3, "Third task"),
 			])
+
+	def test_executionSummary_commandStats(self) :
+
+		s = self.setUpExecution("fixture",
+			"myproject","myclient","2013-03-23-20-10-40")
+
+		s.executionStarts()
+		s.taskStarts(1, "First task")
+		s.commandStarts(1,1, "acommand param1")
+		s.taskEnds(1, True)
+
+		execution = s.execution()
+		self.assertEqual(1, len(execution.tasks[0].commands))
+		task = execution.tasks[0].commands[0]
+
+		self.assertEqual(task.id, 1)
+		self.assertEqual(task.commandline, "acommand param1")
+		self.assertEqual(task.running, True)
+
+
+	def test_executionSummary_commandEndsOk(self) :
+
+		s = self.setUpExecution("fixture",
+			"myproject","myclient","2013-03-23-20-10-40")
+
+		s.executionStarts()
+		s.taskStarts(1, "First task")
+		s.commandStarts(1,1, "acommand param1")
+		s.commandEnds(1,1, "output", True, "info", dict(stat1=3,stat2=19))
+
+		execution = s.execution()
+		self.assertEqual(1, len(execution.tasks[0].commands))
+		task = execution.tasks[0].commands[0]
+
+		self.assertEqual(task.info, "info")
+		self.assertEqual(task.output, "output")
+		self.assertEqual(task.ok, True)
+		self.assertEqual(task.running, False)
+		self.assertEqual(task.stats, dict(stat1=3, stat2=19))
 
 
 

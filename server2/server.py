@@ -241,6 +241,7 @@ class Server(object) :
 			)
 		log = self._logRead(project, client, execution)
 		tasks = {}
+		commands = {}
 		for entry in log :
 			tag = entry[0]
 
@@ -271,6 +272,28 @@ class Server(object) :
 					)
 				continue
 
+			if tag == "startCommand" :
+				task, command, commandline = entry[1:]
+				commands[task,command] = AttributeMap(
+					id = command,
+					commandline = commandline,
+					running = True,
+					)
+				tasks[task].commands.append(commands[task,command])
+				continue
+
+			if tag == "endCommand" :
+				task, command, output, ok, info, stats = entry[1:]
+				commands[task,command].update(
+					command = command,
+					running = False,
+					ok = ok,
+					output = output,
+					info = info,
+					stats = stats,
+					)
+
+
 		summary.tasks = [task for id, task in sorted(tasks.iteritems())]
 		if not summary.running : summary.ok = True
 
@@ -287,26 +310,5 @@ class Server(object) :
 				summary.tasks[-1].description)
 
 		return summary
-
-		if False :
-
-			if tag is "startCommand" :
-				task, command, commandline = entry[1:]
-				tasks[task][command]=dict(
-					commandline = commandline,
-					running = True,
-					)
-
-			if tag is "endCommand" :
-				task, command, output, status, info, stats = entry[1:]
-				task[task][command].update(
-					command = command,
-					running = False,
-					status = status,
-					output = output,
-					info = info,
-					stats = stats,
-					)
-
 
 
