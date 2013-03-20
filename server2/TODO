@@ -3,13 +3,16 @@
 		+ Task
 			+ Command
 				+ Content
+				+ Added id target
+			* Added id target
 - Json project summary
 - Project history
 - Stats plots
 
 - Missing things
-	- execution stoptime or lastupdate in Details
-	- !!! proper command id
+	- Details page
+		- execution stoptime or lastupdate in Details
+		- Summary at the top
 
 
 

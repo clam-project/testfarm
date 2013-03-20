@@ -113,7 +113,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
@@ -129,7 +129,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'bad command line'</span>\n"
 			'	<span class="command_failure">[FAILED]</span>\n'
 			'	<div id="output1_1" class="output">\n'
@@ -148,7 +148,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_running">[RUNNING]</span>\n'
 			'</div>\n'
@@ -164,7 +164,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'bad command line'</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'	<div id="info1_1" class="info">\n'
@@ -187,7 +187,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'	<div class="stats">\n'
@@ -231,7 +231,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.task(task)
 		self.assertMultiLineEqual(result,
-			'<div class="task">\n'
+			'<div class="task" id="task_1">\n'
 			'Task: "First task"\n'
 			'</div>\n\n'
 			)
@@ -242,9 +242,9 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		w = ExecutionDetails()
 		result = w.task(task)
 		self.assertMultiLineEqual(result,
-			'<div class="task">\n'
+			'<div class="task" id="task_1">\n'
 			'Task: "First task"\n'
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
@@ -283,9 +283,9 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			"<h1>Details for execution '20130301-232425'</h1>\n"
 			"<div class='execution'>\n"
 			"<p>Started at 2013-03-01 23:24:25</p>\n"
-			'<div class="task">\n'
+			'<div class="task" id="task_1">\n'
 			'Task: "First task"\n'
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
@@ -303,9 +303,9 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			"<h1>Details for execution '20130301-232425'</h1>\n"
 			"<div class='execution'>\n"
 			"<p>Started at 2013-03-01 23:24:25</p>\n"
-			'<div class="task">\n'
+			'<div class="task" id="task_1">\n'
 			'Task: "First task"\n'
-			"<div class='command'>\n"
+			"<div class='command' id='command_1_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_running">[RUNNING]</span>\n'
 			'</div>\n'

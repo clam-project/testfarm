@@ -56,7 +56,7 @@ class ExecutionDetails(object) :
 		id  = "1_1" # TODO: Compute it!!!!
 
 		return (
-			"<div class='command'>\n"
+			"<div class='command' id='command_{id}'>\n"
 			"	Command: <span class='command_line'>'{commandline}'</span>\n"
 			'	<span class="{indicatorclass}">[{indicatortext}]</span>\n'
 			'{outputblock}'
@@ -64,6 +64,7 @@ class ExecutionDetails(object) :
 			'{statsblock}'
 			'</div>\n'
 			.format(
+				id = id,
 				commandline = command.commandline,
 				indicatorclass = indicatorclass,
 				indicatortext = status,
@@ -87,11 +88,12 @@ class ExecutionDetails(object) :
 			self.command(command)
 			for command in task.commands])
 		return (
-			'<div class="task">\n'
+			'<div class="task" id="task_{id}">\n'
 			'Task: "{description}"\n'
 			'{commandblock}'
 			'</div>\n\n'
 			).format(
+				id = task.id,
 				description = task.description,
 				commandblock = commandBlock,
 			)
@@ -221,6 +223,11 @@ class JsonSummary(object) :
 			)
 
 class ProjectHistory(object) :
+
+	def execution(self, execution) :
+		return
+
+
 	pass
 
 
