@@ -105,11 +105,9 @@ class ExecutionDetails(object) :
 				id=execution.starttime,
 				)
 			if execution.running else
-			"<p>Execution '{id}' finalized at {stoptime}</p>\n".format(
+			"<p>Execution '{id}' finalized with a <b>{status}</b></p>\n".format(
 				id=execution.starttime,
-#				stoptime = datetime.datetime.strptime(
-#					execution.stoptime, "%Y%m%d-%H%M%S"),
-				stoptime = "2013-03-01 23:34:35", # TODO: Take it
+				status = "SUCCESS" if execution else "FAILURE"
 				)
 			)
 			
@@ -147,10 +145,11 @@ class WebGenerator(object) :
 			client = client,
 			execution = execution,
 			deansi_style = deansi.styleSheet(),
-			content = self.executionDetails_execution(executionSummary),
+			content = ExecutionDetails().execution(executionSummary),
 			)
 
 	def executionDetails_execution(self, executionSummary) :
+		
 		return """\
 <div class='execution'>
 <h1>Details for execution '{execution}', started at {executionDate:%Y-%m-%d %H:%M:%S}</h1>

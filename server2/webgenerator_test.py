@@ -285,7 +285,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
 			'</div>\n\n'
-			"<p>Execution '20130301-232425' finalized at 2013-03-01 23:34:35</p>\n"
+			"<p>Execution '20130301-232425' finalized with a <b>SUCCESS</b></p>\n"
 			'</div>\n'
 			)
 
@@ -310,6 +310,18 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			)
 
 
+	def emptyExecution(self) :
+		project, client, execution = "myproject", "myclient", "20130301-232425"
+		s = Server("fixture")
+		s.createServer()
+		s.createProject(project)
+		s.createClient(project, client)
+		e = ArgPrepender(s, project, client, execution)
+		e.executionStarts(
+			timestamp="2013-03-01 23:24:25",
+			changelog=[])
+		e.executionEnds(True)
+		return e.execution()
 
 
 
@@ -320,11 +332,8 @@ class ExecutionDetailsTest(unittest.TestCase) :
 
 
 
-class WebGeneratorTest(unittest.TestCase) :
-
-
-	def _test_executionDetails_emptyExecution(self) :
-		s = self.setUpExecution()
+	def test_executionDetails_emptyExecution(self) :
+		s = self.emptyExecution()
 
 		w = WebGenerator("fixture", "output")
 		self.assertMultiLineEqual(
@@ -343,11 +352,10 @@ class WebGeneratorTest(unittest.TestCase) :
 </head>
 <body>
 
+<h1>Details for execution '20130301-232425'</h1>
 <div class='execution'>
-<h1>Details for execution '20130301-232425', started at 2013-03-01 23:24:25</h1>
-
-<p>Execution '20130301-232425' finalized at 2013-03-01 23:34:35</p>
-<p>No errors detected</p>
+<p>Started at 2013-03-01 23:24:25</p>
+<p>Execution '20130301-232425' finalized with a <b>SUCCESS</b></p>
 </div>
 
 <div class="about">
