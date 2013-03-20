@@ -4,8 +4,9 @@ import unittest
 from server import Server, ArgPrepender
 from server import ProjectNotFound, BadServerPath, ClientNotFound
 import os
-from webgenerator import WebGenerator, ExecutionDetails
+from webgenerator import ExecutionDetails, JsonSummary
 import deansi
+import datetime
 
 class ExecutionDetailsTest(unittest.TestCase) :
 
@@ -309,7 +310,6 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			'</div>\n'
 			)
 
-
 	def emptyExecution(self) :
 		project, client, execution = "myproject", "myclient", "20130301-232425"
 		s = Server("fixture")
@@ -323,21 +323,13 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		e.executionEnds(True)
 		return e.execution()
 
-
-
-
-
-
-
-
-
-
 	def test_executionDetails_emptyExecution(self) :
 		s = self.emptyExecution()
 
-		w = WebGenerator("fixture", "output")
-		self.assertMultiLineEqual(
-			w.executionDetails("myproject","myclient","20130301-232425"),
+		w = ExecutionDetails()
+		s = Server("fixture")
+		content = w.generate(s,"myproject","myclient","20130301-232425")
+		self.assertMultiLineEqual( content,
 			"""\
 <!DOCTYPE HTML>
 <html lang="en-US">
@@ -365,6 +357,221 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 </body>
 </html>
 """)
+
+
+class JsonSummaryTest(unittest.TestCase) :
+
+	def setUp(self) :
+		self.maxDiff = None
+		try :
+			os.system("rm -rf fixture")
+		except Exception as e: 
+			print(e)
+
+	def tearDown(self) :
+		return
+		os.system("rm -rf fixture")
+
+
+	def setUpEmptyClient(self) :
+		s = Server("fixture")
+
+		s.createServer()
+		s.createProject("myproject")
+		s.createClient("myproject", "myclient")
+		s.setClientMetadata("myproject", "myclient",
+			description = "a description",
+			briefDescription = "brief description",
+			)
+		return s
+
+	def test_client_noExecutions(self) :
+
+		s = self.setUpEmptyClient()
+
+		w = JsonSummary()
+		result = w.client(s, 'myproject', 'myclient')
+		self.assertMultiLineEqual(result,
+			'		{\n'
+			'			"name": "myclient",\n'
+			'			"description": \'a description\',\n'
+			'			"name_details": \'brief description\',\n'
+			'			"status": "int",\n'
+			'			"doing": "old",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "1900/01/01 00:00:00",\n'
+			'		},\n'
+			)
+
+	def setUpExecution(self, server, name, running=False, ok=True) :
+		e = ArgPrepender(server, "myproject", "myclient", name)
+		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+		e.executionStarts(
+			timestamp= timestamp,
+			changelog=[])
+		e.taskStarts(1, "First task")
+		e.commandStarts(1,1, "command line")
+		e.commandEnds(1,1, output="output", ok=ok, info=None, stats={})
+		if running : return
+		e.taskEnds(1,ok)
+		e.executionEnds(ok)
+
+		
+	def test_client_green(self) :
+
+		s = self.setUpEmptyClient()
+		self.setUpExecution(s, "20130506-070809")
+		s.clientIdle("myproject", "myclient", 100,
+			datetime.datetime(2013,5,6,7,8,9))
+
+		w = JsonSummary()
+		result = w.client(s, 'myproject', 'myclient')
+		self.assertMultiLineEqual(result,
+			'		{\n'
+			'			"name": "myclient",\n'
+			'			"description": \'a description\',\n'
+			'			"name_details": \'brief description\',\n'
+			'			"status": "green",\n'
+			'			"doing": "wait",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "2013/05/06 07:08:09",\n'
+			'		},\n'
+			)
+
+	def test_client_red(self) :
+
+		s = self.setUpEmptyClient()
+		self.setUpExecution(s, "20130506-070809", ok=False)
+		s.clientIdle("myproject", "myclient", 100,
+			datetime.datetime(2013,5,6,7,8,9))
+
+		w = JsonSummary()
+		result = w.client(s, 'myproject', 'myclient')
+		self.assertMultiLineEqual(result,
+			'		{\n'
+			'			"name": "myclient",\n'
+			'			"description": \'a description\',\n'
+			'			"name_details": \'brief description\',\n'
+			'			"status": "red",\n'
+			'			"doing": "wait",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"failedTasks" : [\n'
+			'				"First task",\n'
+			'			],\n'
+			'			"lastExecution": "2013/05/06 07:08:09",\n'
+			'		},\n'
+			)
+
+	def test_client_greenWhileRunning(self) :
+		s = self.setUpEmptyClient()
+		self.setUpExecution(s, "20130405-060708")
+		self.setUpExecution(s, "20130506-070809", running=True, ok=False)
+		w = JsonSummary()
+		result = w.client(s, 'myproject', 'myclient')
+		self.assertMultiLineEqual(result,
+			'		{\n'
+			'			"name": "myclient",\n'
+			'			"description": \'a description\',\n'
+			'			"name_details": \'brief description\',\n'
+			'			"status": "green",\n'
+			'			"doing": "run",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "2013/04/05 06:07:08",\n'
+			'			"currentTask": "First task",\n'
+			'		},\n'
+			)
+
+	def test_client_redWhileRunning(self) :
+		s = self.setUpEmptyClient()
+		self.setUpExecution(s, "20130405-060708", ok=False)
+		self.setUpExecution(s, "20130506-070809", running=True)
+
+		w = JsonSummary()
+		result = w.client(s, 'myproject', 'myclient')
+		self.assertMultiLineEqual(result,
+			'		{\n'
+			'			"name": "myclient",\n'
+			'			"description": \'a description\',\n'
+			'			"name_details": \'brief description\',\n'
+			'			"status": "red",\n'
+			'			"doing": "run",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"failedTasks" : [\n'
+			'				"First task",\n'
+			'			],\n'
+			'			"lastExecution": "2013/04/05 06:07:08",\n'
+			'			"currentTask": "First task",\n'
+			'		},\n'
+			)
+
+	def test_project_noClients(self) :
+		s = Server("fixture")
+		s.createServer()
+		s.createProject("myproject")
+		s.setProjectMetadata("myproject",
+			description = "project description",
+			briefDescription = "project brief description",
+			)
+
+		w = JsonSummary()
+		result = w.project(s, 'myproject', datetime.datetime(2013,9,1,2,3,4))
+		self.assertMultiLineEqual(result,
+			'{'
+			'	"project" : "myproject",\n'
+			'	"lastupdate" : "2013/09/01 02:03:04",\n'
+			'	"clients" : [\n'
+			'	]\n'
+			'}'
+			)
+
+	def test_project_withClients(self) :
+		s = Server("fixture")
+		s.createServer()
+		s.createProject("myproject")
+		s.createClient("myproject","myclient")
+		s.setClientMetadata("myproject", "myclient",
+			description = "a description",
+			briefDescription = "brief description",
+			)
+		s.createClient("myproject","yourclient")
+		s.setClientMetadata("myproject", "yourclient",
+			description = "your description",
+			briefDescription = "your brief description",
+			)
+
+		w = JsonSummary()
+		result = w.project(s, 'myproject', datetime.datetime(2013,9,1,2,3,4))
+		self.assertMultiLineEqual(result,
+			'{'
+			'	"project" : "myproject",\n'
+			'	"lastupdate" : "2013/09/01 02:03:04",\n'
+			'	"clients" : [\n'
+			'		{\n'
+			'			"name": "myclient",\n'
+			'			"description": \'a description\',\n'
+			'			"name_details": \'brief description\',\n'
+			'			"status": "int",\n'
+			'			"doing": "old",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "1900/01/01 00:00:00",\n'
+			'		},\n'
+			'		{\n'
+			'			"name": "yourclient",\n'
+			'			"description": \'your description\',\n'
+			'			"name_details": \'your brief description\',\n'
+			'			"status": "int",\n'
+			'			"doing": "old",\n'
+			'			"lastupdate": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "1900/01/01 00:00:00",\n'
+			'		},\n'
+			'	]\n'
+			'}'
+			)
+
+
+
+
 
 
 if __name__ == "__main__" :

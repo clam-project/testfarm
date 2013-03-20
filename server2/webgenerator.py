@@ -126,20 +126,9 @@ class ExecutionDetails(object) :
 				endblock = endblock,
 			)
 
-class JsonProjectSummary(object) :
-	def generate(self) :
-		pass
-
-
-class WebGenerator(object) :
-	def __init__(self, serverPath, webPath) :
-		self.server = Server(serverPath)
-
-
-
-	def executionDetails(self, project, client, execution) :
-		executionSummary = self.server.execution(project, client, execution)
-		executionInfo = self.server.executionInfo(project, client, execution)
+	def generate(self, server, project, client, execution) :
+		executionSummary = server.execution(project, client, execution)
+		executionInfo = server.executionInfo(project, client, execution)
 		return detailsTemplate.format(
 			project = project,
 			client = client,
@@ -148,96 +137,94 @@ class WebGenerator(object) :
 			content = ExecutionDetails().execution(executionSummary),
 			)
 
-	def executionDetails_execution(self, executionSummary) :
-		
-		return """\
-<div class='execution'>
-<h1>Details for execution '{execution}', started at {executionDate:%Y-%m-%d %H:%M:%S}</h1>
-{taskcontent}
-<p>Execution '{execution}' finalized at 2013-03-01 23:34:35</p>
-<p>No errors detected</p>
-</div>
-""".format(
-		execution = executionSummary.starttime,
-		executionDate = datetime.datetime.strptime(
-				executionSummary.starttime, "%Y%m%d-%H%M%S"),
-		
-		taskcontent = ""
-		)
-		
 
-	def jsonSummary(self, project) :
-		project_info = self.server.projectMetadata(project)
-		content = [
-				'{',
-				'	"project" : "{}",'.format(project),
-				'	"lastupdate" : "{:%Y/%m/%d %H:%M:%S}",'.format(
-					datetime.datetime.now()),
-				'	"clients" : [',
-			] + [
-				self.jsonClientSumary(project, client)
-				for client in self.server.clients(project)
-			] + [
-				'	]',
-				'}'
-			]
+class JsonSummary(object) :
 
-	def jsonClientSumary(self, project, client) :
-		clientInfo = self.server.clientMetadata(project, client)
-		clientDescription = clientInfo['description']
-		clientBriefDescription = clientInfo['briefDescription']
+	def client(self, server, project, client, now=datetime.datetime.now()) :
+		meta = server.clientMetadata(project,client)
+		executions = server.executions(project, client)
+		expectedIdle = server.expectedIdle(project, client)
+		status = "int"
+		doing = "wait" if expectedIdle>now else "old" # TODO: Not like that
+		currentTask = None
+		failedTasks = []
+		lastExecution = datetime.datetime(1900,1,1,0,0,0)
 
-		executions = self.server.executions(project, client)
+		for executionName in reversed(executions) :
+			execution = server.execution(project, client, executionName)
+			if execution.running :
+				if currentTask : continue
+				currentTask = execution.currentTask[1]
+				doing = "run"
+				continue
+			# last finished execution
+			failedTasks = execution.failedTasks
+			status = 'red' if execution.failedTasks else "green"
+			lastExecution = datetime.datetime.strptime(
+				executionName,"%Y%m%d-%H%M%S")
+			break
 
-		idle_info = idle_per_client[client]
-		current_task = None
-		for name in reversed(executions) :
-			status, start  = self.server
-			log = self.server._logRead(project, client, executions)
-			if status != 'inprogress' : break # found a finished task
-			if current_task : continue # already have an inprogress task
-			subtasks = self.__executed_subtasks(client, start)
-			current_task = "Step %i: %s"%(
-				len(subtasks),subtasks[-1]) if subtasks else "Starting up execution"
-
-		status_map = {
-			'broken': 'red',
-			'stable': 'green',
-			'aborted': 'int',
-			'inprogress': 'int', # TODO: considering single inprogress execution
-			}
-		last_update = datetime.strptime(
-			idle_info['date'], "%Y-%m-%d-%H-%M-%s")
-		next_update = last_update + datetime.timedelta(
-			seconds = idle_info['next_run_in_seconds'])
-		failed_tasks = self.__failed_subtasks(client, start)
-
-		doing = "run" if current_task else (
-			"old" if next_update < datetime.datetime.now() else
-			"wait"
+		failedTasksBlock = '' if not failedTasks else (
+			'			"failedTasks" : [\n' +
+			''.join((
+			'				"{}",\n'.format(failedTask[1])
+			for failedTask in failedTasks
+			)) +
+			'			],\n'
 			)
-		content = [
-			'		{',
-			'			"name": "%s",' % client,
-			'			"description": %s,' % repr(clientDescription),
-			'			"name_details": \'%s\',' % clientBriefDescription,
-			'			"status": "%s",'% status_map[status],
-			'			"doing": "%s",' % doing,
-			'			"lastupdate": "%s",' % format_date(last_update),
-			] + ([
-			'			"failedTasks":',
-			'			[',
-			] + [
-			'				"%s",' % task
-				for task in failed_tasks # todo
-			] + [
-			'			],',
-			] if failed_tasks else []) + [
-			'			stExecution": "%s",' % start,
-			] + ([
-			'			"currentTask": "%s",' % current_task,
-			] if current_task else []) + [
-			'		},',
-			]
+
+		currentTaskBlock = '' if not currentTask else (
+			'			"currentTask": "{}",\n'.format(currentTask)
+			)
+
+		return (
+			'		{{\n'
+			'			"name": "{client}",\n'
+			'			"description": {description},\n'
+			'			"name_details": {briefDescription},\n'
+			'			"status": "{status}",\n'
+			'			"doing": "{doing}",\n'
+			'			"lastupdate": "{idletime:%Y/%m/%d %H:%M:%S}",\n'
+						'{failedTasksBlock}'
+			'			"lastExecution": "{lastExecution:%Y/%m/%d %H:%M:%S}",\n'
+						'{currentTaskBlock}'
+			'		}},\n'
+			).format(
+				client = client,
+				idletime = datetime.datetime(2013,4,5, 6,7,8), # TODO: Compute it
+				description = repr(meta['description']),
+				briefDescription = repr(meta['briefDescription']),
+				status = status,
+				doing = doing,
+				lastExecution = lastExecution,
+				failedTasksBlock = failedTasksBlock,
+				currentTaskBlock = currentTaskBlock,
+			)
+
+	def project(self, server, project, now=datetime.datetime.now()) :
+		clientsBlock = "".join((
+			self.client(server, project, client, now)
+			for client in server.clients(project)
+			))
+		return (
+			'{{'
+			'	"project" : "{project}",\n'
+			'	"lastupdate" : "{now:%Y/%m/%d %H:%M:%S}",\n'
+			'	"clients" : [\n'
+			'{clientsblock}'
+			'	]\n'
+			'}}'
+		).format(
+			now = now,
+			project = project,
+			clientsblock = clientsBlock,
+			)
+
+class ProjectHistory(object) :
+	pass
+
+
+
+
 
 

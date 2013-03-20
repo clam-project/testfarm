@@ -44,6 +44,11 @@ class ArgPrepender(object) :
 	def __getattr__(self, name) :
 		return partial(getattr(self.wrapped,name), *self.args)
 
+class AttributeMap() :
+	def __init__(self, **kwds) : self.update(**kwds)
+	def __contains__(self, what) : return what in self.__dict__
+	def update(self, **kwds) : return self.__dict__.update(**kwds)
+
 
 
 class Server(object) :
@@ -217,8 +222,9 @@ class Server(object) :
 		return "NotResponding"
 
 
-	def clientIdle(self, project, client, minutes) :
-		nextIdle = datetime.datetime.now() + datetime.timedelta(minutes=minutes)
+	def clientIdle(self, project, client, minutes, now=None) :
+		if now is None : now = datetime.datetime.now()
+		nextIdle = now + datetime.timedelta(minutes=minutes)
 		idlefile = open(self._p(project,client,"idle"),'w')
 		idlefile.write(nextIdle.strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -229,10 +235,8 @@ class Server(object) :
 
 
 	def execution(self, project, client, execution) :
-		class AttributeMap() :
-			def __init__(self, **kwds) : self.update(**kwds)
-			def __contains__(self, what) : return what in self.__dict__
-			def update(self, **kwds) : return self.__dict__.update(**kwds)
+		"""Returns a Pythonic navegable structure with the information
+		about an execution taken from its execution log"""
 
 		summary = AttributeMap(
 			failedTasks = [],
