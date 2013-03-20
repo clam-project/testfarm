@@ -258,6 +258,10 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project, client)
+		# force an idle time
+		s.clientIdle(project,client, 0,
+			now=datetime.datetime(2013,4,5,6,7,8))
+
 		e = ArgPrepender(s, project, client, execution)
 		e.executionStarts(
 			timestamp="2013-03-01 23:24:25",
@@ -316,6 +320,10 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project, client)
+		# force an idle time
+		s.clientIdle("myproject", "myclient", 0,
+			now=datetime.datetime(2013,4,5,6,7,8))
+
 		e = ArgPrepender(s, project, client, execution)
 		e.executionStarts(
 			timestamp="2013-03-01 23:24:25",
@@ -383,6 +391,9 @@ class JsonSummaryTest(unittest.TestCase) :
 			description = "a description",
 			briefDescription = "brief description",
 			)
+		# force an idle time
+		s.clientIdle("myproject", "myclient", 0,
+			now=datetime.datetime(2013,4,5,6,7,8))
 		return s
 
 	def test_client_noExecutions(self) :
@@ -422,8 +433,6 @@ class JsonSummaryTest(unittest.TestCase) :
 
 		s = self.setUpEmptyClient()
 		self.setUpExecution(s, "20130506-070809")
-		s.clientIdle("myproject", "myclient", 100,
-			datetime.datetime(2013,5,6,7,8,9))
 
 		w = JsonSummary()
 		result = w.client(s, 'myproject', 'myclient')
@@ -443,8 +452,6 @@ class JsonSummaryTest(unittest.TestCase) :
 
 		s = self.setUpEmptyClient()
 		self.setUpExecution(s, "20130506-070809", ok=False)
-		s.clientIdle("myproject", "myclient", 100,
-			datetime.datetime(2013,5,6,7,8,9))
 
 		w = JsonSummary()
 		result = w.client(s, 'myproject', 'myclient')
@@ -534,11 +541,19 @@ class JsonSummaryTest(unittest.TestCase) :
 			description = "a description",
 			briefDescription = "brief description",
 			)
+		# force an idle time
+		s.clientIdle("myproject", "myclient", 0,
+			now=datetime.datetime(2013,4,5,6,7,8))
 		s.createClient("myproject","yourclient")
 		s.setClientMetadata("myproject", "yourclient",
 			description = "your description",
 			briefDescription = "your brief description",
 			)
+		# force an idle time
+		s.clientIdle("myproject", "yourclient", 0,
+			now=datetime.datetime(2013,4,5,6,7,8))
+
+
 
 		w = JsonSummary()
 		result = w.project(s, 'myproject', datetime.datetime(2013,9,1,2,3,4))

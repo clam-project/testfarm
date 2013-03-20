@@ -145,7 +145,7 @@ class JsonSummary(object) :
 		executions = server.executions(project, client)
 		expectedIdle = server.expectedIdle(project, client)
 		status = "int"
-		doing = "wait" if expectedIdle>now else "old" # TODO: Not like that
+		doing = "wait" if expectedIdle>now and executions else "old"
 		currentTask = None
 		failedTasks = []
 		lastExecution = datetime.datetime(1900,1,1,0,0,0)
@@ -184,14 +184,14 @@ class JsonSummary(object) :
 			'			"name_details": {briefDescription},\n'
 			'			"status": "{status}",\n'
 			'			"doing": "{doing}",\n'
-			'			"lastupdate": "{idletime:%Y/%m/%d %H:%M:%S}",\n'
+			'			"lastupdate": "{nextIdle:%Y/%m/%d %H:%M:%S}",\n'
 						'{failedTasksBlock}'
 			'			"lastExecution": "{lastExecution:%Y/%m/%d %H:%M:%S}",\n'
 						'{currentTaskBlock}'
 			'		}},\n'
 			).format(
 				client = client,
-				idletime = datetime.datetime(2013,4,5, 6,7,8), # TODO: Compute it
+				nextIdle = expectedIdle, # TODO: next expected != last received
 				description = repr(meta['description']),
 				briefDescription = repr(meta['briefDescription']),
 				status = status,
