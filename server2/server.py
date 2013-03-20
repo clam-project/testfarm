@@ -276,6 +276,7 @@ class Server(object) :
 				task, command, commandline = entry[1:]
 				commands[task,command] = AttributeMap(
 					id = command,
+					task = task,
 					commandline = commandline,
 					running = True,
 					)

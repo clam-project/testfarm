@@ -96,6 +96,42 @@ class ExecutionDetails(object) :
 				commandblock = commandBlock,
 			)
 
+	def execution(self, execution) :
+		taskBlock = "" if not execution.tasks else "".join([
+			self.task(task)
+			for task in execution.tasks])
+		endblock = (
+			"<p>Execution '{id}' still running...</p>\n".format(
+				id=execution.starttime,
+				)
+			if execution.running else
+			"<p>Execution '{id}' finalized at {stoptime}</p>\n".format(
+				id=execution.starttime,
+#				stoptime = datetime.datetime.strptime(
+#					execution.stoptime, "%Y%m%d-%H%M%S"),
+				stoptime = "2013-03-01 23:34:35", # TODO: Take it
+				)
+			)
+			
+		return (
+			"<h1>Details for execution '{id}'</h1>\n"
+			"<div class='execution'>\n"
+			"<p>Started at {starttime:%Y-%m-%d %H:%M:%S}</p>\n"
+			"{taskblock}"
+			"{endblock}"
+			'</div>\n'
+			).format(
+				id = execution.starttime,
+				starttime = datetime.datetime.strptime(
+					execution.starttime, "%Y%m%d-%H%M%S"),
+				taskblock = taskBlock,
+				endblock = endblock,
+			)
+
+class JsonProjectSummary(object) :
+	def generate(self) :
+		pass
+
 
 class WebGenerator(object) :
 	def __init__(self, serverPath, webPath) :

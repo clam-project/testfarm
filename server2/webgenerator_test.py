@@ -225,7 +225,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		return e.execution().tasks[0]
 
 	def test_task_empty(self) :
-		task = self.taskFixture("First task", running=True)
+		task = self.taskFixture("First task", running=False)
 
 		w = ExecutionDetails()
 		result = w.task(task)
@@ -250,6 +250,64 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			'</div>\n\n'
 			)
 
+
+	def executionFixture(self, running = False) :
+		project, client, execution = "myproject", "myclient", "20130301-232425"
+		s = Server("fixture")
+		s.createServer()
+		s.createProject(project)
+		s.createClient(project, client)
+		e = ArgPrepender(s, project, client, execution)
+		e.executionStarts(
+			timestamp="2013-03-01 23:24:25",
+			changelog=[])
+		e.taskStarts(1, "First task")
+		e.commandStarts(1,1, "command line")
+		if running : return e.execution()
+		e.commandEnds(1,1, output="output", ok=True, info=None, stats={})
+		e.taskEnds(1,True)
+		e.executionEnds(True)
+		return e.execution()
+
+	def test_execution(self) :
+		execution = self.executionFixture()
+
+		w = ExecutionDetails()
+		result = w.execution(execution)
+		self.assertMultiLineEqual(result,
+			"<h1>Details for execution '20130301-232425'</h1>\n"
+			"<div class='execution'>\n"
+			"<p>Started at 2013-03-01 23:24:25</p>\n"
+			'<div class="task">\n'
+			'Task: "First task"\n'
+			"<div class='command'>\n"
+			"	Command: <span class='command_line'>'command line'</span>\n"
+			'	<span class="command_ok">[OK]</span>\n'
+			'</div>\n'
+			'</div>\n\n'
+			"<p>Execution '20130301-232425' finalized at 2013-03-01 23:34:35</p>\n"
+			'</div>\n'
+			)
+
+	def test_execution_running(self) :
+		execution = self.executionFixture(running=True)
+
+		w = ExecutionDetails()
+		result = w.execution(execution)
+		self.assertMultiLineEqual(result,
+			"<h1>Details for execution '20130301-232425'</h1>\n"
+			"<div class='execution'>\n"
+			"<p>Started at 2013-03-01 23:24:25</p>\n"
+			'<div class="task">\n'
+			'Task: "First task"\n'
+			"<div class='command'>\n"
+			"	Command: <span class='command_line'>'command line'</span>\n"
+			'	<span class="command_running">[RUNNING]</span>\n'
+			'</div>\n'
+			'</div>\n\n'
+			"<p>Execution '20130301-232425' still running...</p>\n"
+			'</div>\n'
+			)
 
 
 
