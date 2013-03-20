@@ -200,6 +200,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 
 	def taskFixture(self, description,
 			commands = 0,
+			id = 1,
 			running = False,
 			ok = None,
 			info=None,
@@ -207,25 +208,23 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			) :
 		project, client, execution = "myproject", "myclient", "20130301-232425"
 		s = Server("fixture")
-		s.createServer()
-		s.createProject(project)
-		s.createClient(project, client)
 		e = ArgPrepender(s, project, client, execution)
 		e.executionStarts(
 			timestamp="2013-03-01 23:24:25",
 			changelog=[])
-		e.taskStarts(1, description)
+		e.taskStarts(id, description)
 		for i in xrange(commands) :
 			output="output for command {}".format(i)
 			ok = True
-			e.commandStarts(1,i, "command line")
+			e.commandStarts(id,i+1, "command line")
 			if running : return e.execution().tasks[0]
-			e.commandEnds(1,i, output=output, ok=ok, info=info, stats=stats)
-		e.taskEnds(1,True)
+			e.commandEnds(id,i+1, output=output, ok=ok, info=info, stats=stats)
+		e.taskEnds(id,True)
 		e.executionEnds(True)
-		return e.execution().tasks[0]
+		return e.execution().tasks[id-1]
 
 	def test_task_empty(self) :
+		self.setUpEmptyClient()
 		task = self.taskFixture("First task", running=False)
 
 		w = ExecutionDetails()
@@ -237,6 +236,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			)
 
 	def test_task_oneCommand(self) :
+		self.setUpEmptyClient()
 		task = self.taskFixture("First task", running=False, commands=1)
 
 		w = ExecutionDetails()
@@ -245,6 +245,38 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			'<div class="task" id="task_1">\n'
 			'Task: "First task"\n'
 			"<div class='command' id='command_1_1'>\n"
+			"	Command: <span class='command_line'>'command line'</span>\n"
+			'	<span class="command_ok">[OK]</span>\n'
+			'</div>\n'
+			'</div>\n\n'
+			)
+
+	def setUpEmptyClient(self) :
+		s = Server("fixture")
+
+		s.createServer()
+		s.createProject("myproject")
+		s.createClient("myproject", "myclient")
+		s.setClientMetadata("myproject", "myclient",
+			description = "a description",
+			briefDescription = "brief description",
+			)
+		# force an idle time
+		s.clientIdle("myproject", "myclient", 0,
+			now=datetime.datetime(2013,4,5,6,7,8))
+		return s
+
+	def test_task_twoTasks(self) :
+		self.setUpEmptyClient()
+		task = self.taskFixture("First task", running=False, commands=1)
+		task = self.taskFixture("Second task", id=2, running=False, commands=1)
+
+		w = ExecutionDetails()
+		result = w.task(task)
+		self.assertMultiLineEqual(result,
+			'<div class="task" id="task_2">\n'
+			'Task: "Second task"\n'
+			"<div class='command' id='command_2_1'>\n"
 			"	Command: <span class='command_line'>'command line'</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'

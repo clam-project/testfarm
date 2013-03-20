@@ -53,7 +53,8 @@ class ExecutionDetails(object) :
 			"running" if command.running else
 			"ok" if command.ok else "failure")
 
-		id  = "1_1" # TODO: Compute it!!!!
+		id  = "{}_{}".format(command.task, command.id)
+		# TODO: Compute it!!!!
 
 		return (
 			"<div class='command' id='command_{id}'>\n"

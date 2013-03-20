@@ -487,6 +487,8 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(1, len(execution.tasks[0].commands))
 		command = execution.tasks[0].commands[0]
 
+		self.assertEqual(command.id, 1)
+		self.assertEqual(command.task, 1)
 		self.assertEqual(command.info, "info")
 		self.assertEqual(command.output, "output")
 		self.assertEqual(command.ok, True)
@@ -507,6 +509,8 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(1, len(execution.tasks[0].commands))
 		command = execution.tasks[0].commands[0]
 
+		self.assertEqual(command.id, 1)
+		self.assertEqual(command.task, 1)
 		self.assertEqual(command.info, "info")
 		self.assertEqual(command.output, "output")
 		self.assertEqual(command.ok, False)
