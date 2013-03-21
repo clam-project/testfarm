@@ -28,10 +28,10 @@ class ExecutionDetailsTest(unittest.TestCase) :
 				id = "2_32",
 				)
 		self.assertMultiLineEqual(content,
-			'	<div id="kind2_32" class="kind">\n'
-			'		<div class="kind_header">KIND:</div>\n'
-			'		<div class="plain_text">content</div>\n'
-			'	</div>\n'
+			'<div id="kind2_32" class="kind">\n'
+			'<div class="kind_header">KIND:</div>\n'
+			'<div class="plain_text">content</div>\n'
+			'</div>\n'
 			)
 
 	def test_contantBlock_notSoLongInfo(self) :
@@ -42,10 +42,10 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			id = "2_32",
 			)
 		self.assertMultiLineEqual(content,
-			'	<div id="kind2_32" class="kind">\n'
-			'		<div class="kind_header">KIND:</div>\n'
-			'		<div class="plain_text">1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11</div>\n'
-			'	</div>\n'
+			'<div id="kind2_32" class="kind">\n'
+			'<div class="kind_header">KIND:</div>\n'
+			'<div class="plain_text">1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11</div>\n'
+			'</div>\n'
 			)
 
 	def test_contantBlock_longInfo(self) :
@@ -56,11 +56,11 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			id = "2_32",
 			)
 		self.assertMultiLineEqual( content,
-			'	<div id="kind2_32" class="kind">\n'
-			'		<div class="kind_header">KIND:</div>\n'
-			'		<div class="plain_text">1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12</div>\n'
-			'	</div>\n'
-			"	<script type='text/javascript'>togglesize('kind2_32');</script>\n"
+			'<div id="kind2_32" class="kind">\n'
+			'<div class="kind_header">KIND:</div>\n'
+			'<div class="plain_text">1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12</div>\n'
+			'</div>\n'
+			"<script type='text/javascript'>togglesize('kind2_32');</script>\n"
 			)
 
 	def test_executionDetails_contantBlock_ansiOutput(self) :
@@ -72,10 +72,10 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			)
 
 		self.assertMultiLineEqual( content,
-			'	<div id="kind2_32" class="kind">\n'
-			'		<div class="kind_header">KIND:</div>\n'
-			'		<div class="plain_text"><span class=\'ansi_blue\'>Blue</span></div>\n'
-			'	</div>\n'
+			'<div id="kind2_32" class="kind">\n'
+			'<div class="kind_header">KIND:</div>\n'
+			'<div class="plain_text"><span class=\'ansi_blue\'>Blue</span></div>\n'
+			'</div>\n'
 			)
 
 	def commandFixture(self, line,
@@ -113,7 +113,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
 			)
@@ -129,12 +129,12 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'bad command line'</span>\n"
+			"	<span class='command_line'>bad command line</span>\n"
 			'	<span class="command_failure">[FAILED]</span>\n'
-			'	<div id="output1_1" class="output">\n'
-			'		<div class="output_header">OUTPUT:</div>\n'
-			'		<div class="plain_text">shown output\n</div>\n'
-			'	</div>\n'
+			'<div id="output1_1" class="output">\n'
+			'<div class="output_header">OUTPUT:</div>\n'
+			'<div class="plain_text">shown output\n</div>\n'
+			'</div>\n'
 			'</div>\n'
 			)
 
@@ -148,7 +148,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_running">[RUNNING]</span>\n'
 			'</div>\n'
 			)
@@ -164,12 +164,12 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'bad command line'</span>\n"
+			"	<span class='command_line'>bad command line</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
-			'	<div id="info1_1" class="info">\n'
-			'		<div class="info_header">INFO:</div>\n'
-			'		<div class="plain_text">information</div>\n'
-			'	</div>\n'
+			'<div id="info1_1" class="info">\n'
+			'<div class="info_header">INFO:</div>\n'
+			'<div class="plain_text">information</div>\n'
+			'</div>\n'
 			'</div>\n'
 			)
 
@@ -187,7 +187,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.command(command)
 		self.assertMultiLineEqual(result,
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'	<div class="stats">\n'
 			'		<div class="stats_header">Statistics:</div>\n'
@@ -230,7 +230,8 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.task(task)
 		self.assertMultiLineEqual(result,
 			'<div class="task" id="task_1">\n'
-			'Task: "First task"\n'
+			'TASK: "First task"\n'
+			'END OF TASK: "First task"\n'
 			'</div>\n\n'
 			)
 
@@ -242,11 +243,12 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.task(task)
 		self.assertMultiLineEqual(result,
 			'<div class="task" id="task_1">\n'
-			'Task: "First task"\n'
+			'TASK: "First task"\n'
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
+			'END OF TASK: "First task"\n'
 			'</div>\n\n'
 			)
 
@@ -274,11 +276,12 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		result = w.task(task)
 		self.assertMultiLineEqual(result,
 			'<div class="task" id="task_2">\n'
-			'Task: "Second task"\n'
+			'TASK: "Second task"\n'
 			"<div class='command' id='command_2_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
+			'END OF TASK: "Second task"\n'
 			'</div>\n\n'
 			)
 
@@ -315,11 +318,12 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			"<div class='execution'>\n"
 			"<p>Started at 2013-03-01 23:24:25</p>\n"
 			'<div class="task" id="task_1">\n'
-			'Task: "First task"\n'
+			'TASK: "First task"\n'
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_ok">[OK]</span>\n'
 			'</div>\n'
+			'END OF TASK: "First task"\n'
 			'</div>\n\n'
 			"<p>Execution '20130301-232425' finalized with a <b>SUCCESS</b></p>\n"
 			'</div>\n'
@@ -335,11 +339,12 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			"<div class='execution'>\n"
 			"<p>Started at 2013-03-01 23:24:25</p>\n"
 			'<div class="task" id="task_1">\n'
-			'Task: "First task"\n'
+			'TASK: "First task"\n'
 			"<div class='command' id='command_1_1'>\n"
-			"	Command: <span class='command_line'>'command line'</span>\n"
+			"	<span class='command_line'>command line</span>\n"
 			'	<span class="command_running">[RUNNING]</span>\n'
 			'</div>\n'
+			'END OF TASK: "First task"\n'
 			'</div>\n\n'
 			"<p>Execution '20130301-232425' still running...</p>\n"
 			'</div>\n'
@@ -665,7 +670,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
 			'	title=""Stable. Click to see the details"\n'
-			'	class="execution stable">\n'
+			'	class="executionbubble stable">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
 			"<div><b>Finished:</b> 2013/04/05 06:07:08</div>\n"
@@ -681,7 +686,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
 			'	title=""Broken. Click to see the details"\n'
-			'	class="execution broken">\n'
+			'	class="executionbubble broken">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
 			"<div><b>Finished:</b> 2013/04/05 06:07:08</div>\n"
@@ -697,7 +702,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
 			"<div>in progress...</div>\n"
@@ -709,7 +714,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
 			'	title=""Aborted. Click to see the details"\n'
-			'	class="execution aborted">\n'
+			'	class="executionbubble aborted">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
 			"<div><b>Aborted:</b> 2013/04/05 06:07:08</div>\n"
@@ -783,12 +788,12 @@ class ProjectHistoryTest(unittest.TestCase) :
 		w = ProjectHistory()
 		result = w.executionTable(s, "myproject")
 		self.assertMultiLineEqual(result,
-			'<tr><td colspan="2" align="center" >2013/03/04</td></tr>\n'
+			'<tr><td colspan="2">2013/03/04</td></tr>\n'
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130304-050607.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
 			'<div>in progress...</div>\n'
@@ -809,19 +814,19 @@ class ProjectHistoryTest(unittest.TestCase) :
 		w = ProjectHistory()
 		result = w.executionTable(s, "myproject")
 		self.assertMultiLineEqual(result,
-			'<tr><td colspan="2" align="center" >2013/03/04</td></tr>\n'
+			'<tr><td colspan="2">2013/03/04</td></tr>\n'
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130304-060708.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 06:07:08</div>\n'
 			'<div>in progress...</div>\n'
 			'</a>\n'
 			'<a href="details-client 1-20130304-050607.html"\n'
 			'	title=""Stable. Click to see the details"\n'
-			'	class="execution stable">\n'
+			'	class="executionbubble stable">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
 			'<div><b>Finished:</b> 2013/04/05 06:07:08</div>\n' # invented
@@ -842,12 +847,12 @@ class ProjectHistoryTest(unittest.TestCase) :
 		w = ProjectHistory()
 		result = w.executionTable(s, "myproject")
 		self.assertMultiLineEqual(result,
-			'<tr><td colspan="2" align="center" >2013/03/04</td></tr>\n'
+			'<tr><td colspan="2">2013/03/04</td></tr>\n'
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130304-050607.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
 			'<div>in progress...</div>\n'
@@ -856,7 +861,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'<td>\n'
 			'<a href="details-client 2-20130304-050607.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			'<div>client 2 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
 			'<div>in progress...</div>\n'
@@ -875,26 +880,26 @@ class ProjectHistoryTest(unittest.TestCase) :
 		w = ProjectHistory()
 		result = w.executionTable(s, "myproject")
 		self.assertMultiLineEqual(result,
-			'<tr><td colspan="2" align="center" >2013/01/02</td></tr>\n'
+			'<tr><td colspan="2">2013/01/02</td></tr>\n'
 			'<tr>\n'
 			'<td>\n'
 			'</td>\n'
 			'<td>\n'
 			'<a href="details-client 2-20130102-050607.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			'<div>client 2 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/01/02 05:06:07</div>\n'
 			'<div>in progress...</div>\n'
 			'</a>\n'
 			'</td>\n'
 			'</tr>\n'
-			'<tr><td colspan="2" align="center" >2013/01/01</td></tr>\n'
+			'<tr><td colspan="2">2013/01/01</td></tr>\n'
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130101-050607.html"\n'
 			'	title=""Running. Click to see the details"\n'
-			'	class="execution running">\n'
+			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/01/01 05:06:07</div>\n'
 			'<div>in progress...</div>\n'
@@ -913,11 +918,13 @@ class ProjectHistoryTest(unittest.TestCase) :
 		s.clientIdle("myproject", "myclient", 1)
 
 		w = ProjectHistory()
-		result = w.clientStatus(s, "myproject", "myclient")
+		data = s.client("myproject", "myclient")
+		result = w.clientStatus(data)
 		self.assertMultiLineEqual(result,
 			'<td>\n'
 			'	<div class="client_status stable">Stable</div>\n'
-			'	<div class="client_doing wait">Next run: 2013/04/05 06:08:08</div>\n'
+			'	<div class="client_doing wait">Next run:<br />\n'
+			'		2013/04/05 06:08:08</div>\n'
 			'</td>\n'
 			)
 		
@@ -929,11 +936,13 @@ class ProjectHistoryTest(unittest.TestCase) :
 		s.clientIdle("myproject", "myclient", 1)
 
 		w = ProjectHistory()
-		result = w.clientStatus(s, "myproject", "myclient")
+		data = s.client("myproject", "myclient")
+		result = w.clientStatus(data)
 		self.assertMultiLineEqual(result,
 			'<td>\n'
 			'	<div class="client_status broken">Broken</div>\n'
-			'	<div class="client_doing wait">Next run: 2013/04/05 06:08:08</div>\n'
+			'	<div class="client_doing wait">Next run:<br />\n'
+			'		2013/04/05 06:08:08</div>\n'
 			'</td>\n'
 			)
 		
@@ -947,11 +956,13 @@ class ProjectHistoryTest(unittest.TestCase) :
 
 		w = ProjectHistory()
 		s.now=datetime.datetime(2013,9,5,6,7,8)
-		result = w.clientStatus(s, "myproject", "myclient")
+		data = s.client("myproject", "myclient")
+		result = w.clientStatus(data)
 		self.assertMultiLineEqual(result,
 			'<td>\n'
 			'	<div class="client_status stable">Stable</div>\n'
-			'	<div class="client_doing old">Not responding since: 2013/04/05 06:08:08</div>\n'
+			'	<div class="client_doing old">Not responding since:<br />\n'
+			'		2013/04/05 06:08:08</div>\n'
 			'</td>\n'
 			)
 
@@ -965,13 +976,18 @@ class ProjectHistoryTest(unittest.TestCase) :
 
 		w = ProjectHistory()
 		s.now=datetime.datetime(2013,9,5,6,7,8)
-		result = w.clientStatus(s, "myproject", "myclient")
+		data = s.client("myproject", "myclient")
+		result = w.clientStatus(data)
 		self.assertMultiLineEqual(result,
 			'<td>\n'
 			'	<div class="client_status unknown">Unknown</div>\n'
-			'	<div class="client_doing run">Running since: 2013/01/02 05:06:07</div>\n'
+			'	<div class="client_doing run">Running since:<br />\n'
+			'		2013/01/02 05:06:07</div>\n'
 			'</td>\n'
 			)
+
+
+
 
 
 

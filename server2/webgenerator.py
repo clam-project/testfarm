@@ -3,7 +3,8 @@ from server import Server
 import deansi
 import datetime
 
-detailsTemplate = """\
+class ExecutionDetails(object) :
+	template = """\
 <!DOCTYPE HTML>
 <html lang="en-US">
 <head>
@@ -26,14 +27,13 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 </html>
 """
 
-class ExecutionDetails(object) :
 	def contentBlock(self, kind, content, id) :
 		id = kind+id
 		return (
-			'	<div id="{id}" class="{kind}">\n'
-			'		<div class="{kind}_header">{KIND}:</div>\n'
-			'		<div class="plain_text">{content}</div>\n'
-			'	</div>\n'
+			'<div id="{id}" class="{kind}">\n'
+			'<div class="{kind}_header">{KIND}:</div>\n'
+			'<div class="plain_text">{content}</div>\n'
+			'</div>\n'
 			'{expander}'
 			.format(
 				id = id,
@@ -41,7 +41,7 @@ class ExecutionDetails(object) :
 				KIND = kind.upper(),
 				content = deansi.deansi(content),
 				expander = "" if content.count("\n") <= 10 else
-					"	<script type='text/javascript'>"
+					"<script type='text/javascript'>"
 						"togglesize('{}');</script>\n".format(id),
 				)
 			)
@@ -58,7 +58,7 @@ class ExecutionDetails(object) :
 
 		return (
 			"<div class='command' id='command_{id}'>\n"
-			"	Command: <span class='command_line'>'{commandline}'</span>\n"
+			"	<span class='command_line'>{commandline}</span>\n"
 			'	<span class="{indicatorclass}">[{indicatortext}]</span>\n'
 			'{outputblock}'
 			'{infoblock}'
@@ -90,8 +90,9 @@ class ExecutionDetails(object) :
 			for command in task.commands])
 		return (
 			'<div class="task" id="task_{id}">\n'
-			'Task: "{description}"\n'
+			'TASK: "{description}"\n'
 			'{commandblock}'
+			'END OF TASK: "{description}"\n'
 			'</div>\n\n'
 			).format(
 				id = task.id,
@@ -132,7 +133,7 @@ class ExecutionDetails(object) :
 	def generate(self, server, project, client, execution) :
 		executionSummary = server.execution(project, client, execution)
 		executionInfo = server.executionInfo(project, client, execution)
-		return detailsTemplate.format(
+		return self.template.format(
 			project = project,
 			client = client,
 			execution = execution,
@@ -172,8 +173,10 @@ class JsonSummary(object) :
 			).format(
 				client = client,
 				nextIdle = data.expectedIdle, # TODO: next expected != last received
-				description = repr(data.meta.description),
-				briefDescription = repr(data.meta.briefDescription),
+				description = repr(data.meta.description
+					if "description" in data.meta else ""),
+				briefDescription = repr(data.meta.briefDescription
+					if "briefDescription" in data.meta else ""),
 				status = data.status,
 				doing = data.doing,
 				lastExecution = data.lastExecution,
@@ -202,6 +205,32 @@ class JsonSummary(object) :
 
 class ProjectHistory(object) :
 
+	template ="""\
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="120">
+<title>Testfarm History for project {project} </title>
+<link href="style.css" rel="stylesheet" type="text/css">
+<script type="text/javascript"s
+	 language="JavaScript1.2"
+	src="testfarm.js"></script>
+</head>
+<body>
+<div id="theLayer" class="layer"></div>
+<h1>testfarm for project <a>{project}
+<span class='tooltip'>{description}</span></a>
+<span class='description'>{briefDescription}</span>
+</h1>
+{content}
+<div class="about">
+<p>TestFarm is free software.
+Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
+</div>
+</body>
+</html>
+"""
 	def execution(self, server, project, client, execution) :
 		data = server.execution(project, client, execution)
 
@@ -229,7 +258,7 @@ class ProjectHistory(object) :
 		return (
 			'<a href="details-{client}-{execution}.html"\n'
 			'	title=""{Status}. Click to see the details"\n'
-			'	class="execution {status}">\n'
+			'	class="executionbubble {status}">\n'
 			"<div>{client} :: brief description</div>\n"
 			"<div><b>Started:</b> {starttime:%Y/%m/%d %H:%M:%S}</div>\n"
 			"{endBlock}"
@@ -268,7 +297,7 @@ class ProjectHistory(object) :
 
 		executionsByDay = self.executionsByDay(clientsExecutions)
 		result = [
-			'<tr><td colspan="{nclients}" align="center" >'
+			'<tr><td colspan="{nclients}">'
 			'{day:%Y/%m/%d}</td></tr>\n'
 			'<tr>\n'
 			.format(
@@ -289,38 +318,197 @@ class ProjectHistory(object) :
 			]
 		return "".join(result)
 
-	def clientStatus(self, server, project, client) :
-		data = server.client(project,client)
+	def clientStatus(self,client) :
 		statusMap = dict(
 			green = "stable",
 			red = "broken",
 			int = "unknown",
 			)
-		status = statusMap[data.status]
+		status = statusMap[client.status]
 
-		if data.doing == "run" :
+		if client.doing == "run" :
 			doingLine = 'Running since'
-			doingTime = data.runningSince
-		elif data.doing == 'wait' :
+			doingTime = client.runningSince
+		elif client.doing == 'wait' :
 			doingLine = 'Next run'
-			doingTime = data.expectedIdle
+			doingTime = client.expectedIdle
 		else :
 			doingLine = 'Not responding since'
-			doingTime = data.expectedIdle
+			doingTime = client.expectedIdle
 
 		return (
 			'<td>\n'
 			'	<div class="client_status {status}">{Status}</div>\n'
-			'	<div class="client_doing {doing}">{doingPhrase}: '
-					'{doingTime:%Y/%m/%d %H:%M:%S}</div>\n'
+			'	<div class="client_doing {doing}">{doingPhrase}:<br />\n'
+			'		{doingTime:%Y/%m/%d %H:%M:%S}</div>\n'
 			'</td>\n'
 			).format(
 				status = status,
 				Status = status.capitalize(),
-				doing = data.doing,
+				doing = client.doing,
 				doingPhrase = doingLine,
 				doingTime = doingTime,
 			)
+
+
+	# TODO: Untested
+	def clientInfo(self, client) :
+		return (
+			"<th> Client: <a>{name}"
+			"<span class='tooltip'>{description}</span></a>"
+			"<p width=\"100%%\">{briefDescription}</p></th> "
+			).format(
+				name = client.name,
+				description = client.description
+					if "description" in client
+					else "",
+				briefDescription = client.briefDescription
+					if "briefDescription" in client
+					else "",
+				)
+
+
+	# TODO: Untested
+	def clientStats(self, client) :
+		return (
+			'<td>'
+			'<a href="{client}-stats.html"><img '
+				' src="{client}_1-thumb.png" /></a>'
+			'<a href="{client}-stats.html">more...</a>'
+			'</td>'
+			).format(client = client.name)
+
+
+	# TODO: Untested
+	def generate(self, server, project) :
+		clients = [
+			server.client(project, client)
+			for client in sorted(server.clients(project))
+			]
+		meta = server.projectMetadata(project)
+		return self.template.format(
+			project = project,
+			description = meta.description if "description" in meta else "",
+			briefDescription = meta.briefDescription if 'briefDescription' in meta else "",
+			content = (
+				'<table class="execution_history">\n'
+				'<tr>\n'
+				+ ''.join([ self.clientInfo(client) for client in clients ]) +
+				'</tr>\n'
+				'<tr>\n'
+				+ ''.join([ self.clientStatus(client) for client in clients ]) +
+				'</tr>\n'
+				'<tr>\n'
+				+ ''.join([ self.clientStats(client) for client in clients ]) +
+				'</tr>'
+				+ self.executionTable(server, project) +
+				'</table>\n'
+				)
+		)
+
+
+# TODO: Untested
+class WebGenerator(object) :
+	def __init__(self, target) :
+		self.target = target
+		self.generated = []
+
+	def _p(self, *args) :
+		return os.path.join(self.target, *args)
+
+	def copy(self, file, *args) :
+		self.write(open(file).read(), *args)
+
+	def write(self, content, *args) :
+		filename = self._p(*args)
+		self.generated.append(filename)
+		f = open(filename, 'w')
+		f.write(content)
+		f.close()
+
+	def generate(self, server) :
+		os.mkdir(self._p())
+		for project in server.projects() :
+			self.generateProject(server, project)
+
+	def generateProject(self, server, project) :
+		os.mkdir(self._p(project))
+		self.copy("style.css", project, "style.css")
+		self.copy("testfarm.js", project, "testfarm.js")
+		self.copy("summary.html", project, "summary.html")
+		writer = ExecutionDetails()
+		for client in server.clients(project) :
+			for execution in server.executions(project, client) :
+				self.write(writer.generate(server,project,client,execution),
+					project, "details-"+client+"-"+execution+".html")
+		writer = ProjectHistory()
+		self.write(writer.generate(server, project),
+			project, "history.html")
+		json = JsonSummary().project(server, project)
+		self.write(json,
+			project,'testfarm-data.js')
+		self.write("callme({})".format(json),
+			project, 'testfarm-data.jsond')
+
+		self.write(writer.generate(server, project),
+			project, "history.html")
+		
+
+
+
+if __name__ == "__main__" :
+
+	def setUpExecution(client, name, ok=True, running=False,
+			ncommands=1,
+			noutputlines=1,
+			ntasks=1,
+			stats=True,
+			) :
+		from server import ArgPrepender
+		s = Server("fixture")
+		e = ArgPrepender(s, "myproject", client, name)
+		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+		e.executionStarts(
+			timestamp= timestamp,
+			changelog=[])
+		e.taskStarts(1,"First task")
+		for i in xrange(ncommands) :
+			e.commandStarts(1,i+1, "command {}".format(i+1))
+			e.commandEnds(1,i+1,
+				("output for command {}\n".format(i+1))*noutputlines,
+				ok or i+1 != ncommands,
+				info = None,
+				stats=dict(param = int(name[-6:])) if stats and not i&3 else {})
+		if running : return
+		e.taskEnds(1,ok)
+		e.executionEnds(ok)
+
+	import os
+	s = Server("fixture")
+	os.system("rm -rf fixture")
+	os.system("rm -rf www")
+	s.createServer()
+	s.now = datetime.datetime(2000,01,02,03,04,05)
+	s.createProject("myproject")
+	s.createClient("myproject", "client1")
+	s.createClient("myproject", "client2")
+	s.createClient("myproject", "client3")
+
+	setUpExecution("client1", "20130304-050607",ncommands=3)
+	setUpExecution("client1", "20130304-050608",ncommands=3, ntasks=3, stats=False)
+	setUpExecution("client1", "20130305-050607",ncommands=4, ok=False, noutputlines=12)
+	setUpExecution("client3", "20130304-050607",ncommands=4)
+	setUpExecution("client3", "20130305-050607",ncommands=4, ok=False, running=True)
+	s.clientIdle("myproject", "client1", 1)
+
+	w = WebGenerator("www")
+	w.generate(s)
+	print w.generated
+
+
+
+
 
 
 
