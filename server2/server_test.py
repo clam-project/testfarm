@@ -4,6 +4,7 @@ import unittest
 from server import Server, ArgPrepender
 from server import ProjectNotFound, BadServerPath, ClientNotFound
 import os
+import datetime
 
 class ServerTest(unittest.TestCase) :
 
@@ -517,6 +518,147 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(command.running, False)
 		self.assertEqual(command.stats, dict(stat1=3, stat2=19))
 
+	def setUpEmptyClient(self, project='myproject', client='myclient', **keyw) :
+		s = Server("fixture")
+		s.createServer()
+		s.createProject(project)
+		s.createClient(project,client)
+		s.now = datetime.datetime(1900,1,1,0,0,0)
+		s.clientIdle(project, client, 0)
+		s.setClientMetadata(project,client,**keyw)
+		return s
+
+	def emulateExecution(self, name,
+			ok = True, running = False,
+			project='myproject', client='myclient', **keyw) :
+		s = Server("fixture")
+		s = ArgPrepender(s, project, client, name)
+		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+		s.executionStarts(
+			timestamp=timestamp,
+			changelog=[])
+		s.taskStarts(1,"First task")
+		if running: return
+		s.taskEnds(1,ok)
+		s.executionEnds(ok)
+
+
+	def test_clientSummary_noMeta(self) :
+		s = self.setUpEmptyClient()
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.meta.__dict__, {})
+
+	def test_clientSummary_hasMeta(self) :
+		s = self.setUpEmptyClient(
+			param1='value1',
+			)
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.meta.param1, "value1")
+
+	def test_clientSummary_noExecution(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.name, "myclient")
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.doing, "old")
+		self.assertFalse("ok" in client)
+		self.assertEqual(client.failedTasks, [])
+		self.assertEqual(client.currentTask, None)
+
+	def test_clientSummary_green(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+		self.emulateExecution("20130301-040506")
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(2013,3,1,4,5,6))
+		self.assertEqual(client.doing, "old")
+		self.assertEqual(client.ok, True)
+		self.assertEqual(client.failedTasks, [])
+		self.assertEqual(client.currentTask, None)
+
+	def test_clientSummary_red(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+		self.emulateExecution("20130301-040506", ok=False)
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(2013,3,1,4,5,6))
+		self.assertEqual(client.doing, "old")
+		self.assertEqual(client.failedTasks, [(1,"First task")])
+		self.assertEqual(client.ok, False)
+		self.assertEqual(client.currentTask, None)
+
+	def test_clientSummary_running(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+		self.emulateExecution("20130301-040506", running=True)
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.failedTasks, [])
+		self.assertFalse("ok" in client)
+		self.assertEqual(client.doing, "run")
+		self.assertEqual(client.currentTask, (1,"First task"))
+
+	def test_clientSummary_lastFinishedCounts(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+		self.emulateExecution("20130301-040506")
+		self.emulateExecution("20130302-040506", ok=False)
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(2013,3,2,4,5,6))
+		self.assertEqual(client.doing, "old")
+		self.assertEqual(client.failedTasks, [(1,"First task")])
+		self.assertEqual(client.ok, False)
+		self.assertEqual(client.currentTask, None)
+
+
+	def test_clientSummary_runningAfterGreen(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+		self.emulateExecution("20130301-040506")
+		self.emulateExecution("20130302-040506", running=True)
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(2013,3,1,4,5,6))
+		self.assertEqual(client.failedTasks, [])
+		self.assertEqual(client.ok, True)
+		self.assertEqual(client.doing, "run")
+		self.assertEqual(client.currentTask, (1,"First task"))
+
+	def test_clientSummary_runningAfterRed(self) :
+		s = self.setUpEmptyClient()
+		s.now = datetime.datetime(2013,3,1,0,0,0)
+		self.emulateExecution("20130301-040506", ok=False)
+		self.emulateExecution("20130302-040506", running=True)
+
+		client = s.client("myproject", "myclient")
+
+		self.assertEqual(client.expectedIdle, datetime.datetime(1900,1,1,0,0,0))
+		self.assertEqual(client.lastExecution, datetime.datetime(2013,3,1,4,5,6))
+		self.assertEqual(client.failedTasks, [(1,"First task")])
+		self.assertEqual(client.ok, False)
+		self.assertEqual(client.doing, "run")
+		self.assertEqual(client.currentTask, (1,"First task"))
 
 
 

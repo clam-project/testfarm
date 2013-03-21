@@ -57,6 +57,15 @@ class Server(object) :
 
 	def __init__(self, path) :
 		self._path = path
+		self._now = None
+
+	@property
+	def now(self) :
+		if self._now : return self._now
+		return datetime.datetime.now()
+	@now.setter
+	def now(self, value) :
+		self._now = value
 
 	def _p(self, *args) :
 		return os.path.join(self._path, *args)
@@ -217,14 +226,13 @@ class Server(object) :
 		if self.isRunning(project, client) :
 			return "Running"
 		expectedIdle = self.expectedIdle(project, client)
-		if expectedIdle > datetime.datetime.now() :
+		if expectedIdle > self.now :
 			return "Idle"
 		return "NotResponding"
 
 
-	def clientIdle(self, project, client, minutes, now=None) :
-		if now is None : now = datetime.datetime.now()
-		nextIdle = now + datetime.timedelta(minutes=minutes)
+	def clientIdle(self, project, client, minutes) :
+		nextIdle = self.now + datetime.timedelta(minutes=minutes)
 		idlefile = open(self._p(project,client,"idle"),'w')
 		idlefile.write(nextIdle.strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -255,6 +263,7 @@ class Server(object) :
 
 			if tag == "endExecution":
 				summary.running = False
+				summary.ok, = entry[1:]
 				continue
 
 			if tag == "startTask":
@@ -300,13 +309,15 @@ class Server(object) :
 
 
 		summary.tasks = [task for id, task in sorted(tasks.iteritems())]
-		if not summary.running : summary.ok = True
 
 		summary.failedTasks = [
 			(task.id, task.description)
 			for task in summary.tasks
 			if "ok" in task and not task.ok
 			]
+
+		if not summary.running :
+			summary.ok &= not(summary.failedTasks)
 
 		summary.currentTask = None
 		if summary.tasks and summary.running :
@@ -315,5 +326,38 @@ class Server(object) :
 				summary.tasks[-1].description)
 
 		return summary
+
+
+	def client(self, project, client) :
+		meta = AttributeMap(**self.clientMetadata(project, client))
+		executions = self.executions(project, client)
+		expectedIdle = self.expectedIdle(project, client)
+		doing = "wait" if expectedIdle>self.now and executions else "old"
+
+		data = AttributeMap(
+			name = client,
+			expectedIdle = expectedIdle,
+			meta = meta,
+			doing = doing,
+			lastExecution = datetime.datetime(1900,1,1,0,0,0),
+			currentTask = None,
+			failedTasks = []
+			)
+		# TODO: If two running, the newer one remains
+		for execution in  reversed(executions) :
+			executionData = self.execution(project, client, execution)
+			executionTime = datetime.datetime.strptime(execution,"%Y%m%d-%H%M%S")
+			if executionData.running :
+				data.currentTask = executionData.currentTask
+				data.doing = 'run'
+				data.runningSince = executionTime
+				continue
+			data.lastExecution = executionTime
+			data.failedTasks = executionData.failedTasks
+			data.ok = not data.failedTasks
+			break
+		data.status = "int" if "ok" not in data else 'green' if data.ok else "red"
+		return data
+
 
 

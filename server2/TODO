@@ -1,13 +1,21 @@
-* Execution details
-	+ Execution
-		+ Task
-			+ Command
-				+ Content
-				+ Added id target
-			* Added id target
-- Json project summary
-- Project history
-- Stats plots
++ Server logger
+- Web Generator
+	* Execution details
+		+ Execution
+			+ Task
+				+ Command
+					+ Content
+					+ Added id target
+				* Added id target
+	+ Json project summary
+		+ Client
+		+ Project
+	- Project history
+	- Stats plots
+- Auto web regeneration
+- Server logger proxy
+- Server logger frontend
+- Server logger reporter
 
 - Missing things
 	- Details page
@@ -15,6 +23,8 @@
 		- Summary at the top
 
 
+	- Status aborted from client
+	- Force abort on old running executions
 
 
 

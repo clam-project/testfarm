@@ -1,10 +1,9 @@
 #!/usr/bin/python
 
-import unittest
 from server import Server, ArgPrepender
-from server import ProjectNotFound, BadServerPath, ClientNotFound
+from webgenerator import ExecutionDetails, JsonSummary, ProjectHistory
+import unittest
 import os
-from webgenerator import ExecutionDetails, JsonSummary
 import deansi
 import datetime
 
@@ -262,8 +261,8 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			briefDescription = "brief description",
 			)
 		# force an idle time
-		s.clientIdle("myproject", "myclient", 0,
-			now=datetime.datetime(2013,4,5,6,7,8))
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 0)
 		return s
 
 	def test_task_twoTasks(self) :
@@ -291,8 +290,8 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		s.createProject(project)
 		s.createClient(project, client)
 		# force an idle time
-		s.clientIdle(project,client, 0,
-			now=datetime.datetime(2013,4,5,6,7,8))
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle(project,client, 0)
 
 		e = ArgPrepender(s, project, client, execution)
 		e.executionStarts(
@@ -353,8 +352,8 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		s.createProject(project)
 		s.createClient(project, client)
 		# force an idle time
-		s.clientIdle("myproject", "myclient", 0,
-			now=datetime.datetime(2013,4,5,6,7,8))
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 0)
 
 		e = ArgPrepender(s, project, client, execution)
 		e.executionStarts(
@@ -418,14 +417,15 @@ class JsonSummaryTest(unittest.TestCase) :
 
 		s.createServer()
 		s.createProject("myproject")
+		s.now = datetime.datetime(2013,4,5,6,7,8)
 		s.createClient("myproject", "myclient")
 		s.setClientMetadata("myproject", "myclient",
 			description = "a description",
 			briefDescription = "brief description",
 			)
 		# force an idle time
-		s.clientIdle("myproject", "myclient", 0,
-			now=datetime.datetime(2013,4,5,6,7,8))
+		s.clientIdle("myproject", "myclient", 0)
+		s.now = datetime.datetime(2013,4,5,6,7,1)
 		return s
 
 	def test_client_noExecutions(self) :
@@ -552,9 +552,10 @@ class JsonSummaryTest(unittest.TestCase) :
 			description = "project description",
 			briefDescription = "project brief description",
 			)
+		s.now = datetime.datetime(2013,9,1,2,3,4)
 
 		w = JsonSummary()
-		result = w.project(s, 'myproject', datetime.datetime(2013,9,1,2,3,4))
+		result = w.project(s, 'myproject')
 		self.assertMultiLineEqual(result,
 			'{'
 			'	"project" : "myproject",\n'
@@ -573,22 +574,21 @@ class JsonSummaryTest(unittest.TestCase) :
 			description = "a description",
 			briefDescription = "brief description",
 			)
-		# force an idle time
-		s.clientIdle("myproject", "myclient", 0,
-			now=datetime.datetime(2013,4,5,6,7,8))
 		s.createClient("myproject","yourclient")
 		s.setClientMetadata("myproject", "yourclient",
 			description = "your description",
 			briefDescription = "your brief description",
 			)
+
 		# force an idle time
-		s.clientIdle("myproject", "yourclient", 0,
-			now=datetime.datetime(2013,4,5,6,7,8))
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 0)
+		s.clientIdle("myproject", "yourclient", 0)
 
-
+		s.now = datetime.datetime(2013,9,1,2,3,4)
 
 		w = JsonSummary()
-		result = w.project(s, 'myproject', datetime.datetime(2013,9,1,2,3,4))
+		result = w.project(s, 'myproject')
 		self.assertMultiLineEqual(result,
 			'{'
 			'	"project" : "myproject",\n'
@@ -617,7 +617,361 @@ class JsonSummaryTest(unittest.TestCase) :
 			)
 
 
+class ProjectHistoryTest(unittest.TestCase) :
 
+	def setUp(self) :
+		self.maxDiff = None
+		try :
+			os.system("rm -rf fixture")
+		except Exception as e: 
+			print(e)
+
+	def tearDown(self) :
+		return
+		os.system("rm -rf fixture")
+
+	def setUpProject(self) :
+		s = Server("fixture")
+		s.createServer()
+		s.createProject("myproject")
+		return s
+
+	def setUpClient(self, client) :
+		s = Server("fixture")
+		s.createClient("myproject", client)
+		s.setClientMetadata("myproject", client, 
+			briefDescription = "brief description",
+			)
+
+	def setUpExecution(self, client, name, ok=True, running=False) :
+		s = Server("fixture")
+		e = ArgPrepender(s, "myproject", client, name)
+		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+		e.executionStarts(
+			timestamp= timestamp,
+			changelog=[])
+		e.taskStarts(1,"First task")
+		if running : return
+		e.taskEnds(1,ok)
+		e.executionEnds(ok)
+
+	def test_execution_green(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130304-050607")
+		w = ProjectHistory()
+		result = w.execution(s, "myproject", "myclient", "20130304-050607")
+		self.assertMultiLineEqual(result,
+			'<a href="details-myclient-20130304-050607.html"\n'
+			'	title=""Stable. Click to see the details"\n'
+			'	class="execution stable">\n'
+			"<div>myclient :: brief description</div>\n"
+			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
+			"<div><b>Finished:</b> 2013/04/05 06:07:08</div>\n"
+			'</a>\n'
+			)
+
+	def test_execution_red(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130304-050607", ok=False)
+		w = ProjectHistory()
+		result = w.execution(s, "myproject", "myclient", "20130304-050607")
+		self.assertMultiLineEqual(result,
+			'<a href="details-myclient-20130304-050607.html"\n'
+			'	title=""Broken. Click to see the details"\n'
+			'	class="execution broken">\n'
+			"<div>myclient :: brief description</div>\n"
+			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
+			"<div><b>Finished:</b> 2013/04/05 06:07:08</div>\n"
+			'</a>\n'
+			)
+	
+	def test_execution_running(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130304-050607", running=True)
+		w = ProjectHistory()
+		result = w.execution(s, "myproject", "myclient", "20130304-050607")
+		self.assertMultiLineEqual(result,
+			'<a href="details-myclient-20130304-050607.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			"<div>myclient :: brief description</div>\n"
+			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
+			"<div>in progress...</div>\n"
+			'</a>\n'
+			)
+
+	# TODO
+	def _test_execution_aborted(self) :
+		self.assertMultiLineEqual(result,
+			'<a href="details-myclient-20130304-050607.html"\n'
+			'	title=""Aborted. Click to see the details"\n'
+			'	class="execution aborted">\n'
+			"<div>myclient :: brief description</div>\n"
+			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
+			"<div><b>Aborted:</b> 2013/04/05 06:07:08</div>\n"
+			'</a>\n'
+			)
+
+
+	def test_executionsByDay(self) :
+
+		w = ProjectHistory()
+		clientsExecutions = {
+			'myclient1' : [
+				'20130101-000000',
+				'20130101-200000',
+				'20130101-300000',
+				'20130102-300000',
+				'20130103-300000',
+				],
+			'myclient2' : [
+				'20130101-300000',
+				'20130103-100000',
+				'20130103-300000',
+				'20130104-300000',
+				],
+			}
+
+		self.assertEqual(
+			w.executionsByDay(clientsExecutions),
+			[
+				('20130104', [
+					('myclient1', [
+						]),
+					('myclient2', [
+						'20130104-300000',
+						]),
+					]),
+				('20130103', [
+					('myclient1', [
+						'20130103-300000',
+						]),
+					('myclient2', [
+						'20130103-300000',
+						'20130103-100000',
+						]),
+					]),
+				('20130102', [
+					('myclient1', [
+						'20130102-300000',
+						]),
+					('myclient2', [
+						]),
+					]),
+				('20130101', [
+					('myclient1', [
+						'20130101-300000',
+						'20130101-200000',
+						'20130101-000000',
+						]),
+					('myclient2', [
+						'20130101-300000',
+						]),
+					]),
+			])
+
+	def test_executionTable(self) :
+		s = self.setUpProject()
+		self.setUpClient("client 1")
+		self.setUpClient("client 2")
+		self.setUpExecution("client 1", "20130304-050607", running=True)
+
+		w = ProjectHistory()
+		result = w.executionTable(s, "myproject")
+		self.assertMultiLineEqual(result,
+			'<tr><td colspan="2" align="center" >2013/03/04</td></tr>\n'
+			'<tr>\n'
+			'<td>\n'
+			'<a href="details-client 1-20130304-050607.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			'<div>client 1 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
+			'<div>in progress...</div>\n'
+			'</a>\n'
+			'</td>\n'
+			'<td>\n'
+			'</td>\n'
+			'</tr>\n'
+			)
+
+	def test_executionTable_twoSameClient(self) :
+		s = self.setUpProject()
+		self.setUpClient("client 1")
+		self.setUpClient("client 2")
+		self.setUpExecution("client 1", "20130304-050607")
+		self.setUpExecution("client 1", "20130304-060708", running=True)
+
+		w = ProjectHistory()
+		result = w.executionTable(s, "myproject")
+		self.assertMultiLineEqual(result,
+			'<tr><td colspan="2" align="center" >2013/03/04</td></tr>\n'
+			'<tr>\n'
+			'<td>\n'
+			'<a href="details-client 1-20130304-060708.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			'<div>client 1 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/03/04 06:07:08</div>\n'
+			'<div>in progress...</div>\n'
+			'</a>\n'
+			'<a href="details-client 1-20130304-050607.html"\n'
+			'	title=""Stable. Click to see the details"\n'
+			'	class="execution stable">\n'
+			'<div>client 1 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
+			'<div><b>Finished:</b> 2013/04/05 06:07:08</div>\n' # invented
+			'</a>\n'
+			'</td>\n'
+			'<td>\n'
+			'</td>\n'
+			'</tr>\n'
+			)
+
+	def test_executionTable_twoSameDay(self) :
+		s = self.setUpProject()
+		self.setUpClient("client 1")
+		self.setUpClient("client 2")
+		self.setUpExecution("client 1", "20130304-050607", running=True)
+		self.setUpExecution("client 2", "20130304-050607", running=True)
+
+		w = ProjectHistory()
+		result = w.executionTable(s, "myproject")
+		self.assertMultiLineEqual(result,
+			'<tr><td colspan="2" align="center" >2013/03/04</td></tr>\n'
+			'<tr>\n'
+			'<td>\n'
+			'<a href="details-client 1-20130304-050607.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			'<div>client 1 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
+			'<div>in progress...</div>\n'
+			'</a>\n'
+			'</td>\n'
+			'<td>\n'
+			'<a href="details-client 2-20130304-050607.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			'<div>client 2 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
+			'<div>in progress...</div>\n'
+			'</a>\n'
+			'</td>\n'
+			'</tr>\n'
+			)
+
+	def test_executionTable_differentDays(self) :
+		s = self.setUpProject()
+		self.setUpClient("client 1")
+		self.setUpClient("client 2")
+		self.setUpExecution("client 1", "20130101-050607", running=True)
+		self.setUpExecution("client 2", "20130102-050607", running=True)
+
+		w = ProjectHistory()
+		result = w.executionTable(s, "myproject")
+		self.assertMultiLineEqual(result,
+			'<tr><td colspan="2" align="center" >2013/01/02</td></tr>\n'
+			'<tr>\n'
+			'<td>\n'
+			'</td>\n'
+			'<td>\n'
+			'<a href="details-client 2-20130102-050607.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			'<div>client 2 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/01/02 05:06:07</div>\n'
+			'<div>in progress...</div>\n'
+			'</a>\n'
+			'</td>\n'
+			'</tr>\n'
+			'<tr><td colspan="2" align="center" >2013/01/01</td></tr>\n'
+			'<tr>\n'
+			'<td>\n'
+			'<a href="details-client 1-20130101-050607.html"\n'
+			'	title=""Running. Click to see the details"\n'
+			'	class="execution running">\n'
+			'<div>client 1 :: brief description</div>\n'
+			'<div><b>Started:</b> 2013/01/01 05:06:07</div>\n'
+			'<div>in progress...</div>\n'
+			'</a>\n'
+			'</td>\n'
+			'<td>\n'
+			'</td>\n'
+			'</tr>\n'
+			)
+
+	def test_clientStatus_green(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130102-050607")
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 1)
+
+		w = ProjectHistory()
+		result = w.clientStatus(s, "myproject", "myclient")
+		self.assertMultiLineEqual(result,
+			'<td>\n'
+			'	<div class="client_status stable">Stable</div>\n'
+			'	<div class="client_doing wait">Next run: 2013/04/05 06:08:08</div>\n'
+			'</td>\n'
+			)
+		
+	def test_clientStatus_red(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130102-050607", ok=False)
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 1)
+
+		w = ProjectHistory()
+		result = w.clientStatus(s, "myproject", "myclient")
+		self.assertMultiLineEqual(result,
+			'<td>\n'
+			'	<div class="client_status broken">Broken</div>\n'
+			'	<div class="client_doing wait">Next run: 2013/04/05 06:08:08</div>\n'
+			'</td>\n'
+			)
+		
+	def test_clientStatus_old(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130102-050607")
+		# force an idle time
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 1)
+
+		w = ProjectHistory()
+		s.now=datetime.datetime(2013,9,5,6,7,8)
+		result = w.clientStatus(s, "myproject", "myclient")
+		self.assertMultiLineEqual(result,
+			'<td>\n'
+			'	<div class="client_status stable">Stable</div>\n'
+			'	<div class="client_doing old">Not responding since: 2013/04/05 06:08:08</div>\n'
+			'</td>\n'
+			)
+
+	def test_clientStatus_running(self) :
+		s = self.setUpProject()
+		self.setUpClient("myclient")
+		self.setUpExecution("myclient", "20130102-050607", running=True)
+		# force an idle time
+		s.now=datetime.datetime(2013,4,5,6,7,8)
+		s.clientIdle("myproject", "myclient", 1)
+
+		w = ProjectHistory()
+		s.now=datetime.datetime(2013,9,5,6,7,8)
+		result = w.clientStatus(s, "myproject", "myclient")
+		self.assertMultiLineEqual(result,
+			'<td>\n'
+			'	<div class="client_status unknown">Unknown</div>\n'
+			'	<div class="client_doing run">Running since: 2013/01/02 05:06:07</div>\n'
+			'</td>\n'
+			)
 
 
 

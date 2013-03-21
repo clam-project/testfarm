@@ -143,41 +143,18 @@ class ExecutionDetails(object) :
 
 class JsonSummary(object) :
 
-	def client(self, server, project, client, now=datetime.datetime.now()) :
-		meta = server.clientMetadata(project,client)
-		executions = server.executions(project, client)
-		expectedIdle = server.expectedIdle(project, client)
-		status = "int"
-		doing = "wait" if expectedIdle>now and executions else "old"
-		currentTask = None
-		failedTasks = []
-		lastExecution = datetime.datetime(1900,1,1,0,0,0)
-
-		for executionName in reversed(executions) :
-			execution = server.execution(project, client, executionName)
-			if execution.running :
-				if currentTask : continue
-				currentTask = execution.currentTask[1]
-				doing = "run"
-				continue
-			# last finished execution
-			failedTasks = execution.failedTasks
-			status = 'red' if execution.failedTasks else "green"
-			lastExecution = datetime.datetime.strptime(
-				executionName,"%Y%m%d-%H%M%S")
-			break
-
-		failedTasksBlock = '' if not failedTasks else (
+	def client(self, server, project, client) :
+		data = server.client(project, client)
+		failedTasksBlock = '' if not data.failedTasks else (
 			'			"failedTasks" : [\n' +
 			''.join((
-			'				"{}",\n'.format(failedTask[1])
-			for failedTask in failedTasks
+				'				"{}",\n'.format(failedTask[1])
+				for failedTask in data.failedTasks
 			)) +
 			'			],\n'
 			)
-
-		currentTaskBlock = '' if not currentTask else (
-			'			"currentTask": "{}",\n'.format(currentTask)
+		currentTaskBlock = '' if not data.currentTask else (
+			'			"currentTask": "{}",\n'.format(data.currentTask[1])
 			)
 
 		return (
@@ -194,19 +171,19 @@ class JsonSummary(object) :
 			'		}},\n'
 			).format(
 				client = client,
-				nextIdle = expectedIdle, # TODO: next expected != last received
-				description = repr(meta['description']),
-				briefDescription = repr(meta['briefDescription']),
-				status = status,
-				doing = doing,
-				lastExecution = lastExecution,
+				nextIdle = data.expectedIdle, # TODO: next expected != last received
+				description = repr(data.meta.description),
+				briefDescription = repr(data.meta.briefDescription),
+				status = data.status,
+				doing = data.doing,
+				lastExecution = data.lastExecution,
 				failedTasksBlock = failedTasksBlock,
 				currentTaskBlock = currentTaskBlock,
 			)
 
-	def project(self, server, project, now=datetime.datetime.now()) :
+	def project(self, server, project) :
 		clientsBlock = "".join((
-			self.client(server, project, client, now)
+			self.client(server, project, client)
 			for client in server.clients(project)
 			))
 		return (
@@ -218,19 +195,132 @@ class JsonSummary(object) :
 			'	]\n'
 			'}}'
 		).format(
-			now = now,
+			now = server.now,
 			project = project,
 			clientsblock = clientsBlock,
 			)
 
 class ProjectHistory(object) :
 
-	def execution(self, execution) :
-		return
+	def execution(self, server, project, client, execution) :
+		data = server.execution(project, client, execution)
+
+		# TODO: briefDescription was named task_name in old testfarm
+		# TODO: check where to really get it
+		meta = server.clientMetadata(project, client)
+		try :
+			briefDescription = meta["briefDescription"]
+		except KeyError :
+			briefDescription = "No brief description"
+
+		stoptime = datetime.datetime(2013,4,5,6,7,8)
+		starttime = datetime.datetime.strptime(
+			data.starttime, "%Y%m%d-%H%M%S")
+		status = "running" if data.running else "stable" if data.ok else "broken"
+		endBlock = (
+			"<div>in progress...</div>\n"
+			if data.running else
+			"<div><b>Finished:</b> {stoptime:%Y/%m/%d %H:%M:%S}</div>\n"
+			.format(
+				stoptime = stoptime,
+				)
+			)
+			
+		return (
+			'<a href="details-{client}-{execution}.html"\n'
+			'	title=""{Status}. Click to see the details"\n'
+			'	class="execution {status}">\n'
+			"<div>{client} :: brief description</div>\n"
+			"<div><b>Started:</b> {starttime:%Y/%m/%d %H:%M:%S}</div>\n"
+			"{endBlock}"
+			'</a>\n'
+		).format(
+			client = client,
+			execution = execution,
+			status = status,
+			Status = status.capitalize(),
+			briefDescription = briefDescription,
+			starttime = starttime,
+			endBlock = endBlock,
+		)
+
+	def executionsByDay(self,clientsExecutions) :
+		result = []
+		for client in clientsExecutions :
+			result += [
+				(execution[:8], client, execution)
+				for execution in clientsExecutions[client]
+				]
+		oldDay = None
+		final = {}
+		for day, client, execution in sorted(result, reverse=True) :
+			if day not in final :
+				clients = dict(((c,[]) for c in clientsExecutions.keys()))
+				final[day] = sorted(clients.items())
+			clients[client].append(execution)
+		return [a for a in reversed(sorted(final.items()))]
 
 
-	pass
+	def executionTable(self, server, project) :
+		clientsExecutions = dict( [
+			( client, server.executions(project, client))
+			for client in server.clients(project) ])
 
+		executionsByDay = self.executionsByDay(clientsExecutions)
+		result = [
+			'<tr><td colspan="{nclients}" align="center" >'
+			'{day:%Y/%m/%d}</td></tr>\n'
+			'<tr>\n'
+			.format(
+				nclients = len(clientsExecutions),
+				day = datetime.datetime.strptime(day,"%Y%m%d"),
+			) + 
+			"".join([
+				'<td>\n' +
+				"".join([
+					self.execution(server, project, client, execution)
+					for execution in executions
+					]) + 
+				'</td>\n'
+				for client, executions in clients
+				]) +
+			'</tr>\n'
+			for day, clients in executionsByDay
+			]
+		return "".join(result)
+
+	def clientStatus(self, server, project, client) :
+		data = server.client(project,client)
+		statusMap = dict(
+			green = "stable",
+			red = "broken",
+			int = "unknown",
+			)
+		status = statusMap[data.status]
+
+		if data.doing == "run" :
+			doingLine = 'Running since'
+			doingTime = data.runningSince
+		elif data.doing == 'wait' :
+			doingLine = 'Next run'
+			doingTime = data.expectedIdle
+		else :
+			doingLine = 'Not responding since'
+			doingTime = data.expectedIdle
+
+		return (
+			'<td>\n'
+			'	<div class="client_status {status}">{Status}</div>\n'
+			'	<div class="client_doing {doing}">{doingPhrase}: '
+					'{doingTime:%Y/%m/%d %H:%M:%S}</div>\n'
+			'</td>\n'
+			).format(
+				status = status,
+				Status = status.capitalize(),
+				doing = data.doing,
+				doingPhrase = doingLine,
+				doingTime = doingTime,
+			)
 
 
 
