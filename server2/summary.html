@@ -153,23 +153,14 @@ table.tfclients th
 <div id='tferror'></div>
 <table class='tfclients'>
 <tr>
-	<th>Last build</th>
 	<th>Client</th>
 	<th>Updated</th>
 	<th>Currently</th>
+	<th>Last build</th>
 	<th></th>
 </tr>
 <script id="testfarmrowTempl" type="text/x-jsrender">
 <tr>
-	<td class='tf{{:status}}'>{{statusString status /}}
-		<div class='tfdetails'>
-		{{if failedTasks }}
-			Failed tasks:
-			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
-		{{/if}}
-		<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Execution details</a>
-		</div>
-	</td>
 	<td>{{:name}}
 	{{if name_details}}
 		<div class='tfdetails'>{{:name_details}}</div>
@@ -181,8 +172,16 @@ table.tfclients th
 		<div class='tfdetails'>Current tasks: {{:currentTask}}</div>
 		{{/if}}
 	</td>
+	<td class='tf{{:status}}'>{{statusString status /}}
+		{{if failedTasks }}
+		<div class='tfdetails'>Failed tasks:
+			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
+		</div>
+		{{/if}}
+	</td>
 	<td>
-		<a href="{{testfarmUrl /}}index.html" title="History">History</a>
+		<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Execution details</a>
+		<a href="{{testfarmUrl /}}history.html" title="History">Full history</a>
 	</td>
 </tr>
 </script>
@@ -222,11 +221,11 @@ function formatDate(d)
 
 $.views.tags({
 	formatDate: formatDate,
-	each_in: function(data)
+	each_in: function(list)
 	{
 		result = ""
-		for (key in data)
-			result += this.tmpl.render(data[key]);
+		for (key in list)
+			result += this.tagCtx.render(list[key]);
 		return result;
 	},
 	doingString: function( key )
