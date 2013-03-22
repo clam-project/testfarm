@@ -10,9 +10,16 @@
 	+ Json project summary
 		+ Client
 		+ Project
-	- Project history
+	+ Project history
 	- Stats plots
-- Auto web regeneration
+* Website generation
+	+ Full regeneration
+	- Not regenerating up-to-date pages
+		- A logger for written files
+		- Testing condigitons
+	- Caching
+		
+
 - Server logger proxy
 - Server logger frontend
 - Server logger reporter

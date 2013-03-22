@@ -1,0 +1,389 @@
+body {
+	font-family: 'Trebuchet MS', 'lucida grande', verdana, sans-serif; 
+}
+h1 {
+	color: #666;
+}
+a:link {
+	color: #006699;
+}
+
+a:visited {
+	color: blue;
+}
+
+.name{
+	font-weight: bold;
+}
+
+table.execution_history td
+{
+	text-align: center;
+}
+
+.tooltip
+{
+	padding: 2em;
+	color: black;
+	font-weight: normal;
+	background: #ffa;
+	border: 1pt #ccc solid;
+	position: absolute;
+	display: none;
+	max-width: 20em;
+}
+:hover > .tooltip
+{
+	display: block;
+}
+
+.layer
+{
+	position:absolute;
+	width:350px;
+	font-size: 0.8em;
+	left:0;
+	top:0;
+	visibility:hidden;
+	opacity: .9;
+	filter: alpha(opacity=90); 
+}
+
+.idle
+{
+	margin: 0.5em;
+	padding: 0.3em;
+	text-align: center;
+	font-size: 0.8em;
+	color: black;
+	background-color: #ccc;
+}
+.client_status,
+.executionbubble
+{
+	display: block;
+	text-decoration: none;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	margin-left: 0.5em;
+	margin-right: 0.5em;
+	padding: 0.3em;
+	padding-bottom: 1em;
+	text-align: center;
+	font-size: 0.8em;
+	-moz-border-radius: 0.8em; /* mozilla only */
+	border-radius: 0.8em;
+}
+.executionbubble:hover
+{
+	opacity: .7;
+}
+.executionbubble > p
+{
+	padding: 0;
+	margin: 2pt;
+}
+.client_status.run,
+.executionbubble.running
+{
+	color: black;
+	background-color: yellow;
+}
+
+.client_status.unknown,
+.executionbubble.aborted
+{
+	color: black;
+	background-color: #FF9B00;
+}
+
+.client_status.stable,
+.executionbubble.stable
+{
+	color: white;
+	background-color: #00C200;
+}
+.client_status.broken,
+.executionbubble.broken
+{
+	color: white;
+	background-color: red;
+}
+
+table
+{
+	border-spacing: 5px;
+}
+
+th 
+{ 
+	border: solid 1px #ddd; 
+	background-color: #fff;
+	padding: 0.8em;
+	width : 250px;
+}
+td 
+{ 
+	border: solid 1px #ddd; 
+	vertical-align: top;
+	background-color: #eee;
+	width : 250px;
+}
+
+.description{
+	font-size: 0.5em;
+}
+
+.execution
+{
+	left: 5%;
+	color: #888;
+	padding: 2em; 
+	border: solid 1px #eee;
+}
+
+.executionok
+{
+	background-color: #00C200;
+	color: white;
+}
+
+.executionfailure
+{
+	background-color: red;
+	color: white;
+}
+
+.end_execution_tobedone
+{
+	color: #DDD;	
+}
+
+.task
+{
+	left: 2%;
+	padding: 1em; 
+	margin: 1em;
+	border: solid 1px #999;
+}
+
+.task_tobedone
+{
+	left: 2%;
+	padding: 1em; 
+	margin: 1em;
+	color: #DDD;
+	border: solid 1px #999;
+}
+
+.end_task_tobedone
+{
+	color: #DDD;	
+}
+
+.command
+{
+	position: relative;
+	padding-left: 0em;
+}
+
+.command_tobedone
+{
+	color: #DDD;
+	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
+	padding-left: 1em;
+}
+
+.command_line
+{
+	padding-left: 2em;
+	position: relative;
+	font-family: monospace;
+	font-size: 1.2em;
+	color:maroon;
+}
+
+.command_ok
+{
+	color: green;
+	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
+	padding-left: 3em;
+}
+
+.command_failure
+{
+	color: red;
+	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
+	padding-left: 3em;
+}
+
+.command_inprogress
+{
+	color: #A8A837;
+	font-weight: bold;
+	font-family: monospace;
+	font-size: 1.2em;
+	padding-left: 3em;
+}
+
+.plain_text
+{
+/*	margin: 1em;*/
+	margin-top: 0;
+	margin-left: 2em;
+	white-space: pre;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding: 1em 2em 2em; 
+	overflow-x: visible;
+}
+.info > .plain_text
+{
+	margin: 0pt;
+	border: solid 1px #ddd;
+	color: blue;
+}
+.output > .plain_text
+{
+	margin: 0pt;
+	border: solid 3px red;
+	color: black;
+	background-color: yellow;
+}
+
+.info, .output
+{
+	margin: 1em;
+	margin-left: 2em;
+	font-family: monospace;
+	font-size: 0.9em;
+	padding-left: 2em; 
+}
+
+.more
+{
+	margin-top: 0pt;
+	position: relative;
+	bottom: 5px;
+	left: 3em;
+	display: inline;
+	background: white;
+	font-weight: bold;
+	color: #9370DB;
+	padding: 5px;
+	border: 1pt solid black;
+}
+.output_header
+{
+	display: inline;
+	padding: 2pt;
+	background: red;
+	color: yellow;
+}
+.info_header
+{
+	display: inline;
+	margin-bottom: 0;
+	padding: 0px;
+	background: #eee;
+	border: 1pt solid #ddd;
+	color: green;
+}
+
+.about
+{
+	font-size: 0.7em;
+}
+
+.stats
+{
+	white-space: pre;
+	position: relative;
+	left: 2em;
+	color:#777A7F;
+}
+
+
+.details
+{
+	white-space: pre;
+	font-size: 0.8em;
+}
+
+#normal
+{
+	text-align: left; 
+	color: black;
+	font-size: 11px;
+}
+
+#execution
+{
+	position: relative;
+	left: 5%;
+	font-weight: bolder; 
+}
+
+#subexecution
+{
+	position: relative;
+	left: 10%;
+	font-weight: bold;
+}
+
+#command
+{
+	position: relative;
+	left: 15%;
+	color:#43CCCC;
+}
+
+#command_ok
+{
+	color: green;
+	font-size: 11px;
+}
+
+#command_failure
+{
+	color: red;
+	font-size: 11px;
+	
+}
+
+#tab
+{
+	width:20px;
+}
+
+.client_doing
+{
+	font-weight: bold;
+}
+
+.client_doing.run
+{
+	color: #a60;
+}
+
+.client_doing.old
+{
+	color: purple;
+}
+
+.client_doing.wait
+{
+	color: blue;
+}
+
+.plot.thumbnail
+{
+	height: 100px;
+}
+	

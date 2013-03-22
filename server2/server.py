@@ -54,6 +54,7 @@ class AttributeMap() :
 class Server(object) :
 	"""A server handles information from executions comming
 	from several clients for several projects"""
+	fileAccessTrace = []
 
 	def __init__(self, path) :
 		self._path = path
@@ -61,6 +62,7 @@ class Server(object) :
 
 	@property
 	def now(self) :
+		"""Holds the current time unless you set it to a concrete time"""
 		if self._now : return self._now
 		return datetime.datetime.now()
 	@now.setter
@@ -85,15 +87,19 @@ class Server(object) :
 			raise ClientNotFound(client)
 
 	def _metadataUpdate(self, *args, **kwds) :
-		try : oldmeta = eval(open(self._p(*args)).read())
+		filename = self._p(*args)
+#		print "Updating meta",filename
+		try : oldmeta = eval(open(filename).read())
 		except IOError : oldmeta = {}
 		oldmeta.update(kwds)
 		metadata = open(self._p(*args),'w')
 		metadata.write(repr(oldmeta))
 
 	def _metadataRead(self, *args) :
+		filename = self._p(*args)
+#		print "Reading meta",filename
 		try :
-			return eval(open(self._p(*args)).read())
+			return eval(open(filename).read())
 		except IOError :
 			return {}
 
@@ -104,8 +110,10 @@ class Server(object) :
 		logfile.write(repr(log))
 
 	def _logRead(self, project, client, execution) :
+		filename = self._p(project, client, execution+".log")
+#		print "Reading log ", filename
 		try :
-			return eval(open(self._p(project, client, execution+".log")).read())
+			return eval(open(filename).read())
 		except IOError :
 			return []
 
@@ -237,8 +245,11 @@ class Server(object) :
 		idlefile.write(nextIdle.strftime("%Y-%m-%d %H:%M:%S"))
 
 	def expectedIdle(self, project, client) :
+		filename = self._p(project,client,"idle")
+#		print "Reading idle", filename
 		return datetime.datetime.strptime(
-			open(self._p(project,client,"idle")).read(),"%Y-%m-%d %H:%M:%S")
+			open(filename).read(),
+			"%Y-%m-%d %H:%M:%S")
 
 
 

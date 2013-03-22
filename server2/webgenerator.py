@@ -213,10 +213,12 @@ class ProjectHistory(object) :
 <meta http-equiv="refresh" content="120">
 <title>Testfarm History for project {project} </title>
 <link href="style.css" rel="stylesheet" type="text/css">
-<script type="text/javascript"s
-	 language="JavaScript1.2"
-	src="testfarm.js"></script>
+<script language="javascript" type="text/javascript" src="testfarm.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.js"></script>
+<script language="javascript" type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script language="javascript" type="text/javascript" src="plot.js"></script>
 </head>
+
 <body>
 <div id="theLayer" class="layer"></div>
 <h1>testfarm for project <a>{project}
@@ -372,9 +374,10 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 	def clientStats(self, client) :
 		return (
 			'<td>'
-			'<a href="{client}-stats.html"><img '
-				' src="{client}_1-thumb.png" /></a>'
-			'<a href="{client}-stats.html">more...</a>'
+			'<a href="{client}-stats.html" title="Click to expand">'
+			'<div'
+				' class="plot thumbnail"'
+				' src="{client}-stats.json" /></a>'
 			'</td>'
 			).format(client = client.name)
 
@@ -421,6 +424,7 @@ class WebGenerator(object) :
 
 	def write(self, content, *args) :
 		filename = self._p(*args)
+#		print "Writing",filename
 		self.generated.append(filename)
 		f = open(filename, 'w')
 		f.write(content)
@@ -432,15 +436,22 @@ class WebGenerator(object) :
 			self.generateProject(server, project)
 
 	def generateProject(self, server, project) :
+		full = False
 		os.mkdir(self._p(project))
 		self.copy("style.css", project, "style.css")
 		self.copy("testfarm.js", project, "testfarm.js")
+		self.copy("plot.js", project, "plot.js")
+		self.copy("jquery.js", project, "jquery.js")
 		self.copy("summary.html", project, "summary.html")
 		writer = ExecutionDetails()
 		for client in server.clients(project) :
 			for execution in server.executions(project, client) :
 				self.write(writer.generate(server,project,client,execution),
 					project, "details-"+client+"-"+execution+".html")
+
+			self.write(Stats().generate(server,project, client),
+				project, client+"-stats.json")
+
 		writer = ProjectHistory()
 		self.write(writer.generate(server, project),
 			project, "history.html")
@@ -452,7 +463,21 @@ class WebGenerator(object) :
 
 		self.write(writer.generate(server, project),
 			project, "history.html")
-		
+
+import random
+
+class Stats(object) :
+	def generate(self, server, project, client) :
+		keys = [ "Tests", "LOC", "Build time" ]
+		return (
+		'[\n'
+		'[ ' + ", ".join([repr(header) for header in (["Execution"] + keys) ]) + ' ],\n'
+		+ "".join((
+			"[ '{}', ".format(execution) + ", ".join((repr(random.randint(0,400)) for i in keys)) + ' ],\n'
+			for execution in server.executions(project, client)
+			)) +
+		']\n'
+		)
 
 
 
@@ -501,6 +526,8 @@ if __name__ == "__main__" :
 	setUpExecution("client3", "20130304-050607",ncommands=4)
 	setUpExecution("client3", "20130305-050607",ncommands=4, ok=False, running=True)
 	s.clientIdle("myproject", "client1", 1)
+
+	print "Starting generator"
 
 	w = WebGenerator("www")
 	w.generate(s)
