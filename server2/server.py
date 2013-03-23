@@ -117,6 +117,20 @@ class Server(object) :
 		except IOError :
 			return []
 
+	def updateStats(self, project, client, execution, stats) :
+		filename = self._p(project, client, "stats")
+		f = open(filename, "a")
+		for key, value in sorted(stats.iteritems()) :
+			f.write(repr( (execution, key, value))+",")
+		f.close()
+
+	def clientStats(self, project, client) :
+		filename = self._p(project, client, "stats")
+		try :
+			return eval("[" + open(filename).read() + "]")
+		except IOError :
+			return []
+			
 	def createServer(self) :
 		os.mkdir(self._p())
 
@@ -199,6 +213,7 @@ class Server(object) :
 
 		self._log(project, client, execution,
 			'endCommand', task, command, output, ok, info, stats)
+		self.updateStats(project, client, execution, stats)
 
 	def taskEnds(self,
 			project, client, execution,
@@ -317,6 +332,7 @@ class Server(object) :
 					info = info,
 					stats = stats,
 					)
+				continue
 
 
 		summary.tasks = [task for id, task in sorted(tasks.iteritems())]

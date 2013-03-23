@@ -531,7 +531,7 @@ if __name__ == "__main__" :
 
 	w = WebGenerator("www")
 	w.generate(s)
-	print w.generated
+	#print w.generated
 
 
 

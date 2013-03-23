@@ -660,6 +660,104 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.doing, "run")
 		self.assertEqual(client.currentTask, (1,"First task"))
 
+	def emulateExecutionWithStats(self, name, tasks,
+			project='myproject', client='myclient', **keyw) :
+		s = Server("fixture")
+		s = ArgPrepender(s, project, client, name)
+		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+		s.executionStarts(
+			timestamp=timestamp,
+			changelog=[])
+		for i, (task,commands) in enumerate(tasks) :
+			s.taskStarts(i+1,task)
+			for j, (line, ok, output, info, stats) in enumerate(commands) :
+				s.commandStarts(i+1, j+1, line)
+				if ok is None : break # interrupted
+				s.commandEnds(i+1, j+1,
+					output=output,
+					ok=ok,
+					info=info,
+					stats=stats)
+				if ok is False : break # Failed, fatal for the task
+			if ok is None : break # interrupted, fatal for the execution
+			s.taskEnds(i+1,ok)
+		s.executionEnds(ok)
+
+	def test_updateStats_noUpdates(self) :
+		s = self.setUpEmptyClient()
+		self.assertEqual(s.clientStats("myproject", "myclient"), [
+		])
+		
+	def test_updateStats(self) :
+		s = self.setUpEmptyClient()
+		s.updateStats("myproject","myclient","20130301-040506",dict(
+			param1 = 6,
+			))
+		result = s.clientStats("myproject", "myclient")
+		self.assertEqual(result, [
+			("20130301-040506", "param1", 6),
+		])
+		
+	def test_updateStats_twoExecutions(self) :
+		s = self.setUpEmptyClient()
+		s.updateStats("myproject","myclient","20130301-040506",dict(
+			param1 = 6,
+			))
+		s.updateStats("myproject","myclient","20130301-040506",dict(
+			param2 = 4,
+			))
+		result = s.clientStats("myproject", "myclient")
+		self.assertEqual(sorted(result), [
+			("20130301-040506", "param1", 6),
+			("20130301-040506", "param2", 4),
+		])
+		
+	def test_updateStats_twoStats(self) :
+		s = self.setUpEmptyClient()
+		s.updateStats("myproject","myclient","20130301-040506",dict(
+			param1 = 6,
+			param2 = 4,
+			))
+		result = s.clientStats("myproject", "myclient")
+		self.assertEqual(sorted(result), [
+			("20130301-040506", "param1", 6),
+			("20130301-040506", "param2", 4),
+		])
+
+	def test_clientStats_singleStat(self) :
+		s = self.setUpEmptyClient()
+		self.emulateExecutionWithStats("20130301-040506",[
+			("FirstTask", [
+			("command 1", True, "output1", None, dict(
+				param1=4,
+				param2=6,
+				)),
+			]),
+			("Second task", [
+			("command 2", True, "output2", None, dict(
+				param1=1,
+				param2=2,
+				)),
+			]),
+			])
+		self.emulateExecutionWithStats("20130301-040507",[
+			("FirstTask", [
+			("command 1", True, "output1", None, dict(
+				param1=2,
+				param2=3,
+				)),
+			]),
+			])
+		result = s.clientStats("myproject", "myclient")
+		self.assertEqual(result, [
+			("20130301-040506", "param1", 4),
+			("20130301-040506", "param2", 6),
+			("20130301-040506", "param1", 1),
+			("20130301-040506", "param2", 2),
+			("20130301-040507", "param1", 2),
+			("20130301-040507", "param2", 3),
+		])
 
 
 if __name__ == "__main__" :
