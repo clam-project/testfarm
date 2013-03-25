@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
 from server import Server, ArgPrepender
-from webgenerator import ExecutionDetails, JsonSummary, ProjectHistory
+from webgenerator import ExecutionDetails
+from webgenerator import JsonSummary
+from webgenerator import ProjectHistory
+from webgenerator import ClientStatsPlot
 import unittest
 import os
 import deansi
@@ -987,7 +990,85 @@ class ProjectHistoryTest(unittest.TestCase) :
 			)
 
 
+def setUpEmptyClient(project='myproject', client='myclient', **keyw) :
+	s = Server("fixture")
+	s.createServer()
+	s.createProject(project)
+	s.createClient(project,client)
+	s.now = datetime.datetime(1900,1,1,0,0,0)
+	s.clientIdle(project, client, 0)
+	s.setClientMetadata(project,client,**keyw)
+	return s
 
+def emulateExecution(name, tasks,
+		project='myproject', client='myclient') :
+	s = Server("fixture")
+	s = ArgPrepender(s, project, client, name)
+	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+	s.executionStarts(
+		timestamp=timestamp,
+		changelog=[])
+	for i, (task,commands) in enumerate(tasks) :
+		s.taskStarts(i+1,task)
+		for j, (line, ok, output, info, stats) in enumerate(commands) :
+			s.commandStarts(i+1, j+1, line)
+			if ok is None : break # interrupted
+			s.commandEnds(i+1, j+1,
+				output=output,
+				ok=ok,
+				info=info,
+				stats=stats)
+			if ok is False : break # Failed, fatal for the task
+		if ok is None : break # interrupted, fatal for the execution
+		s.taskEnds(i+1,ok)
+	s.executionEnds(ok)
+
+class StatsPageTests(unittest.TestCase) :
+	def setUp(self) :
+		self.maxDiff = None
+		try :
+			os.system("rm -rf fixture")
+		except Exception as e: 
+			print(e)
+
+	def tearDown(self) :
+		return
+		os.system("rm -rf fixture")
+
+	def test_tuplesToJson_emptyData(self) :
+		data = [
+			("20130301-040506", "param1", 4),
+			("20130301-040506", "param2", 6),
+			("20130301-040506", "param1", 1),
+			("20130301-040506", "param2", 2),
+			("20130301-040507", "param1", 2),
+			("20130301-040507", "param2", 3),
+		]
+
+		w = ClientStatsPlot()
+		result = w.tuplesToJson([])
+		self.assertMultiLineEqual(result,
+			"[\n"
+			"]\n"
+			)
+
+	def test_tuplesToJson_singleRow(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+		]
+
+		w = ClientStatsPlot()
+		result = w.tuplesToJson(data)
+		self.assertMultiLineEqual(result,
+			"[\n"
+			'[ "Execution", "param1" ],\n'
+			'[ "20130301-040506", 4 ],\n'
+			"]\n"
+			)
+
+
+		pass
 
 
 

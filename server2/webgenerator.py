@@ -449,7 +449,7 @@ class WebGenerator(object) :
 				self.write(writer.generate(server,project,client,execution),
 					project, "details-"+client+"-"+execution+".html")
 
-			self.write(Stats().generate(server,project, client),
+			self.write(ClientStatsPlot().generate(server,project, client),
 				project, client+"-stats.json")
 
 		writer = ProjectHistory()
@@ -466,7 +466,7 @@ class WebGenerator(object) :
 
 import random
 
-class Stats(object) :
+class ClientStatsPlot(object) :
 	def generate(self, server, project, client) :
 		keys = [ "Tests", "LOC", "Build time" ]
 		return (
@@ -478,6 +478,14 @@ class Stats(object) :
 			)) +
 		']\n'
 		)
+
+	def tuplesToJson(self, data) :
+		return (
+			'[\n' +
+			('[ "Execution", "param1" ],\n' if data else '') +
+			('[ "20130301-040506", 4 ],\n' if data else '') +
+			']\n'
+			)
 
 
 

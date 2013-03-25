@@ -6,6 +6,31 @@ from server import ProjectNotFound, BadServerPath, ClientNotFound
 import os
 import datetime
 
+def emulateExecutionWithStats(self, name, tasks,
+		project='myproject', client='myclient') :
+	s = Server("fixture")
+	s = ArgPrepender(s, project, client, name)
+	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
+	s.executionStarts(
+		timestamp=timestamp,
+		changelog=[])
+	for i, (task,commands) in enumerate(tasks) :
+		s.taskStarts(i+1,task)
+		for j, (line, ok, output, info, stats) in enumerate(commands) :
+			s.commandStarts(i+1, j+1, line)
+			if ok is None : break # interrupted
+			s.commandEnds(i+1, j+1,
+				output=output,
+				ok=ok,
+				info=info,
+				stats=stats)
+			if ok is False : break # Failed, fatal for the task
+		if ok is None : break # interrupted, fatal for the execution
+		s.taskEnds(i+1,ok)
+	s.executionEnds(ok)
+
+
 class ServerTest(unittest.TestCase) :
 
 	def setUp(self) :
@@ -661,7 +686,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.currentTask, (1,"First task"))
 
 	def emulateExecutionWithStats(self, name, tasks,
-			project='myproject', client='myclient', **keyw) :
+			project='myproject', client='myclient') :
 		s = Server("fixture")
 		s = ArgPrepender(s, project, client, name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
