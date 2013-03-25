@@ -481,14 +481,22 @@ class ClientStatsPlot(object) :
 
 	def tuplesToJson(self, data) :
 		if not data : return "[\n]\n"
+
+		table = dict((
+			((execution, key), value)
+			for execution, key, value in data))
+		execution = "20130301-010101"
 		return (
 			'[\n'
-			'[ "Execution"' + ''.join((
-				', "{}"'.format(key)
+			"[ 'Execution'"
+			+ ''.join((
+				', {!r}'.format(key)
+				for key in self.keys(data))) +
+			' ],\n' +
+			'[ {!r}'.format(execution)
+			+ ''.join((
+				', {}'.format(table[execution,key])
 				for key in self.keys(data))) + ' ],\n'
-			'[ "20130301-040506"' + ''.join((
-				', {}'.format(value)
-				for execution, key, value in data))+' ],\n'
 			']\n'
 			)
 
