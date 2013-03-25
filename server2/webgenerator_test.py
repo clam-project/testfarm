@@ -1103,6 +1103,17 @@ class StatsPageTests(unittest.TestCase) :
 			"param1",
 			])
 
+	def test_executions_singleRow(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+		]
+
+		w = ClientStatsPlot()
+		result = w.executions(data)
+		self.assertEqual(result, [
+			"20130301-010101",
+			])
+
 
 
 
