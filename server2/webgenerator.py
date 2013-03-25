@@ -492,7 +492,7 @@ class ClientStatsPlot(object) :
 			(( key for execution, key, value in data))))
 
 	def executions(self, data) :
-		return sorted(set([ execution for execution, key, value in data]))
+		return sorted(set(( execution for execution, key, value in data)))
 
 
 
