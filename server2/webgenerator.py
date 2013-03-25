@@ -488,7 +488,6 @@ class ClientStatsPlot(object) :
 			)
 
 	def keys(self, data) :
-		return [data[0][1]]
 		return [ key for execution, key, value in data]
 
 

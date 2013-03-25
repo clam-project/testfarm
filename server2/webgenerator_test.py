@@ -1078,6 +1078,19 @@ class StatsPageTests(unittest.TestCase) :
 			"param1",
 			])
 
+	def test_keys_twoParams(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+			("20130301-010101", "param2", 4),
+		]
+
+		w = ClientStatsPlot()
+		result = w.keys(data)
+		self.assertEqual(result, [
+			"param1",
+			"param2",
+			])
+
 
 
 
