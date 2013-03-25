@@ -1091,6 +1091,18 @@ class StatsPageTests(unittest.TestCase) :
 			"param2",
 			])
 
+	def test_keys_repeatedParam(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+			("20130301-010101", "param1", 4),
+		]
+
+		w = ClientStatsPlot()
+		result = w.keys(data)
+		self.assertEqual(result, [
+			"param1",
+			])
+
 
 
 
