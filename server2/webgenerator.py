@@ -492,7 +492,7 @@ class ClientStatsPlot(object) :
 			(( key for execution, key, value in data))))
 
 	def executions(self, data) :
-		return [data[0][0]]
+		return [ execution for execution, key, value in data]
 
 
 
