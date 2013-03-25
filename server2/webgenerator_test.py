@@ -1067,8 +1067,17 @@ class StatsPageTests(unittest.TestCase) :
 			"]\n"
 			)
 
+	def test_keys_singleRow(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+		]
 
-		pass
+		w = ClientStatsPlot()
+		result = w.keys(data)
+		self.assertEqual(result, [
+			"param1",
+			])
+
 
 
 

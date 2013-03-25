@@ -487,6 +487,10 @@ class ClientStatsPlot(object) :
 			']\n'
 			)
 
+	def keys(self, data) :
+		return [data[0][1]]
+		return [ key for execution, key, value in data]
+
 
 
 if __name__ == "__main__" :
