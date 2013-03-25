@@ -480,10 +480,15 @@ class ClientStatsPlot(object) :
 		)
 
 	def tuplesToJson(self, data) :
+		if not data : return "[\n]\n"
 		return (
-			'[\n' +
-			('[ "Execution", "param1" ],\n' if data else '') +
-			('[ "20130301-040506", 4 ],\n' if data else '') +
+			'[\n'
+			'[ "Execution"' + ''.join((
+				', "{}"'.format(key)
+				for key in self.keys(data))) + ' ],\n'
+			'[ "20130301-040506"' + ''.join((
+				', {}'.format(value)
+				for execution, key, value in data))+' ],\n'
 			']\n'
 			)
 
