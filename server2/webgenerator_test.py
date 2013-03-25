@@ -1154,6 +1154,21 @@ class StatsPageTests(unittest.TestCase) :
 			"]\n"
 			)
 
+	def test_tuplesToJson_twoExecutionsSameParam(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+			("20130301-020202", "param1", 5),
+		]
+		w = ClientStatsPlot()
+		result = w.tuplesToJson(data)
+		self.assertMultiLineEqual(result,
+			"[\n"
+			"[ 'Execution', 'param1' ],\n"
+			"[ '20130301-010101', 4 ],\n"
+			"[ '20130301-020202', 5 ],\n"
+			"]\n"
+			)
+
 
 
 

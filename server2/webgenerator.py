@@ -486,6 +486,7 @@ class ClientStatsPlot(object) :
 			((execution, key), value)
 			for execution, key, value in data))
 		execution = "20130301-010101"
+		executions = self.executions(data)
 		return (
 			'[\n'
 			"[ 'Execution'"
@@ -493,10 +494,12 @@ class ClientStatsPlot(object) :
 				', {!r}'.format(key)
 				for key in self.keys(data))) +
 			' ],\n' +
-			'[ {!r}'.format(execution)
-			+ ''.join((
-				', {}'.format(table[execution,key])
-				for key in self.keys(data))) + ' ],\n'
+			''.join((
+				'[ {!r}'.format(execution)
+				+ ''.join((
+					', {}'.format(table[execution,key])
+					for key in self.keys(data))) + ' ],\n'
+				for execution in executions )) +
 			']\n'
 			)
 
