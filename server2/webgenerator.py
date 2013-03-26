@@ -503,7 +503,7 @@ class WebGenerator(object) :
 		return os.path.join(self.target, *args)
 
 	def copyToProject(self, project, file) :
-		self.write(open(file).read(), project, file)
+		self.write(open(os.path.join("resources",file)).read(), project, file)
 
 	def write(self, content, *args) :
 		filename = self._p(*args)
@@ -522,7 +522,6 @@ class WebGenerator(object) :
 		full = False
 		os.mkdir(self._p(project))
 		self.copyToProject(project, "style.css")
-		self.copyToProject(project, "clientstats.html")
 		self.copyToProject(project, "testfarm.js")
 		self.copyToProject(project, "plot.js")
 		self.copyToProject(project, "jquery.js")
