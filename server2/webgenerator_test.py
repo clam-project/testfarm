@@ -450,7 +450,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"status": "int",\n'
 			'			"doing": "old",\n'
 			'			"lastupdate": "2013/04/05 06:07:08",\n'
-			'			"lastExecution": "1900/01/01 00:00:00",\n'
+			'			"lastExecution": "19000101-000000",\n'
 			'		},\n'
 			)
 
@@ -484,7 +484,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"status": "green",\n'
 			'			"doing": "wait",\n'
 			'			"lastupdate": "2013/04/05 06:07:08",\n'
-			'			"lastExecution": "2013/05/06 07:08:09",\n'
+			'			"lastExecution": "20130506-070809",\n'
 			'		},\n'
 			)
 
@@ -506,7 +506,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"failedTasks" : [\n'
 			'				"First task",\n'
 			'			],\n'
-			'			"lastExecution": "2013/05/06 07:08:09",\n'
+			'			"lastExecution": "20130506-070809",\n'
 			'		},\n'
 			)
 
@@ -524,7 +524,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"status": "green",\n'
 			'			"doing": "run",\n'
 			'			"lastupdate": "2013/04/05 06:07:08",\n'
-			'			"lastExecution": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "20130405-060708",\n'
 			'			"currentTask": "First task",\n'
 			'		},\n'
 			)
@@ -547,7 +547,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"failedTasks" : [\n'
 			'				"First task",\n'
 			'			],\n'
-			'			"lastExecution": "2013/04/05 06:07:08",\n'
+			'			"lastExecution": "20130405-060708",\n'
 			'			"currentTask": "First task",\n'
 			'		},\n'
 			)
@@ -609,7 +609,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"status": "int",\n'
 			'			"doing": "old",\n'
 			'			"lastupdate": "2013/04/05 06:07:08",\n'
-			'			"lastExecution": "1900/01/01 00:00:00",\n'
+			'			"lastExecution": "19000101-000000",\n'
 			'		},\n'
 			'		{\n'
 			'			"name": "yourclient",\n'
@@ -618,7 +618,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"status": "int",\n'
 			'			"doing": "old",\n'
 			'			"lastupdate": "2013/04/05 06:07:08",\n'
-			'			"lastExecution": "1900/01/01 00:00:00",\n'
+			'			"lastExecution": "19000101-000000",\n'
 			'		},\n'
 			'	]\n'
 			'}'
@@ -672,7 +672,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		result = w.execution(s, "myproject", "myclient", "20130304-050607")
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
-			'	title=""Stable. Click to see the details"\n'
+			'	title="Stable. Click to see the details"\n'
 			'	class="executionbubble stable">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
@@ -688,7 +688,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		result = w.execution(s, "myproject", "myclient", "20130304-050607")
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
-			'	title=""Broken. Click to see the details"\n'
+			'	title="Broken. Click to see the details"\n'
 			'	class="executionbubble broken">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
@@ -704,7 +704,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		result = w.execution(s, "myproject", "myclient", "20130304-050607")
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
@@ -716,7 +716,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 	def _test_execution_aborted(self) :
 		self.assertMultiLineEqual(result,
 			'<a href="details-myclient-20130304-050607.html"\n'
-			'	title=""Aborted. Click to see the details"\n'
+			'	title="Aborted. Click to see the details"\n'
 			'	class="executionbubble aborted">\n'
 			"<div>myclient :: brief description</div>\n"
 			"<div><b>Started:</b> 2013/03/04 05:06:07</div>\n"
@@ -795,7 +795,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130304-050607.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
@@ -821,14 +821,14 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130304-060708.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 06:07:08</div>\n'
 			'<div>in progress...</div>\n'
 			'</a>\n'
 			'<a href="details-client 1-20130304-050607.html"\n'
-			'	title=""Stable. Click to see the details"\n'
+			'	title="Stable. Click to see the details"\n'
 			'	class="executionbubble stable">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
@@ -854,7 +854,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130304-050607.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
@@ -863,7 +863,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'</td>\n'
 			'<td>\n'
 			'<a href="details-client 2-20130304-050607.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			'<div>client 2 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/03/04 05:06:07</div>\n'
@@ -889,7 +889,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'</td>\n'
 			'<td>\n'
 			'<a href="details-client 2-20130102-050607.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			'<div>client 2 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/01/02 05:06:07</div>\n'
@@ -901,7 +901,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 			'<tr>\n'
 			'<td>\n'
 			'<a href="details-client 1-20130101-050607.html"\n'
-			'	title=""Running. Click to see the details"\n'
+			'	title="Running. Click to see the details"\n'
 			'	class="executionbubble running">\n'
 			'<div>client 1 :: brief description</div>\n'
 			'<div><b>Started:</b> 2013/01/01 05:06:07</div>\n'
@@ -1166,6 +1166,38 @@ class StatsPageTests(unittest.TestCase) :
 			"[ 'Execution', 'param1' ],\n"
 			"[ '20130301-010101', 4 ],\n"
 			"[ '20130301-020202', 5 ],\n"
+			"]\n"
+			)
+
+	def test_tuplesToJson_repeatedExecutionParamLastRemains(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+			("20130301-010101", "param1", 5),
+		]
+		w = ClientStatsPlot()
+		result = w.tuplesToJson(data)
+		self.assertMultiLineEqual(result,
+			"[\n"
+			"[ 'Execution', 'param1' ],\n"
+			"[ '20130301-010101', 5 ],\n"
+			"]\n"
+			)
+
+
+	def test_tuplesToJson_missingParamIsNull(self) :
+		data = [
+			("20130301-010101", "param1", 4),
+			("20130301-010101", "param2", 5),
+			("20130301-020202", "param2", 7),
+		]
+
+		w = ClientStatsPlot()
+		result = w.tuplesToJson(data)
+		self.assertMultiLineEqual(result,
+			"[\n"
+			"[ 'Execution', 'param1', 'param2' ],\n"
+			"[ '20130301-010101', 4, 5 ],\n"
+			"[ '20130301-020202', null, 7 ],\n"
 			"]\n"
 			)
 

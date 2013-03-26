@@ -1,5 +1,6 @@
 
 from server import Server
+from server import ArgPrepender
 import deansi
 import datetime
 
@@ -167,7 +168,7 @@ class JsonSummary(object) :
 			'			"doing": "{doing}",\n'
 			'			"lastupdate": "{nextIdle:%Y/%m/%d %H:%M:%S}",\n'
 						'{failedTasksBlock}'
-			'			"lastExecution": "{lastExecution:%Y/%m/%d %H:%M:%S}",\n'
+			'			"lastExecution": "{lastExecution:%Y%m%d-%H%M%S}",\n'
 						'{currentTaskBlock}'
 			'		}},\n'
 			).format(
@@ -259,7 +260,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 			
 		return (
 			'<a href="details-{client}-{execution}.html"\n'
-			'	title=""{Status}. Click to see the details"\n'
+			'	title="{Status}. Click to see the details"\n'
 			'	class="executionbubble {status}">\n'
 			"<div>{client} :: brief description</div>\n"
 			"<div><b>Started:</b> {starttime:%Y/%m/%d %H:%M:%S}</div>\n"
@@ -377,7 +378,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 			'<a href="{client}-stats.html" title="Click to expand">'
 			'<div'
 				' class="plot thumbnail"'
-				' src="{client}-stats.json" /></a>'
+				' src="{client}-stats.json"></div></a>'
 			'</td>'
 			).format(client = client.name)
 
@@ -410,6 +411,88 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 		)
 
 
+class ClientStatsPlot(object) :
+
+	# TODO: no unit test for this
+	def generate(self, server, project, client) :
+		stats = server.clientStats(project, client)
+		return self.tuplesToJson(stats)
+
+	def tuplesToJson(self, data) :
+		if not data : return "[\n]\n"
+
+		table = dict((
+			((execution, key), value)
+			for execution, key, value in data))
+		execution = "20130301-010101"
+		executions = self.executions(data)
+		def formatedValueOrNul(execution, key) :
+			try:
+				return ', {}'.format(table[execution,key])
+			except KeyError:
+				return ', null'
+
+		return (
+			'[\n'
+			"[ 'Execution'"
+			+ ''.join((
+				', {!r}'.format(key)
+				for key in self.keys(data))) +
+			' ],\n' +
+			''.join((
+				'[ {!r}'.format(execution)
+				+ ''.join((
+					formatedValueOrNul(execution,key)
+					for key in self.keys(data))) + ' ],\n'
+				for execution in executions )) +
+			']\n'
+			)
+
+	def keys(self, data) :
+		return sorted(set(
+			(( key for execution, key, value in data))))
+
+	def executions(self, data) :
+		return sorted(set(( execution for execution, key, value in data)))
+
+
+statsPage = """\
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="refresh" content="120">
+<title>Testfarm History for project myproject </title>
+<link href="style.css" rel="stylesheet" type="text/css">
+<script language="javascript" type="text/javascript" src="testfarm.js"></script>
+<script language="javascript" type="text/javascript" src="jquery.js"></script>
+<script language="javascript" type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script language="javascript" type="text/javascript" src="plot.js"></script>
+<style type="text/css">
+html, body
+{{
+	height: 100%;
+	}}
+.plot
+{{
+	height: 90%;
+	width: 100%;
+}}
+</style>
+</head>
+
+<body>
+<h1>Stats for client '{client}'</h1>
+<div class="plot" src="{client}-stats.json" />
+
+<div class="about">
+<p>TestFarm is free software.
+Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
+</div>
+</body>
+</html>
+"""
+
 # TODO: Untested
 class WebGenerator(object) :
 	def __init__(self, target) :
@@ -419,8 +502,8 @@ class WebGenerator(object) :
 	def _p(self, *args) :
 		return os.path.join(self.target, *args)
 
-	def copy(self, file, *args) :
-		self.write(open(file).read(), *args)
+	def copyToProject(self, project, file) :
+		self.write(open(file).read(), project, file)
 
 	def write(self, content, *args) :
 		filename = self._p(*args)
@@ -438,11 +521,12 @@ class WebGenerator(object) :
 	def generateProject(self, server, project) :
 		full = False
 		os.mkdir(self._p(project))
-		self.copy("style.css", project, "style.css")
-		self.copy("testfarm.js", project, "testfarm.js")
-		self.copy("plot.js", project, "plot.js")
-		self.copy("jquery.js", project, "jquery.js")
-		self.copy("summary.html", project, "summary.html")
+		self.copyToProject(project, "style.css")
+		self.copyToProject(project, "clientstats.html")
+		self.copyToProject(project, "testfarm.js")
+		self.copyToProject(project, "plot.js")
+		self.copyToProject(project, "jquery.js")
+		self.copyToProject(project, "summary.html")
 		writer = ExecutionDetails()
 		for client in server.clients(project) :
 			for execution in server.executions(project, client) :
@@ -451,6 +535,8 @@ class WebGenerator(object) :
 
 			self.write(ClientStatsPlot().generate(server,project, client),
 				project, client+"-stats.json")
+			self.write(statsPage.format(client=client),
+				project, client+"-stats.html")
 
 		writer = ProjectHistory()
 		self.write(writer.generate(server, project),
@@ -464,82 +550,32 @@ class WebGenerator(object) :
 		self.write(writer.generate(server, project),
 			project, "history.html")
 
-import random
-
-class ClientStatsPlot(object) :
-	def generate(self, server, project, client) :
-		keys = [ "Tests", "LOC", "Build time" ]
-		return (
-		'[\n'
-		'[ ' + ", ".join([repr(header) for header in (["Execution"] + keys) ]) + ' ],\n'
-		+ "".join((
-			"[ '{}', ".format(execution) + ", ".join((repr(random.randint(0,400)) for i in keys)) + ' ],\n'
-			for execution in server.executions(project, client)
-			)) +
-		']\n'
-		)
-
-	def tuplesToJson(self, data) :
-		if not data : return "[\n]\n"
-
-		table = dict((
-			((execution, key), value)
-			for execution, key, value in data))
-		execution = "20130301-010101"
-		executions = self.executions(data)
-		return (
-			'[\n'
-			"[ 'Execution'"
-			+ ''.join((
-				', {!r}'.format(key)
-				for key in self.keys(data))) +
-			' ],\n' +
-			''.join((
-				'[ {!r}'.format(execution)
-				+ ''.join((
-					', {}'.format(table[execution,key])
-					for key in self.keys(data))) + ' ],\n'
-				for execution in executions )) +
-			']\n'
-			)
-
-	def keys(self, data) :
-		return sorted(set(
-			(( key for execution, key, value in data))))
-
-	def executions(self, data) :
-		return sorted(set(( execution for execution, key, value in data)))
-
-
-
 if __name__ == "__main__" :
 
-	def setUpExecution(client, name, ok=True, running=False,
-			ncommands=1,
-			noutputlines=1,
-			ntasks=1,
-			stats=True,
-			) :
-		from server import ArgPrepender
+	def emulateExecution(client, name, tasks,
+			project='myproject') :
 		s = Server("fixture")
-		e = ArgPrepender(s, "myproject", client, name)
+		s = ArgPrepender(s, project, client, name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
-		e.executionStarts(
-			timestamp= timestamp,
+		s.executionStarts(
+			timestamp=timestamp,
 			changelog=[])
-		e.taskStarts(1,"First task")
-		for i in xrange(ncommands) :
-			e.commandStarts(1,i+1, "command {}".format(i+1))
-			e.commandEnds(1,i+1,
-				("output for command {}\n".format(i+1))*noutputlines,
-				ok or i+1 != ncommands,
-				info = None,
-				stats=dict(param = int(name[-6:])) if stats and not i&3 else {})
-		if running : return
-		e.taskEnds(1,ok)
-		e.executionEnds(ok)
+		for i, (task,commands) in enumerate(tasks) :
+			s.taskStarts(i+1,task)
+			for j, (line, ok, output, info, stats) in enumerate(commands) :
+				s.commandStarts(i+1, j+1, line)
+				if ok is None : return # Running or interrupted
+				s.commandEnds(i+1, j+1,
+					output=output,
+					ok=ok,
+					info=info,
+					stats=stats)
+				if ok is False : break # Failed, fatal for the task
+			s.taskEnds(i+1,ok)
+		s.executionEnds(ok)
 
+	print "Simulating client calls"
 	import os
 	s = Server("fixture")
 	os.system("rm -rf fixture")
@@ -551,18 +587,84 @@ if __name__ == "__main__" :
 	s.createClient("myproject", "client2")
 	s.createClient("myproject", "client3")
 
-	setUpExecution("client1", "20130304-050607",ncommands=3)
-	setUpExecution("client1", "20130304-050608",ncommands=3, ntasks=3, stats=False)
-	setUpExecution("client1", "20130305-050607",ncommands=4, ok=False, noutputlines=12)
-	setUpExecution("client3", "20130304-050607",ncommands=4)
-	setUpExecution("client3", "20130305-050607",ncommands=4, ok=False, running=True)
+	emulateExecution("client1", "20130304-050607",[
+		("first task", [
+			("command 1", True, "output", None, dict(
+				tests = 34,
+			)),
+		]),
+	])
+	emulateExecution("client1", "20130304-050608",[
+		("first task", [
+			("command 1", True, "output", "Info", dict(
+				tests = 36,
+			)),
+			("command 2", True, "output", None, {}),
+			("command 3", False, "output", None, {}),
+		]),
+	])
+	emulateExecution("client1", "20130305-050607",[
+		("Multi line outputs and info", [
+			("command 1", True, "output\n"*12, "info\n"*12, dict(
+				tests = 123,
+				)),
+			("command 2", True, "output\n"*12, "info\n"*12, {}),
+			("command 3", False, "output\n"*12, None, {}),
+		]),
+	])
+	emulateExecution("client3", "20130301-050607", [
+		("Feeding stats", [
+			("command 1", True, "output", "info", dict(
+				tests = 325,
+				loc = 424,
+				)),
+		]),
+	])
+	emulateExecution("client3", "20130302-050607", [
+		("Feeding stats", [
+			("command 1", True, "output", "info", dict(
+				tests = 326,
+				loc = 430,
+				)),
+		]),
+	])
+	emulateExecution("client3", "20130303-050607", [
+		("Feeding stats", [
+			("command 1", True, "output", "info", dict(
+				tests = 336,
+				loc = 450,
+				)),
+		]),
+	])
+	emulateExecution("client3", "20130304-050607", [
+		("Example of incomplete task", [
+			("command 1", True, "output\n"*12, "info\n"*12, dict(
+				tests = 342,
+				loc = 430,
+				)),
+			("command 2", True, "output\n"*12, "info\n"*12, {}),
+			("command 3", True, "output\n"*12, None, {}),
+		]),
+	])
+	emulateExecution("client3", "20130305-050607",[
+		("Failing task that should not appear in red until execution finishes", [
+			("command 1", True, "output", "info", {}),
+			("command 2", False, "output", "info", {}),
+		]),
+		("Example of incomplete task", [
+			("command 1", True, "output\n"*12, "info\n"*12, dict(
+				tests = 442,
+				loc = 530,
+				)),
+			("command 2", None, "output\n"*12, None, {}),
+		]),
+	])
 	s.clientIdle("myproject", "client1", 1)
 
 	print "Starting generator"
-
 	w = WebGenerator("www")
 	w.generate(s)
-	#print w.generated
+	print w.generated
 
 
 
