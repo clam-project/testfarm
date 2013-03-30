@@ -1,0 +1,61 @@
+<style>
+.ansi_terminal { background-color: #222; color: #cfc; }
+.ansi_terminal { white-space: pre; font-family: monospace; }
+.ansi_black { color: black; }
+.ansi_red { color: darkred; }
+.ansi_green { color: darkgreen; }
+.ansi_yellow { color: orange; }
+.ansi_blue { color: darkblue; }
+.ansi_magenta { color: purple; }
+.ansi_cyan { color: darkcyan; }
+.ansi_white { color: lightgray; }
+.ansi_bright.ansi_black { color: gray; }
+.ansi_bright.ansi_red { color: red; }
+.ansi_bright.ansi_green { color: green; }
+.ansi_bright.ansi_yellow { color: yellow; }
+.ansi_bright.ansi_blue { color: blue; }
+.ansi_bright.ansi_magenta { color: magenta; }
+.ansi_bright.ansi_cyan { color: cyan; }
+.ansi_bright.ansi_white { color: white; }
+.ansi_bgblack { background-color: black; }
+.ansi_bgred { background-color: red; }
+.ansi_bggreen { background-color: green; }
+.ansi_bgyellow { background-color: yellow; }
+.ansi_bgblue { background-color: blue; }
+.ansi_bgmagenta { background-color: magenta; }
+.ansi_bgcyan { background-color: cyan; }
+.ansi_bgwhite { background-color: white; }
+.ansi_bright { font-weight: bold; }
+.ansi_faint { opacity: .5; }
+.ansi_italic { font-style: italic; }
+.ansi_underscore { text-decoration: underline; }
+.ansi_blink { text-decoration: blink; }
+.ansi_reverse { border: 1pt solid; }
+.ansi_hide { opacity: 0; }
+.ansi_strike { text-decoration: line-through; }
+</style>
+<div class='ansi_terminal'>Normal colors:
+	<span class='ansi_black'>black</span>	<span class='ansi_red'>red</span>	<span class='ansi_green'>green</span>	<span class='ansi_yellow'>yellow</span>	<span class='ansi_blue'>blue</span>	<span class='ansi_magenta'>magenta</span>	<span class='ansi_cyan'>cyan</span>	<span class='ansi_white'>white</span>	default
+Bright colors:
+	<span class='ansi_bright ansi_black'>black</span>	<span class='ansi_bright ansi_red'>red</span>	<span class='ansi_bright ansi_green'>green</span>	<span class='ansi_bright ansi_yellow'>yellow</span>	<span class='ansi_bright ansi_blue'>blue</span>	<span class='ansi_bright ansi_magenta'>magenta</span>	<span class='ansi_bright ansi_cyan'>cyan</span>	<span class='ansi_bright ansi_white'>white</span>	<span class='ansi_bright'>default</span>
+Background colors:
+	<span class='ansi_bgblack'>black</span>	<span class='ansi_bgred'>red</span>	<span class='ansi_bggreen'>green</span>	<span class='ansi_bgyellow'>yellow</span>	<span class='ansi_bgblue'>blue</span>	<span class='ansi_bgmagenta'>magenta</span>	<span class='ansi_bgcyan'>cyan</span>	<span class='ansi_bgwhite'>white</span>	default
+Attributes:
+	<span class='ansi_bright'>bright</span>
+	<span class='ansi_faint'>faint</span>
+	<span class='ansi_italic'>italic</span>
+	<span class='ansi_underscore'>underscore</span>
+	<span class='ansi_blink'>blink</span>
+	double blink &lt;- not implemented
+	<span class='ansi_reverse'>reverse</span> &lt;- TODO: Find a better way to implement it
+	<span class='ansi_hide'>hide</span> &lt;- It's hidden, you can still select and copy it
+	<span class='ansi_strike'>strike</span>
+
+Activating <span class='ansi_red'>red and then </span><span class='ansi_red ansi_bgyellow'>dark yellow
+background and then activating </span><span class='ansi_green ansi_bgyellow'>green foreground
+now changing attribute to </span><span class='ansi_bright ansi_green ansi_bgyellow'>bright and then
+</span><span class='ansi_green ansi_bgyellow'>reseting it without changing colors.
+</span><span class='ansi_green ansi_bgblue'>blue background and </span><span class='ansi_blink ansi_green ansi_bgblue'>blink attribute,
+</span><span class='ansi_blink ansi_green'>default background, unsetting </span><span class='ansi_green'>blink,
+unsetting </span> foreground and all attribs.
+</div>

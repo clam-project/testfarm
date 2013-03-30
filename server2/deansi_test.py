@@ -28,198 +28,198 @@ html_template = """\
 import unittest
 
 class DeansiTest(unittest.TestCase) :
-	def assertDeansiEquals(self, expected, inputText) :
-		return self.assertEquals(expected, deansi(inputText))
+	def assertDeansiEqual(self, expected, inputText) :
+		return self.assertEqual(expected, deansi(inputText))
 
 	def test_html(self) :
-		self.assertDeansiEquals(
+		self.assertDeansiEqual(
 			'weee&lt;&gt;&amp;',
 			'weee<>&',
 		)
 
 	def test_ansiAttributes_withSingleAttribute(self) :
-		self.assertEquals(
+		self.assertEqual(
 			([45],'text'),
 			ansiAttributes("[45mtext")
 		)
 
 	def test_ansiAttributes_withManyAttributes(self) :
-		self.assertEquals(
+		self.assertEqual(
 			([45,54,2],'text'),
 			ansiAttributes("[45;54;2mtext")
 		)
 
 	def test_ansiAttributes_withNoAttributes(self) :
-		self.assertEquals(
+		self.assertEqual(
 			([], 'text'),
 			ansiAttributes("text")
 		)
 
 	def test_ansiAttributes_withNoNumbers(self) :
-		self.assertEquals(
+		self.assertEqual(
 			([], '[a;bmtext'),
 			ansiAttributes("[a;bmtext")
 		)
 
 	def test_ansiAttributes_emptyReturnsZero(self) :
-		self.assertEquals(
+		self.assertEqual(
 			([0], 'text'),
 			ansiAttributes("[mtext")
 		)
 
 	def test_ansiState_bright(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['bright']), None, None),
 			ansiState(1, set(), None, None),
 		)
 
 	def test_ansiState_faint(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['faint']), None, None),
 			ansiState(2, set(), None, None),
 		)
 
 	def test_ansiState_italic(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['italic']), None, None),
 			ansiState(3, set(), None, None),
 		)
 
 	def test_ansiState_underscore(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['underscore']), None, None),
 			ansiState(4, set(), None, None),
 		)
 
 	def test_ansiState_blink(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['blink']), None, None),
 			ansiState(5, set(), None, None),
 		)
 
 	def test_ansiState_reverse(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['reverse']), None, None),
 			ansiState(7, set(), None, None),
 		)
 
 	def test_ansiState_hide(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['hide']), None, None),
 			ansiState(8, set(), None, None),
 		)
 
 	def test_ansiState_addTwoAttributes(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['bright', 'blink']), None, None),
 			ansiState(1, set(['blink']), None, None),
 		)
 
 	def test_ansiState_clear_clearsBits(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(), None, None),
 			ansiState(0, set(['blink', 'whatever']), None, None),
 		)
 
 	def test_ansiState_setForeground(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(), 'green', None),
 			ansiState(32, set(), 'green', None),
 		)
 
 	def test_ansiState_setForegroundTwice(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(), 'red', None),
 			ansiState(31, set(), 'green', None),
 		)
 
 	def test_ansiState_setBackground(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(), None, 'yellow'),
 			ansiState(43, set(), None, None),
 		)
 
 	def test_ansiState_clearClearsFore(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(), None, None),
 			ansiState(0, set(), 'green', None),
 		)
 
 	def test_ansiState_clearClearsBack(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(), None, None),
 			ansiState(0, set(), None, 'green'),
 		)
 
 	def test_ansiState_noForeground(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['blink','inverse']), None, 'red'),
 			ansiState(39, set(['blink','inverse']), 'green', 'red')
 			)
 
 	def test_ansiState_noBackground(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['blink','inverse']), 'green', None),
 			ansiState(49, set(['blink','inverse']), 'green', 'red')
 			)
 
 	def test_ansiState_resetAttribute(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['inverse']), 'green', 'red'),
 			ansiState(25, set(['blink','inverse']), 'green', 'red')
 			)
 
 	def test_ansiState_resetAttributeNotInThere(self) :
-		self.assertEquals(
+		self.assertEqual(
 			(set(['inverse']), 'green', 'red'),
 			ansiState(25, set(['inverse']), 'green', 'red')
 			)
 
 	def test_stateToClasses_withAttribs(self) :
-		self.assertEquals(
+		self.assertEqual(
 			"ansi_blink ansi_bright",
 			stateToClasses(set(['bright','blink']), None, None)
 			)
 
 	def test_stateToClasses_withFore(self) :
-		self.assertEquals(
+		self.assertEqual(
 			"ansi_red",
 			stateToClasses(set(), 'red', None)
 			)
 
 	def test_stateToClasses_withBack(self) :
-		self.assertEquals(
+		self.assertEqual(
 			"ansi_bgred",
 			stateToClasses(set(), None, 'red')
 			)
 
 	def test_stateToClasses_withAll(self) :
-		self.assertEquals(
+		self.assertEqual(
 			"ansi_blink ansi_inverse ansi_green ansi_bgred",
 			stateToClasses(set(['blink','inverse']), 'green', 'red')
 			)
 
 	def test_deansi_withCodes(self) :
-		self.assertEquals(
+		self.assertEqual(
 			'this should be <span class=\'ansi_red\'>red</span> and this not',
 			deansi('this should be \033[31mred\033[0m and this not'),
 		)
 
 	def test_deansi_emptyAttributeClears(self) :
-		self.assertEquals(
+		self.assertEqual(
 			'this should be <span class=\'ansi_red\'>red</span> and this not',
 			deansi('this should be \033[31mred\033[m and this not'),
 		)
 
 	def test_deansi_withComplexCodes(self) :
-		self.assertEquals(
+		self.assertEqual(
 			'this should be <span class=\'ansi_red\'>red</span>'
 			'<span class=\'ansi_bright ansi_red ansi_bggreen\'> and green background</span> and this not',
 			deansi('this should be \033[31mred\033[42;1m and green background\033[0m and this not'),
 		)
 
 	def test_deansi_takesMultiline(self) :
-		self.assertEquals(
+		self.assertEqual(
 			'this should be <span class=\'ansi_red\'>\nred</span>'
 			'<span class=\'ansi_bright ansi_red ansi_bggreen\'> and green \nbackground\n</span> and this not',
 			deansi('this should be \033[31m\nred\033[42;1m and green \nbackground\n\033[0m and this not'),
@@ -276,13 +276,13 @@ now changing attribute to \033[1mbright and then
 \033[49mdefault background, unsetting \033[25mblink,
 unsetting \033[39m foreground and \033[0mall attribs.
 """
-		print terminalInput
-		expected = file("deansi-b2b.html").read()
+#		print terminalInput
+		expected = file("resources/deansi-b2b.html").read()
 		result = html_template % (styleSheet(), deansi(terminalInput))
 
 		if (result!=expected) :
 			file("deansi-failed.html","w").write(result)
-		self.assertEquals(expected, result)
+		self.assertMultiLineEqual(expected, result)
 
 if __name__ == "__main__" :
 	unittest.main()
