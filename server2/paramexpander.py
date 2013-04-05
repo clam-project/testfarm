@@ -9,8 +9,9 @@ def expandfunction(expander) :
 		wrapperSpec = inspect.formatargspec(
 			[arg for arg in fargs]+
 			[arg for arg in gargs
-				if arg not in fargs
-				and arg not in gdefaultvars]+
+				if  arg not in fargs
+				and arg not in gdefaultvars
+			]+
 			([arg for arg in gdefaultvars] if gdefaults else []),
 			None,
 			None,
