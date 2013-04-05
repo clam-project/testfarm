@@ -12,7 +12,7 @@ def expandfunction(expander) :
 				if  arg not in fargs
 				and arg not in gdefaultvars
 			]+
-			([arg for arg in gdefaultvars] if gdefaults else []),
+			([arg for arg in gdefaultvars] or []),
 			None,
 			None,
 			gdefaults
