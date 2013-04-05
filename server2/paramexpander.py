@@ -8,10 +8,12 @@ def expandfunction(expander) :
 		wrapperSpec = inspect.formatargspec(fargs)
 		wrapperSource = """\
 def wrapper {wrapperSpec} :
-	g()
-	return f(a,b)
+	g {gcall}
+	return f {fcall}
 """.format(
 	wrapperSpec = wrapperSpec,
+	gcall = "()",
+	fcall = "(a,b)",
 	)
 		exec wrapperSource in locals(), globals()
 		return wrapper
