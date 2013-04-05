@@ -104,23 +104,33 @@ class ParamExpanderTest(unittest.TestCase) :
 
 	def test_expandfunction_optionalArgsInExpander(self) :
 		expanderReturns = []
-		def expander(x,y=66): expanderReturns.append(x,y)
+		def expander(x,y=66): expanderReturns.append((x,y))
 		@expandfunction(expander)
 		def adaptee(a, b): return a,b
 
 		self.assertSignatureEqual(adaptee, "(a, b, x, y=66)")
 		self.assertEqual(adaptee(1,2,3), (1,2))
-		self.assertEqual(expanderReturns, [3,66])
+		self.assertEqual(expanderReturns, [(3,66)])
 
 	def test_expandfunction_optionalArgsInAdaptee(self) :
 		expanderReturns = []
-		def expander(x,y=66): expanderReturns.append(x)
+		def expander(x): expanderReturns.append(x)
 		@expandfunction(expander)
-		def adaptee(a, b): return a,b
+		def adaptee(a, b=66): return a,b
 
-		self.assertSignatureEqual(adaptee, "(a, b, x, y=66)")
-		self.assertEqual(adaptee(1,2,3), (1,2))
-		self.assertEqual(expanderReturns, [3])
+		self.assertSignatureEqual(adaptee, "(a, x, b=66)")
+		self.assertEqual(adaptee(1,2,3), (1,3))
+		self.assertEqual(expanderReturns, [2])
+
+	def test_expandfunction_optionalArgsInBoth(self) :
+		expanderReturns = []
+		def expander(x, y=99): expanderReturns.append((x,y))
+		@expandfunction(expander)
+		def adaptee(a, b=66): return a,b
+
+		self.assertSignatureEqual(adaptee, "(a, x, b=66, y=99)")
+		self.assertEqual(adaptee(1,2,3,4), (1,3))
+		self.assertEqual(expanderReturns, [(2,4)])
 
 
 

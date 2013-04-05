@@ -6,16 +6,20 @@ def expandfunction(expander) :
 		gargs, gvarargs, gkeywords, gdefaults = inspect.getargspec(g)
 		fargs, fvarargs, fkeywords, fdefaults = inspect.getargspec(f)
 		gdefaultvars = gargs[-len(gdefaults):] if gdefaults else []
+		fdefaultvars = fargs[-len(fdefaults):] if fdefaults else []
 		wrapperSpec = inspect.formatargspec(
-			[arg for arg in fargs]+
+			[arg for arg in fargs
+				if arg not in fdefaultvars
+			]+
 			[arg for arg in gargs
 				if  arg not in fargs
 				and arg not in gdefaultvars
 			]+
+			([arg for arg in fdefaultvars])+
 			([arg for arg in gdefaultvars]),
 			None,
 			None,
-			gdefaults
+			(fdefaults or ()) + (gdefaults or ())
 			)
 		gcall = ",".join((
 			"{var}={var}".format(var=var)
