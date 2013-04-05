@@ -257,23 +257,6 @@ class ParamExpanderTest(unittest.TestCase) :
 
 
 
-"""
-TODO:
-+ adaptee name remains
-+ adaptee doc remains
-+ optionals in expander
-+ optionals in adaptee
-+ optionals in both sorted adaptee, then expander
-+ shared optional in expander remains optional
-+ shared optional in adaptee remains optional
-+ shared optional in both, takes adaptee value (yes?)
-+ keyword call allows disordering
-- varargs, what to do with them?
-- keywordargs, what to do with them?
-"""
-
-
-
 if __name__=="__main__" :
 	unittest.main()
 

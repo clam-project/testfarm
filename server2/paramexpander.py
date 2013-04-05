@@ -5,63 +5,57 @@ def expandfunction(expander) :
 		g = expander
 		gargs, gvarargs, gkeywords, gdefaults = inspect.getargspec(g)
 		fargs, fvarargs, fkeywords, fdefaults = inspect.getargspec(f)
-		gdefaultvars = gargs[-len(gdefaults):] if gdefaults else []
-		fdefaultvars = fargs[-len(fdefaults):] if fdefaults else []
-		defaultvars = fdefaultvars + gdefaultvars
+		goptional = gargs[-len(gdefaults):] if gdefaults else []
+		foptional = fargs[-len(fdefaults):] if fdefaults else []
+		alloptional = foptional + goptional
 		keywords = fkeywords or gkeywords
+		def keywordArgs(args) :
+			return [
+				"{var}={var}".format(var=var)
+				for var in args
+				]
 		wrapperSpec = inspect.formatargspec(
-			[arg for arg in fargs
-				if arg not in defaultvars
-			]+
-			[arg for arg in gargs
-				if  arg not in fargs
-				and arg not in gdefaultvars
-			]+
-			([arg for arg in fdefaultvars])+
-			([arg for arg in gdefaultvars
-				if arg not in fdefaultvars]),
+			[
+				# mandatory args from f
+				arg for arg in fargs
+				if  arg not in foptional
+				and arg not in goptional
+			] + [
+				# mandatory args from g not in f
+				arg for arg in gargs
+				if  arg not in goptional
+				and arg not in fargs
+			] +
+				foptional
+			+ [
+				arg for arg in goptional
+				if arg not in foptional
+			],
 			None,
 			keywords,
 			list(fdefaults or []) + [
 			value
-			for var, value in zip(gdefaultvars, gdefaults or [])
-			if var not in fdefaultvars]
+			for var, value in zip(goptional, gdefaults or [])
+			if var not in foptional]
 			)
-		gcall = [
-				"{var}={var}".format(var=var)
-				for var in gargs
-			]
-		if gkeywords :
-			gcall += [
-				"{var}={var}".format(var=var)
-				for var in fargs
-				if arg not in gargs
-			]+["**{}".format(keywords)]
-		fcall = [
-				"{var}={var}".format(var=var)
-				for var in fargs
-			]
-		if fkeywords :
-			fcall += [
-				"{var}={var}".format(var=var)
-				for var in gargs
-				if var not in fargs
-			] + ["**{}".format(keywords) ]
+		allCallArgs = keywordArgs(set(gargs+fargs)) + [
+			"**{}".format(keywords) ]
+		gcall = allCallArgs if gkeywords else keywordArgs(gargs)
+		fcall = allCallArgs if fkeywords else keywordArgs(fargs)
 		wrapperSource = """\
 def wrapper {wrapperSpec} :
 	g ({gcall})
 	return f ({fcall})
 """.format(
-	wrapperSpec = wrapperSpec,
-	gcall = ",".join(gcall),
-	fcall = ",".join(fcall),
-	)
+			wrapperSpec = wrapperSpec,
+			gcall = ",".join(gcall),
+			fcall = ",".join(fcall),
+			)
 		exec wrapperSource in locals(), globals()
 		wrapper.__name__ = f.__name__
 		wrapper.__doc__ = f.__doc__
 		return wrapper
 	return decorator
 
-def lala() :
-		gargs, gvarargs, gkeywords, gdefaults = inspect.getargspec(g)
-		fargs, fvarargs, fkeywords, fdefaults = inspect.getargspec(f)
+
+
