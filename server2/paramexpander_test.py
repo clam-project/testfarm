@@ -104,6 +104,16 @@ class ParamExpanderTest(unittest.TestCase) :
 
 	def test_expandfunction_optionalArgsInExpander(self) :
 		expanderReturns = []
+		def expander(x,y=66): expanderReturns.append(x,y)
+		@expandfunction(expander)
+		def adaptee(a, b): return a,b
+
+		self.assertSignatureEqual(adaptee, "(a, b, x, y=66)")
+		self.assertEqual(adaptee(1,2,3), (1,2))
+		self.assertEqual(expanderReturns, [3,66])
+
+	def test_expandfunction_optionalArgsInAdaptee(self) :
+		expanderReturns = []
 		def expander(x,y=66): expanderReturns.append(x)
 		@expandfunction(expander)
 		def adaptee(a, b): return a,b
@@ -116,10 +126,20 @@ class ParamExpanderTest(unittest.TestCase) :
 
 
 
+
 """
 TODO:
-- function name is preserved
-- function doc is preserved
++ adaptee name remains
++ adaptee doc remains
++ optionals in expander
+- optionals in adaptee
+- optionals in both sorted adaptee, then expander
+- optional in expander remains optional
+- optional in adaptee remains optional
+- optional in both, takes adaptee value (yes?)
+- keyword call allows disordering
+- varargs, what to do with them?
+- keywordargs, what to do with them?
 """
 
 
