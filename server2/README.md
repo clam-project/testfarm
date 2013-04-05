@@ -1,9 +1,7 @@
-This is the temporary repository for a rewrite of the server
-side of [TestFarm].
+This folder contains an ongoing rewrite of the testfarm server.
 
 More info at [this blog][here].
 
-[TestFarm]: http://sourceforge.net/projects/testfarm/
 [here]: http://canvoki.net/coder/blog/2013-03-21-refactoring-the-testfarm-server.html
 
 
