@@ -44,13 +44,13 @@ def FunctionReturningResponse(request) :
 		)
 
 def dummySigner(signature, id, **kwd) :
-	import Service
+	import service
 	keys = dict(
 		alibaba="sesame, open",
 		)
-	if id not in keys : raise Service.Forbidden("Not such id")
+	if id not in keys : raise service.Forbidden("Not such id")
 	expectedKey = keys[id]+'0' #str(len(kwd))
-	if signature != expectedKey : raise Service.Forbidden("Bad signature")
+	if signature != expectedKey : raise service.Forbidden("Bad signature")
 
 import spike_expanddecorator
 @spike_expanddecorator.expand_decorator(dummySigner)
@@ -72,8 +72,8 @@ class ServiceTest(unittest.TestCase) :
 		source.write(_serviceCode)
 		source.close()
 		del source
-		import Service
-		self.app = Service.Reload(Service.Service([
+		import service
+		self.app = service.Reload(service.Service([
 			"TestingService",
 			]))
 		def createApp() : return self.app
