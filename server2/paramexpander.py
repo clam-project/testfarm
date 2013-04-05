@@ -12,7 +12,7 @@ def expandfunction(expander) :
 				if  arg not in fargs
 				and arg not in gdefaultvars
 			]+
-			([arg for arg in gdefaultvars] or []),
+			([arg for arg in gdefaultvars]),
 			None,
 			None,
 			gdefaults
@@ -31,6 +31,8 @@ def wrapper {wrapperSpec} :
 	fcall = "a,b",
 	)
 		exec wrapperSource in locals(), globals()
+		wrapper.__name__ = f.__name__
+		wrapper.__doc__ = f.__doc__
 		return wrapper
 	return decorator
 

@@ -41,6 +41,22 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertSignatureEqual(adaptee,
 			"(a, **b)")
 
+	def test_expandfunction_keepsName(self) :
+		expanderReturns = []
+		def expander(): pass
+		@expandfunction(expander)
+		def adaptee(): return None
+
+		self.assertEqual(adaptee.__name__, "adaptee")
+
+	def test_expandfunction_keepsDocs(self) :
+		expanderReturns = []
+		def expander(): pass
+		@expandfunction(expander)
+		def adaptee(): "documentation"
+
+		self.assertEqual(adaptee.__doc__, "documentation")
+
 	def test_expandfunction_expanderIsCalled(self) :
 		expanderCalled = []
 		def expander(): expanderCalled.append("yes")
@@ -95,6 +111,9 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertSignatureEqual(adaptee, "(a, b, x, y=66)")
 		self.assertEqual(adaptee(1,2,3), (1,2))
 		self.assertEqual(expanderReturns, [3])
+
+
+
 
 
 """
