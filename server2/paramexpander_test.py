@@ -133,7 +133,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(expanderReturns, [(2,4)])
 
 
-	def test_expandfuction_sharedOptionalInAdaptee(self) :
+	def test_expandfunction_sharedOptionalInAdaptee(self) :
 		expanderReturns = []
 		def expander(m): expanderReturns.append(m)
 		@expandfunction(expander)
@@ -143,7 +143,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1,2), (1,2))
 		self.assertEqual(expanderReturns, [2])
 
-	def test_expandfuction_sharedOptionalInExpander(self) :
+	def test_expandfunction_sharedOptionalInExpander(self) :
 		expanderReturns = []
 		def expander(m=66): expanderReturns.append(m)
 		@expandfunction(expander)
@@ -153,7 +153,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1,2), (1,2))
 		self.assertEqual(expanderReturns, [2])
 
-	def test_expandfuction_sharedOptionalInBoth(self) :
+	def test_expandfunction_sharedOptionalInBoth(self) :
 		# TOREVIEW: No reason for taking adaptee over expander default
 		expanderReturns = []
 		def expander(m=99): expanderReturns.append(m)
@@ -164,7 +164,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1), (1,66))
 		self.assertEqual(expanderReturns, [66])
 
-	def test_expandfuction_sharedOptionalInBoth(self) :
+	def test_expandfunction_sharedOptionalInBoth(self) :
 		# TOREVIEW: No reason for taking adaptee over expander default
 		expanderReturns = []
 		def expander(m=99): expanderReturns.append(m)
@@ -175,7 +175,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1), (1,66))
 		self.assertEqual(expanderReturns, [66])
 
-	def test_expandfuction_keywordCallAllowDisorder(self) :
+	def test_expandfunction_keywordCallAllowDisorder(self) :
 		expanderReturns = []
 		def expander(x,m,y): expanderReturns.append((x,m,y))
 		@expandfunction(expander)
@@ -185,7 +185,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(x='x',a='a',c='c',b='b',y='y',m='m'), ('m','a','b','c'))
 		self.assertEqual(expanderReturns, [('x','m','y')])
 
-	def test_expandFunction_expanderKwdsTakesAdapteeArgs(self) :
+	def test_expandfunction_expanderKwdsTakesAdapteeArgs(self) :
 		expanderReturns = []
 		def expander(**kwds): expanderReturns.append(kwds)
 		@expandfunction(expander)
@@ -195,7 +195,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1), 1)
 		self.assertEqual(expanderReturns, [dict(a=1)])
 
-	def test_expandFunction_expanderKwdsTakesExtraArgs(self) :
+	def test_expandfunction_expanderKwdsTakesExtraArgs(self) :
 		expanderReturns = []
 		def expander(**kwds): expanderReturns.append(kwds)
 		@expandfunction(expander)
@@ -205,7 +205,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(j=3), "boo")
 		self.assertEqual(expanderReturns, [dict(j=3)])
 
-	def test_expandFunction_expanderKwdsRemovesExplicitArgs(self) :
+	def test_expandfunction_expanderKwdsRemovesExplicitArgs(self) :
 		expanderReturns = []
 		def expander(m, **kwds): expanderReturns.append((m,kwds))
 		@expandfunction(expander)
@@ -215,7 +215,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1,j=3), "boo")
 		self.assertEqual(expanderReturns, [(1,dict(j=3))])
 
-	def test_expandFunction_expanderKwdsSharedKeys(self) :
+	def test_expandfunction_expanderKwdsSharedKeys(self) :
 		expanderReturns = []
 		def expander(m, **kwds): expanderReturns.append((m,kwds))
 		@expandfunction(expander)
@@ -225,7 +225,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1,j=3), 1)
 		self.assertEqual(expanderReturns, [(1,dict(j=3))])
 
-	def test_expandFunction_adapteeKwdsTakesExpanderArgs(self) :
+	def test_expandfunction_adapteeKwdsTakesExpanderArgs(self) :
 		expanderReturns = []
 		def expander(a): expanderReturns.append(a)
 		@expandfunction(expander)
@@ -235,7 +235,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(1), dict(a=1))
 		self.assertEqual(expanderReturns, [1])
 
-	def test_expandFunction_adapteeKwdsTakesExtraArgs(self) :
+	def test_expandfunction_adapteeKwdsTakesExtraArgs(self) :
 		expanderReturns = []
 		def expander(): expanderReturns.append("boo")
 		@expandfunction(expander)
@@ -245,7 +245,7 @@ class ParamExpanderTest(unittest.TestCase) :
 		self.assertEqual(adaptee(j=3), dict(j=3))
 		self.assertEqual(expanderReturns, ["boo"])
 
-	def test_expandFunction_adapteeKwdsTakesExtraArgs(self) :
+	def test_expandfunction_adapteeKwdsTakesExtraArgs(self) :
 		expanderReturns = []
 		def expander(m): expanderReturns.append(m)
 		@expandfunction(expander)
