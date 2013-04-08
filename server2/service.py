@@ -122,6 +122,7 @@ class Service :
 				status = "500 Internal Server Error",
 				content_type = 'text/plain',
 				)
+		return "Should never happen"
 
 	# TODO: Not unittested
 	@wrapper
@@ -189,6 +190,11 @@ class Service :
 
 	@wrapper
 	def _handleData(self, f, request, target) :
+		"""
+		If the target is not callable is just plain data like:
+			version = "4.2"
+		Just turns it into a string.
+		"""
 		if callable(target) : return f(self, request, target)
 
 		return webob.Response(
@@ -235,12 +241,21 @@ class Service :
 			result = target(request=request, **request.params)
 		else :
 			result = target(**request.params)
+
+		if result is None :
+			return webob.Response("Done",
+				content_type = getattr(
+					target, 'content_type', 'text/plain'))
+
 		if isinstance(result, basestring) :
 				content_type = getattr(target, 'content_type', 'text/plain')
 				return webob.Response(
 					result,
 					content_type = content_type,
 					)
+
+		# TODO: result being anything not a string or a Response!!
+
 		return result
 
 

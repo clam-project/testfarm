@@ -52,6 +52,9 @@ def dummySigner(signature, id, **kwd) :
 	expectedKey = keys[id]+'0' #str(len(kwd))
 	if signature != expectedKey : raise service.Forbidden("Bad signature")
 
+def voidFunction() :
+	return None
+
 import spike_expanddecorator
 @spike_expanddecorator.expand_decorator(dummySigner)
 def signedFunction0() :
@@ -373,6 +376,13 @@ class ServiceTest(unittest.TestCase) :
 			"TestingService/signedFunction0?id=alibaba&signature=sesame0",
 			403,
 			body = "Forbidden: Bad signature\n",
+			headers = self.headerPlainText(),
+			)
+
+	def test_voidFunction(self) :
+		self.assertContent(
+			"TestingService/voidFunction",
+			body = "Done",
 			headers = self.headerPlainText(),
 			)
 
