@@ -193,6 +193,7 @@ class Server(object) :
 			task, description,
 			) :
 
+		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
 			"startTask", task, description)
@@ -202,6 +203,7 @@ class Server(object) :
 			task, sequence, command
 			) :
 
+		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
 			"startCommand", task, sequence, command)
@@ -211,6 +213,7 @@ class Server(object) :
 			task, command, output, ok, info, stats
 			) :
 
+		self._assertClientOk(project,client)
 		self._log(project, client, execution,
 			'endCommand', task, command, output, ok, info, stats)
 		self.updateStats(project, client, execution, stats)
@@ -220,6 +223,7 @@ class Server(object) :
 			task, ok,
 			) :
 
+		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
 			"endTask", task, ok)
@@ -229,6 +233,7 @@ class Server(object) :
 			ok
 			) :
 
+		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
 			"endExecution", ok)
@@ -255,6 +260,7 @@ class Server(object) :
 
 
 	def clientIdle(self, project, client, minutes) :
+		self._assertClientOk(project,client)
 		nextIdle = self.now + datetime.timedelta(minutes=minutes)
 		idlefile = open(self._p(project,client,"idle"),'w')
 		idlefile.write(nextIdle.strftime("%Y-%m-%d %H:%M:%S"))
