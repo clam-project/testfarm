@@ -1,0 +1,210 @@
+#!/usr/bin/env python
+
+
+from server import Server, ArgPrepender
+from webgenerator import WebGenerator
+import argparse
+import sys
+import datetime
+
+def f_generate(args) :
+	print (
+		"Generating websites for server data '{serverpath}' into '{outputdir}'."
+		.format(**vars(args)))
+	s = Server(args.serverpath)
+	w = WebGenerator(args.outputdir)
+	w.generate(s)
+	sys.exit(0)
+
+def f_createserver(args) :
+	s = Server(args.serverpath)
+	s.createServer()
+	sys.exit(0)
+
+def f_addproject(args) :
+	print (
+		"Creating project '{project}' at server path '{serverpath}'."
+		.format(**vars(args)))
+	s = Server(args.serverpath)
+	s.createProject(args.project)
+	sys.exit(0)
+
+def f_addclient(args) :
+	s = Server(args.serverpath)
+	s.createClient(args.project, args.client)
+	sys.exit(0)
+
+def f_meta(args) :
+	s = Server(args.serverpath)
+	if args.client is None : 
+		print "Metadata for project '{project}':".format(**vars(args))
+		d= s.projectMetadata(args.project)
+	else:
+		print "Metadata for client '{client}' at project '{project}':".format(**vars(args))
+		d = s.clientMetadata(args.project, args.client)
+	for key, value in d.iteritems() :
+		print "\t{}: {}".format(key,value)
+	if not d :
+		print "\tNo values stored"
+	sys.exit(0)
+
+def f_fakerun(args) :
+	if args.execution is None :
+		args.execution = "{:%Y%m%d-%H%M%S}".format(datetime.datetime.now())
+	print(
+		"Generating task '{execution}'"
+		" for client '{client}'"
+		" at project '{project}'"
+		.format(**vars(args)))
+	s = Server(args.serverpath)
+	s = ArgPrepender(s, args.project, args.client, args.execution)
+
+	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		datetime.datetime.strptime(args.execution, "%Y%m%d-%H%M%S"))
+	s.executionStarts(
+		timestamp=timestamp,
+		changelog=[])
+	infos = dict([
+		((int(task), int(command)), info)
+		for task, command, info in args.info
+		])
+	for task in xrange(1, args.ntasks+1) :
+		s.taskStarts(task,args.tasktemplate.format(**vars()))
+		print args.stats
+		for command in xrange(1,args.ncommands+1) :
+			s.commandStarts(task, command, args.commandtemplate.format(**vars()))
+			output = "Output of the command {command}"
+			stats = dict([
+				(key, float(value))
+				for stattask, statcommand, key, value in args.stats
+				if int(stattask) == task and int(statcommand) == command
+				])
+			if [task, command] in args.interrupt :
+				return
+			ok = [task, command] not in args.fail
+			s.commandEnds(task, command,
+				output=output.format(**vars()),
+				ok=ok,
+				info=infos.get((task,command), None),
+				stats=stats)
+			if ok is False : break # Failed, fatal for the task, not the execution
+		if ok is None : break # interrupted, fatal for the execution
+		s.taskEnds(task,ok)
+	s.executionEnds(ok)
+	print "Done"
+	sys.exit(0)
+
+parser = argparse.ArgumentParser(
+	description = "Command line control of a testfarm server",
+	)
+parser.add_argument('--version', action='version', version='%(prog)s 2.0')
+parser.add_argument('--verbose', '-v', action='count', default=0, help="adds a verbosity level (acommulative)")
+subparsers = parser.add_subparsers(
+	title='subcommands',
+	description='For additional help type: %(prog)s SUBCOMMAND --help',
+	)
+sub = subparsers.add_parser(
+	'init',
+	help="Creates a testfarm server filesystem")
+sub.add_argument('serverpath')
+sub.set_defaults(func = f_createserver)
+
+sub = subparsers.add_parser(
+	'addproject',
+	help="Adds a project to manage to the testfarm server")
+sub.add_argument('serverpath')
+sub.add_argument('project')
+sub.set_defaults(func = f_addproject)
+
+sub = subparsers.add_parser(
+	'addclient',
+	help="Adds a client to a given project")
+sub.add_argument('serverpath')
+sub.add_argument('project')
+sub.add_argument('client')
+sub.set_defaults(func = f_addclient)
+
+sub = subparsers.add_parser(
+	'generate',
+	help="Generates the website for a server")
+sub.add_argument('serverpath')
+sub.add_argument('outputdir')
+sub.set_defaults(func = f_generate)
+
+sub = subparsers.add_parser(
+	'meta',
+	help="Shows metadata for project or client")
+sub.add_argument('serverpath')
+sub.add_argument('project')
+sub.add_argument('client', nargs="?")
+sub.set_defaults(func = f_meta)
+
+sub = subparsers.add_parser(
+	'fakerun',
+	help="Emulates a fake client execution",
+	)
+sub.add_argument('serverpath')
+sub.add_argument('project')
+sub.add_argument('client')
+sub.add_argument('execution', nargs='?')
+sub.add_argument('tasktemplate', nargs='?',
+	default="Task number {task}",
+	help = "Template for the task description",
+	)
+sub.add_argument('commandtemplate', nargs='?',
+	default="command {task} {command}",
+	help = "Template for the command description",
+	)
+sub.add_argument('--ntasks', type=int,
+	default=4,
+	help = "Number of tasks for the execution",
+	)
+sub.add_argument('--ncommands', type=int,
+	default=4,
+	help = "Number of commands for each task",
+	)
+sub.add_argument('--fail',
+	nargs = 2,
+	metavar = ("TASK","COMMAND"),
+	type = int,
+	action='append',
+	default=[],
+	help = "Makes the nth task to fail at the mth command. Can be specified many times.",
+	)
+sub.add_argument('--interrupt',
+	nargs = 2,
+	metavar = ("TASK","COMMAND"),
+	type = int,
+	action='append',
+	default = [],
+	help = "Makes the execution to be interrupting at the mth command of the nth task",
+	)
+sub.add_argument('--stats',
+	nargs = 4,
+	metavar = ("TASK","COMMAND","KEY","VALUE"),
+	action='append',
+	help = "Adds an stat for a given command. Can be specified many times.",
+	)
+sub.set_defaults(func = f_fakerun)
+
+sub.add_argument('--info',
+	nargs = 3,
+	metavar = ("TASK","COMMAND","INFO"),
+	default = [],
+	action='append',
+	help = "Adds info for a given command. Can be specified many times.",
+	)
+sub.set_defaults(func = f_fakerun)
+	
+
+
+args = parser.parse_args(sys.argv[1:])
+args.func(args)
+
+
+
+
+
+
+
+
