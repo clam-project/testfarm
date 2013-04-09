@@ -70,7 +70,6 @@ def f_fakerun(args) :
 		])
 	for task in xrange(1, args.ntasks+1) :
 		s.taskStarts(task,args.tasktemplate.format(**vars()))
-		print args.stats
 		for command in xrange(1,args.ncommands+1) :
 			s.commandStarts(task, command, args.commandtemplate.format(**vars()))
 			output = "Output of the command {command}"
@@ -157,11 +156,11 @@ sub.add_argument('commandtemplate', nargs='?',
 	)
 sub.add_argument('--ntasks', type=int,
 	default=4,
-	help = "Number of tasks for the execution",
+	help = "Number of tasks for the execution (default: %(default)s)",
 	)
 sub.add_argument('--ncommands', type=int,
 	default=4,
-	help = "Number of commands for each task",
+	help = "Number of commands for each task (default: %(default)s)",
 	)
 sub.add_argument('--fail',
 	nargs = 2,
@@ -183,6 +182,7 @@ sub.add_argument('--stats',
 	nargs = 4,
 	metavar = ("TASK","COMMAND","KEY","VALUE"),
 	action='append',
+	default = [],
 	help = "Adds an stat for a given command. Can be specified many times.",
 	)
 sub.set_defaults(func = f_fakerun)
