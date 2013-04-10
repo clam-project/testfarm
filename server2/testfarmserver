@@ -36,9 +36,19 @@ def f_addclient(args) :
 
 def f_meta(args) :
 	s = Server(args.serverpath)
+	if args.client is None :
+		print "Setting metadata for project '{project}':".format(**vars(args))
+		s.setProjectMetadata(args.project, **dict(args.set))
+	else :
+		print "Setting metadata for client '{client}' at project '{project}':".format(**vars(args))
+		s.setClientMetadata(args.project, args.client, **dict(args.set))
+	for key, value in args.set :
+		print "\t{}: {}".format(key,value)
+	if args.set : sys.exit(0)
+	# get
 	if args.client is None : 
 		print "Metadata for project '{project}':".format(**vars(args))
-		d= s.projectMetadata(args.project)
+		d = s.projectMetadata(args.project)
 	else:
 		print "Metadata for client '{client}' at project '{project}':".format(**vars(args))
 		d = s.clientMetadata(args.project, args.client)
@@ -102,46 +112,60 @@ subparsers = parser.add_subparsers(
 	title='subcommands',
 	description='For additional help type: %(prog)s SUBCOMMAND --help',
 	)
+
+
 sub = subparsers.add_parser(
 	'init',
 	help="Creates a testfarm server filesystem")
-sub.add_argument('serverpath')
 sub.set_defaults(func = f_createserver)
+sub.add_argument('serverpath')
+
 
 sub = subparsers.add_parser(
 	'addproject',
 	help="Adds a project to manage to the testfarm server")
+sub.set_defaults(func = f_addproject)
 sub.add_argument('serverpath')
 sub.add_argument('project')
-sub.set_defaults(func = f_addproject)
+
 
 sub = subparsers.add_parser(
 	'addclient',
 	help="Adds a client to a given project")
+sub.set_defaults(func = f_addclient)
 sub.add_argument('serverpath')
 sub.add_argument('project')
 sub.add_argument('client')
-sub.set_defaults(func = f_addclient)
+
 
 sub = subparsers.add_parser(
 	'generate',
 	help="Generates the website for a server")
+sub.set_defaults(func = f_generate)
 sub.add_argument('serverpath')
 sub.add_argument('outputdir')
-sub.set_defaults(func = f_generate)
+
 
 sub = subparsers.add_parser(
 	'meta',
 	help="Shows metadata for project or client")
+sub.set_defaults(func = f_meta)
 sub.add_argument('serverpath')
 sub.add_argument('project')
 sub.add_argument('client', nargs="?")
-sub.set_defaults(func = f_meta)
+sub.add_argument('--set',
+	nargs=2,
+	metavar=("KEY","VALUE"),
+	action='append',
+	default=[],
+	)
+
 
 sub = subparsers.add_parser(
 	'fakerun',
 	help="Emulates a fake client execution",
 	)
+sub.set_defaults(func = f_fakerun)
 sub.add_argument('serverpath')
 sub.add_argument('project')
 sub.add_argument('client')
@@ -185,8 +209,6 @@ sub.add_argument('--stats',
 	default = [],
 	help = "Adds an stat for a given command. Can be specified many times.",
 	)
-sub.set_defaults(func = f_fakerun)
-
 sub.add_argument('--info',
 	nargs = 3,
 	metavar = ("TASK","COMMAND","INFO"),
@@ -194,8 +216,7 @@ sub.add_argument('--info',
 	action='append',
 	help = "Adds info for a given command. Can be specified many times.",
 	)
-sub.set_defaults(func = f_fakerun)
-	
+
 
 
 args = parser.parse_args(sys.argv[1:])
