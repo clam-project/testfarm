@@ -1,6 +1,12 @@
+Legend
+------
 + Means DONE
 - Means TODO
 * Means currently workin at
+
+TODO's
+------
+
 + Server logger
 + Web Generator
 	+ Execution details
@@ -15,24 +21,27 @@
 		+ Project
 	+ Project history
 	+ Stats plots
-* Website generation
-	+ Full regeneration
+- Smart web generation
 	- Not regenerating up-to-date pages
 		- A logger for written files
-		- Testing condigitons
+		- Testing conditons
 	- Caching
-		
+
 
 - Server logger proxy
 - Server logger frontend
 - Server logger reporter
 
+- Bugs
+	- Execution end time in history page is always 2013-04-50 06:07:08
+	- Aborted executions are still 'in progress' in history page
+
 - Missing things
+	- SECURITY: Limit at server names used as file names (project, client, execution)
+	- SECURITY: Signed client messages
 	- Details page
 		- execution stoptime or lastupdate in Details
 		- Summary at the top
-
-
 	- Status aborted from client
 	- Force abort on old running executions
 
