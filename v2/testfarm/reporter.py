@@ -18,7 +18,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 import inspect
 
 class NullReporter(object) :
-
+	"""Defines the reporter interface.
+	Used among other things to build the MockUpReporter
+	wrapping it with a LogWrapper.
+	"""
 	def idle(self, minutes, running=False) : pass
 	def startExecution(self, execution) : pass
 	def startTask(self, execution, task, description) : pass
@@ -28,7 +31,6 @@ class NullReporter(object) :
 			) : pass
 	def stopTask(self, execution, task, ok) : pass
 	def stopExecution(self, execution) : pass
-
 
 class LogWrapper(object) :
 	class wrapper(object) :
@@ -85,7 +87,11 @@ class LogWrapper(object) :
 
 
 def MockUpReporter() :
+	"""
+	A mock-up reporter that just keeps the logs for the called methods.
+	"""
 	return LogWrapper(NullReporter())
+
 
 class MultiReporter(object) :
 	"Forwards method calls to a set of added objects"
