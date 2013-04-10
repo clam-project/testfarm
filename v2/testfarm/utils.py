@@ -2,6 +2,7 @@
 
 import subprocess
 import sys
+import os
 
 def loadDictFile(dictfile) :
 	""" Returns a dict with the variables defined in a file """
@@ -73,13 +74,19 @@ class ansi2html :
 		assert False, "Not implemented"
 		self.f.write(content)
 
-def run(command, message=None, log=sys.stdout, err=None, fatal=True) :
+def run(command, message=None, log=sys.stdout, err=None, fatal=True, cwd=None) :
 	if message is None : message = "Running: " + command
 	if message :
 		print "\033[32m== %s\033[0m"%(message)
 	if err is None :
 		err = quotedFile(log, "\033[31m", "\033[0m")
+	# TODO: Exception save implementation of dir changing
+	if cwd :
+		oldcwd = os.getcwd()
+		os.chdir(cwd)
 	process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	if cwd :
+		os.chdir(oldcwd)
 	import select
 	outpoll = select.poll()
 	outpoll.register(process.stdout.fileno())
