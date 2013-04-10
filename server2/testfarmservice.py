@@ -1,5 +1,5 @@
 from server import Server
-path = "fixture"
+path = "projects"
 s = Server(path)
 
 def clientIdle(project, client, minutes) :
@@ -12,8 +12,8 @@ def executionStarts( project, client, execution) :
 def taskStarts( project, client, execution, task, description) :
 	s.taskStarts(project, client, execution, task, description)
 
-def commandStarts( project, client, execution, task, sequence, command) :
-	s.commandStarts( project, client, execution, task, sequence, command)
+def commandStarts( project, client, execution, task, command, commandline) :
+	s.commandStarts( project, client, execution, task, command, commandline)
 
 def commandEnds(project, client, execution,
 		task, command, output, ok, info, stats
