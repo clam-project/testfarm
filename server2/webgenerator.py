@@ -3,6 +3,7 @@ from server import Server
 from server import ArgPrepender
 import deansi
 import datetime
+import os
 
 class ExecutionDetails(object) :
 	template = """\
@@ -419,8 +420,6 @@ class ClientStatsPlot(object) :
 		return self.tuplesToJson(stats)
 
 	def tuplesToJson(self, data) :
-		if not data : return "[\n]\n"
-
 		table = dict((
 			((execution, key), value)
 			for execution, key, value in data))
@@ -502,6 +501,12 @@ class WebGenerator(object) :
 	def _p(self, *args) :
 		return os.path.join(self.target, *args)
 
+	def _mkdir(self, dir) :
+		try : os.mkdir(dir)
+		except OSError :
+			if not os.access(dir, os.F_OK) :
+				raise # not in there
+
 	def copyToProject(self, project, file) :
 		self.write(open(os.path.join("resources",file)).read(), project, file)
 
@@ -514,13 +519,13 @@ class WebGenerator(object) :
 		f.close()
 
 	def generate(self, server) :
-		os.mkdir(self._p())
+		self._mkdir(self._p())
 		for project in server.projects() :
 			self.generateProject(server, project)
 
 	def generateProject(self, server, project) :
 		full = False
-		os.mkdir(self._p(project))
+		self._mkdir(self._p(project))
 		self.copyToProject(project, "style.css")
 		self.copyToProject(project, "testfarm.js")
 		self.copyToProject(project, "plot.js")
@@ -551,6 +556,14 @@ class WebGenerator(object) :
 
 if __name__ == "__main__" :
 
+	import sys
+	if len(sys.argv) == 3 :
+		s = Server(sys.argv[1])
+		w = WebGenerator(sys.argv[2])
+		w.generate(s)
+		sys.exit(0)
+		
+
 	def emulateExecution(client, name, tasks,
 			project='myproject') :
 		s = Server("fixture")
@@ -575,7 +588,6 @@ if __name__ == "__main__" :
 		s.executionEnds(ok)
 
 	print "Simulating client calls"
-	import os
 	s = Server("fixture")
 	os.system("rm -rf fixture")
 	os.system("rm -rf www")

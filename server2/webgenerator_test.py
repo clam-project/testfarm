@@ -1038,18 +1038,13 @@ class StatsPageTests(unittest.TestCase) :
 
 	def test_tuplesToJson_emptyData(self) :
 		data = [
-			("20130301-010101", "param1", 4),
-			("20130301-010101", "param2", 6),
-			("20130301-010101", "param1", 1),
-			("20130301-010101", "param2", 2),
-			("20130301-020202", "param1", 2),
-			("20130301-020202", "param2", 3),
 		]
 
 		w = ClientStatsPlot()
-		result = w.tuplesToJson([])
+		result = w.tuplesToJson(data)
 		self.assertMultiLineEqual(result,
 			"[\n"
+			"[ 'Execution' ],\n"
 			"]\n"
 			)
 
