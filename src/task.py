@@ -18,7 +18,7 @@
 #
 #
 
-import commands, os, time, sys, subprocess, tempfile
+import os, time, sys, subprocess, tempfile
 from listeners import NullResultListener, MultiListener, ConsoleResultListener
 from SvnSandbox import SvnSandbox
 import utils
