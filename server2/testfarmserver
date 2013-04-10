@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 
-from server import Server, ArgPrepender
-from webgenerator import WebGenerator
+from testfarm.server import Server, ArgPrepender
+from testfarm.webgenerator import WebGenerator
 import argparse
 import sys
 import datetime

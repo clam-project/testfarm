@@ -47,7 +47,7 @@ def FunctionReturningNone() :
 	return None
 
 def dummySigner(signature, id, **kwd) :
-	import service
+	from testfarm import service
 	keys = dict(
 		alibaba="sesame, open",
 		)
@@ -55,7 +55,7 @@ def dummySigner(signature, id, **kwd) :
 	expectedKey = keys[id]+'0' #str(len(kwd))
 	if signature != expectedKey : raise service.Forbidden("Bad signature")
 
-import paramexpander
+from testfarm import paramexpander
 @paramexpander.expandfunction(dummySigner)
 def signedFunction0() :
 	return "Ok"
