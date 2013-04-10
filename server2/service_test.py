@@ -43,6 +43,9 @@ def FunctionReturningResponse(request) :
 		content_type='text/plain',
 		)
 
+def FunctionReturningNone() :
+	return None
+
 def dummySigner(signature, id, **kwd) :
 	import service
 	keys = dict(
@@ -52,11 +55,8 @@ def dummySigner(signature, id, **kwd) :
 	expectedKey = keys[id]+'0' #str(len(kwd))
 	if signature != expectedKey : raise service.Forbidden("Bad signature")
 
-def voidFunction() :
-	return None
-
-import spike_expanddecorator
-@spike_expanddecorator.expand_decorator(dummySigner)
+import paramexpander
+@paramexpander.expandfunction(dummySigner)
 def signedFunction0() :
 	return "Ok"
 
@@ -355,6 +355,14 @@ class ServiceTest(unittest.TestCase) :
 			headers = self.headerPlainText(),
 			)
 
+	def test_voidFunction(self) :
+		self.assertContent(
+			"TestingService/FunctionReturningNone",
+			body = "Done",
+			headers = self.headerPlainText(),
+			)
+
+
 	def test_signedFunction0_withNoParameters(self) :
 		self.assertError(
 			"TestingService/signedFunction0",
@@ -376,13 +384,6 @@ class ServiceTest(unittest.TestCase) :
 			"TestingService/signedFunction0?id=alibaba&signature=sesame0",
 			403,
 			body = "Forbidden: Bad signature\n",
-			headers = self.headerPlainText(),
-			)
-
-	def test_voidFunction(self) :
-		self.assertContent(
-			"TestingService/voidFunction",
-			body = "Done",
 			headers = self.headerPlainText(),
 			)
 
