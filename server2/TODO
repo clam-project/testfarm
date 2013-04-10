@@ -1,6 +1,9 @@
++ Means DONE
+- Means TODO
+* Means currently workin at
 + Server logger
-- Web Generator
-	* Execution details
++ Web Generator
+	+ Execution details
 		+ Execution
 			+ Task
 				+ Command
@@ -11,7 +14,7 @@
 		+ Client
 		+ Project
 	+ Project history
-	- Stats plots
+	+ Stats plots
 * Website generation
 	+ Full regeneration
 	- Not regenerating up-to-date pages
