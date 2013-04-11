@@ -8,7 +8,7 @@ datapath='share/testfarm'
 datafiles=[
 #	'testfarm.cron',
 #	'mod_python_testfarm.conf',
-]+ glob("resources/*")
+]
 
 setup(
 	name='testfarm',
@@ -21,7 +21,6 @@ setup(
 	install_requires = [
 		'decorator',
 		],
-	include_package_data = True,
 	packages = find_packages(),
 	package_dir = {
 		'testfarm': 'testfarm',
