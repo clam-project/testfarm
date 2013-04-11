@@ -20,6 +20,10 @@ setup(
 	license = 'GPL v3 or later',
 	install_requires = [
 		'decorator',
+		'webob',
+		'argparse',
+		'wsgi_intercept',
+		'wsgiref',
 		],
 	packages = find_packages(),
 	package_dir = {
