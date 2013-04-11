@@ -662,6 +662,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 		e.taskStarts(1,"First task")
 		if running : return
 		e.taskEnds(1,ok)
+		s.now = datetime.datetime(2013,4,5,6,7,8)
 		e.executionEnds(ok)
 
 	def test_execution_green(self) :

@@ -33,7 +33,7 @@ TODO's
 - Server logger reporter
 
 - Bugs
-	- Execution end time in history page is always 2013-04-50 06:07:08
+	+ Execution end time in history page is always 2013-04-50 06:07:08
 	- Aborted executions are still 'in progress' in history page
 
 - Missing things

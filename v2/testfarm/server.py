@@ -230,13 +230,13 @@ class Server(object) :
 
 	def executionEnds(self,
 			project, client, execution,
-			ok
+			ok,
 			) :
 
 		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
-			"endExecution", ok)
+			"endExecution", ok, "{:%Y%m%d-%H%M%S}".format(self.now))
 
 	def isRunning(self,
 			project, client, execution=None) :
@@ -295,7 +295,7 @@ class Server(object) :
 
 			if tag == "endExecution":
 				summary.running = False
-				summary.ok, = entry[1:]
+				summary.ok, summary.stoptime = entry[1:]
 				continue
 
 			if tag == "startTask":

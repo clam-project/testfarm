@@ -205,6 +205,7 @@ class ServerTest(unittest.TestCase) :
 		s.createProject(project)
 		s.createClient(project, client)
 		e = ArgPrepender(s, project, client, execution)
+		s.now = datetime.datetime(2013,03,01,13,23,14)
 		return e
 
 	def test_executionStarts_whenBadClient(self) :
@@ -273,7 +274,7 @@ class ServerTest(unittest.TestCase) :
 			('startCommand', 1, 1, 'command line options'),
 			('endCommand', 1, 1, 'Output\n', True, 'Info', {}),
 			('endTask', 1, True),
-			('endExecution', True),
+			('endExecution', True, "20130301-132314"),
 			])
 
 

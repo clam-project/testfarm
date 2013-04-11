@@ -246,7 +246,6 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 		except KeyError :
 			briefDescription = "No brief description"
 
-		stoptime = datetime.datetime(2013,4,5,6,7,8)
 		starttime = datetime.datetime.strptime(
 			data.starttime, "%Y%m%d-%H%M%S")
 		status = "running" if data.running else "stable" if data.ok else "broken"
@@ -255,7 +254,8 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 			if data.running else
 			"<div><b>Finished:</b> {stoptime:%Y/%m/%d %H:%M:%S}</div>\n"
 			.format(
-				stoptime = stoptime,
+				stoptime = datetime.datetime.strptime(
+					data.stoptime, "%Y%m%d-%H%M%S"),
 				)
 			)
 			
