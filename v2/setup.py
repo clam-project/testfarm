@@ -27,7 +27,9 @@ setup(
 		'testfarm': 'testfarm',
 #		'testfarm_indicator': 'indicator',
 		},
-	data_files=[ ( datapath, datafiles ), ],
+	data_files=[
+		('resources', glob('resources/*' )),
+		],
 	test_suite = "runtest",
 	scripts = [
 		"testfarmserver",

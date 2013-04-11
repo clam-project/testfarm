@@ -510,12 +510,10 @@ class WebGenerator(object) :
 				raise # not in there
 
 	def copyToProject(self, project, file) :
-#		self.write(open(os.path.join("resources",file)).read(), project, file)
 		basepath = pkg_resources.Requirement.parse('testfarm')
-		print basepath
 		content = pkg_resources.resource_string(
 			basepath,
-			os.path.join('share','testfarm',file))
+			os.path.join('resources',file))
 		self.write(content, project, file)
 
 	def write(self, content, *args) :
