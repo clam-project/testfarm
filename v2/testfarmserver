@@ -48,6 +48,9 @@ def f_addproject(args) :
 	sys.exit(0)
 
 def f_addclient(args) :
+	print (
+		"Creating client '{client}' within project '{project}' at server path '{serverpath}'."
+		.format(**vars(args)))
 	s = Server(args.serverpath)
 	s.createClient(args.project, args.client)
 	sys.exit(0)
@@ -147,7 +150,8 @@ sub = subparsers.add_parser(
 	'addproject',
 	help="Adds a project to manage to the testfarm server")
 sub.set_defaults(func = f_addproject)
-sub.add_argument('project')
+sub.add_argument('serverpath', help=serverpathhelp)
+sub.add_argument('project', help=projecthelp)
 
 
 sub = subparsers.add_parser(
@@ -172,7 +176,7 @@ sub = subparsers.add_parser(
 	help="Shows/sets metadata for project or client")
 sub.set_defaults(func = f_meta)
 sub.add_argument('serverpath', help=serverpathhelp)
-sub.add_argument('project')
+sub.add_argument('project', help=projecthelp)
 sub.add_argument('client',
 	help = "If not specified, the command refers to project's metadata",
 	nargs="?")
@@ -191,7 +195,7 @@ sub = subparsers.add_parser(
 	)
 sub.set_defaults(func = f_fakerun)
 sub.add_argument('serverpath', help=serverpathhelp)
-sub.add_argument('project')
+sub.add_argument('project', help=projecthelp)
 sub.add_argument('client')
 sub.add_argument('execution', nargs='?')
 sub.add_argument('tasktemplate', nargs='?',
