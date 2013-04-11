@@ -492,6 +492,8 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 </html>
 """
 
+import pkg_resources
+
 # TODO: Untested
 class WebGenerator(object) :
 	def __init__(self, target) :
@@ -508,7 +510,13 @@ class WebGenerator(object) :
 				raise # not in there
 
 	def copyToProject(self, project, file) :
-		self.write(open(os.path.join("resources",file)).read(), project, file)
+#		self.write(open(os.path.join("resources",file)).read(), project, file)
+		basepath = pkg_resources.Requirement.parse('testfarm')
+		print basepath
+		content = pkg_resources.resource_string(
+			basepath,
+			os.path.join('share','testfarm',file))
+		self.write(content, project, file)
 
 	def write(self, content, *args) :
 		filename = self._p(*args)

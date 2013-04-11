@@ -2,7 +2,7 @@
 
 import os.path
 from glob import glob
-from distutils.core import setup
+from setuptools import setup, find_packages
 
 datapath='share/testfarm'
 datafiles=[
@@ -12,21 +12,23 @@ datafiles=[
 
 setup(
 	name='testfarm',
-	version='2.0',
+	version='2.0-dev',
 	description = 'Testfarm, a continuous integration tool',
 	url = 'http://github.com/clam-project/testfarm/',
 	author = 'CLAM Project',
 	author_email='info@clam-project.org',
 	license = 'GPL v3 or later',
-	packages = [
-		'testfarm',
-#		'testfarm_indicator',
+	install_requires = [
+		'decorator',
 		],
+	include_package_data = True,
+	packages = find_packages(),
 	package_dir = {
 		'testfarm': 'testfarm',
 #		'testfarm_indicator': 'indicator',
 		},
 	data_files=[ ( datapath, datafiles ), ],
+	test_suite = "runtest",
 	scripts = [
 		"testfarmserver",
 		],
