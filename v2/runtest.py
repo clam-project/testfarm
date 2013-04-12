@@ -7,6 +7,7 @@ from testfarm.service_test import *
 from testfarm.paramexpander_test import *
 from testfarm.command_test import *
 from testfarm.reporter_test import *
+from testfarm.client_test import *
 
 
 if __name__ == '__main__' :
