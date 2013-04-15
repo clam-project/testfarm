@@ -67,6 +67,7 @@ import unittest
 import urllib2
 import HttpFormPost
 import os
+import sys
 
 class ServiceTest(unittest.TestCase) :
 
@@ -82,6 +83,7 @@ class ServiceTest(unittest.TestCase) :
 		def createApp() : return self.app
 		wsgi_intercept.urllib2_intercept.install_opener()
 		wsgi_intercept.add_wsgi_intercept('myhost', 80, createApp)
+		sys.path.append(os.getcwd())
 
 
 	def tearDown(self) :
@@ -89,6 +91,7 @@ class ServiceTest(unittest.TestCase) :
 		os.unlink("TestingService.py")
 		if os.path.exists("TestingService.pyc") :
 			os.unlink("TestingService.pyc")
+		sys.path.remove(os.getcwd())
 
 	def request(self, query, postdata=None) :
 		body = None
