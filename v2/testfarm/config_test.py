@@ -113,7 +113,7 @@ class ConfigTest(unittest.TestCase) :
 		self.assertEqual(c.var1, 2)
 		self.assertEqual(c.var2, 4)
 
-	def test_load_subConfig(self) :
+	def test_load_subConfigAsClass(self) :
 		self.writeFile("fixtureconfig",
 			"var1 = 2\n"
 			"class subvar :\n"
@@ -124,6 +124,69 @@ class ConfigTest(unittest.TestCase) :
 		c.load("fixtureconfig")
 		self.assertEqual(c.var1, 2)
 		self.assertEqual(c.subvar.var1, 'value')
+
+	def test_load_subConfigAsConfig(self) :
+		self.writeFile("fixtureconfig",
+			"var1 = 2\n"
+			"subvar = Config()\n"
+			"subvar.var1 = 'value'\n"
+			)
+		c = Config(var1 = 3, var2=4)
+		c.subvar = Config()
+		c.load("fixtureconfig")
+		self.assertEqual(c.var1, 2)
+		self.assertEqual(c.subvar.var1, 'value')
+
+	def test_dumps(self) :
+		c = Config(var1 =1, var2="2")
+		self.assertMultiLineEqual(c.dumps(),
+			"var1 = 1\n"
+			"var2 = '2'\n"
+		)
+
+	def test_dumps_subconfig(self) :
+		c = Config(var1 =1, var2="2",
+			sub1 = dict(
+				var1 = "value",
+			))
+		
+		self.assertMultiLineEqual(c.dumps(),
+			"sub1 = Config()\n"
+			"sub1.var1 = 'value'\n"
+			"var1 = 1\n"
+			"var2 = '2'\n"
+		)
+
+	def test_dumps_subsubconfig(self) :
+		c = Config(var1 =1, var2="2",
+			var3 = dict(
+				var31 = dict(
+					var311 = "value",
+			)))
+		
+		self.assertMultiLineEqual(c.dumps(),
+			"var1 = 1\n"
+			"var2 = '2'\n"
+			"var3 = Config()\n"
+			"var3.var31 = Config()\n"
+			"var3.var31.var311 = 'value'\n"
+		)
+
+	def test_dumps_subClassStyle(self) :
+		c = Config(var1 =1, var2="2",
+			var3 = dict(
+				var31 = dict(
+					var311 = "value",
+			)))
+		
+		self.assertMultiLineEqual(c.dumps(classStyle=True),
+			"var1 = 1\n"
+			"var2 = '2'\n"
+			"class var3 :\n"
+			"	class var31 :\n"
+			"		var311 = 'value'\n"
+		)
+		
 
 
 

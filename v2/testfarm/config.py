@@ -11,24 +11,48 @@ def loadDictFile(dictfile) :
 class Config(object) :
 
 	def __init__(self, **kwds) :
-		self._vars = kwds
-		vars(self).update(kwds)
+		self.__dict__['_vars'] = kwds
 
 	def __contains__(self, key) :
-		return key in vars(self)
+		return key in self._vars
 
 	def __setattr__(self, key, value) :
-		vars(self)[key] = value
+		if key in self.__dict__ :
+			return super(object, self).__setattr__(key,value)
 		self._vars[key] = value
 
+	def __getattr__(self, key) :
+		try :
+			return self._vars[key]
+		except KeyError as e:
+			raise AttributeError("'Config' object has no attribute '{}'"
+				.format(key))
+
 	def subst(self, string) :
-		return string.format(**vars(self))
+		return string.format(**self._vars)
 
 	def load(self, filename) :
 		loaded = loadDictFile(filename)
-		vars(self).update(loaded)
 		self._vars.update(loaded)
 
+	def dumps(self, classStyle=False) :
+		def dumpSubConfigClassStyle(key, value, prefix) :
+			subprefix = prefix + "\t"
+			subline = "{}class {} :\n".format(prefix, key)
+			return subline + "".join(dumpdict(value, subprefix))
+		def dumpSubConfig(key, value, prefix) :
+			subprefix = "{}{}.".format(prefix,key)
+			subline = "{}{} = Config()\n".format(prefix, key)
+			return subline + "".join(dumpdict(value, subprefix))
+		if classStyle : dumpSubConfig = dumpSubConfigClassStyle
+		def dumpdict(values, prefix='') :
+			return [
+				"{}{} = {!r}\n".format(prefix, key, value)
+				if not isinstance(value, dict) else
+				dumpSubConfig(key, value, prefix)
+				for key, value in sorted(values.iteritems()) ]
+
+		return "".join(dumpdict(self._vars))
 
 
 
