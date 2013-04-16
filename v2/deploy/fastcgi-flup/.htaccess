@@ -1,0 +1,12 @@
+AddHandler fastcgi-script .fcgi
+Options +FollowSymLinks +ExecCGI
+
+RewriteEngine On
+
+RewriteBase /~vokimon/testfarm/server2/
+RewriteRule ^dispatch\.fcgi/ - [L]
+RewriteRule ^(.*)$ dispatch.fcgi/$1 [L]
+
+RewriteBase /testfarm/
+RewriteRule ^dispatch\.fcgi/ - [L]
+RewriteRule ^(.*)$ dispatch.fcgi/$1 [L]
