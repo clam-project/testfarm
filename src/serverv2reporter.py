@@ -1,6 +1,8 @@
-from server import Server
+import datetime
+from testfarm.server import Server
 
-class ServerReporter(object) :
+class ServerV2Reporter(object) :
+	"Adapter class for old clients to interact with v2 servers"
 
 	def __init__(self, server, project, client) :
 		self.server = server
@@ -21,6 +23,9 @@ class ServerReporter(object) :
 		self.currentTask = task
 
 	def listen_begin_task(self, taskname, snapshot=""):
+		# TODO: what to do with taskname?
+		taskname = "{:%Y%m%d-%H%M%S}".format(
+			datetime.datetime.now())
 		self.tasks.append(taskname)
 		self.server.executionStarts(
 			project = self.project,
@@ -60,7 +65,7 @@ class ServerReporter(object) :
 			command = len(self.commands),
 			output = output,
 			ok = ok,
-			info = info,
+			info = info or None,
 			stats = stats,
 			)
 		self.commands.pop()
@@ -74,20 +79,21 @@ class ServerReporter(object) :
 			client = self.client,
 			execution = self.tasks[-1],
 			task = len(self.subtasks),
-			ok = self.subtaskok, # TODO: ok=True????
+			ok = self.subtaskok,
 			)
-		self.subtasks.pop()
+		self.commands = []
 
 	def listen_end_task(self, taskname, status):
 		assert(self.tasks)
-		assert(taskname == self.tasks[-1])
+#		assert(taskname == self.tasks[-1])
 		self.server.executionEnds(
 			project = self.project,
 			client = self.client,
 			execution = self.tasks[-1],
 			ok = status,
 			)
-		self.tasks.pop()
+		self.commands = []
+		self.subtasks = []
 		self.currentTask = None
 
 	def listen_end_task_gently(self, taskname):
