@@ -30,6 +30,7 @@ class ServerReporter(object) :
 
 	def listen_begin_subtask(self, subtaskname):
 		self.subtasks.append(subtaskname)
+		self.subtaskok = True
 		self.server.taskStarts(
 			project = self.project,
 			client = self.client,
@@ -63,6 +64,7 @@ class ServerReporter(object) :
 			stats = stats,
 			)
 		self.commands.pop()
+		self.subtaskok &= ok
 
 	def listen_end_subtask(self, subtaskname) :
 		assert(self.subtasks)
@@ -72,7 +74,7 @@ class ServerReporter(object) :
 			client = self.client,
 			execution = self.tasks[-1],
 			task = len(self.subtasks),
-			ok = True, # TODO: ok=True????
+			ok = self.subtaskok, # TODO: ok=True????
 			)
 		self.subtasks.pop()
 
