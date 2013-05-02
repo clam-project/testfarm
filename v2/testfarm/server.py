@@ -200,13 +200,13 @@ class Server(object) :
 
 	def commandStarts(self,
 			project, client, execution,
-			task, sequence, command
+			task, command, commandline
 			) :
 
 		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
-			"startCommand", task, sequence, command)
+			"startCommand", task, command, commandline)
 
 	def commandEnds(self,
 			project, client, execution,
