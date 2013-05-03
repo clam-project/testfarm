@@ -2,9 +2,7 @@ from testfarm.server import Server as _Server
 import os as _os
 import ast as _ast
 def _server(request) :
-	print request.environ.keys()
 	_path = request.environ.get("TESTFARM_LOGPATH", "projects")
-	print "PATH", _path
 	return _Server(_path)
 
 api = "2.0"
