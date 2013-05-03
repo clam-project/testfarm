@@ -12,7 +12,7 @@ class RemoteLogger(ServiceProxy) :
 	def clientIdle(self, project, client, minutes) : pass
 
 	@remote
-	def executionStarts(self, project, client, execution) : pass
+	def executionStarts(self, project, client, execution, **kwds) : pass
 
 	@remote
 	def taskStarts(self, project, client, execution, task, description) : pass
