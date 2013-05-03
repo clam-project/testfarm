@@ -18,11 +18,9 @@ class RemoteLoggerTest(unittest.TestCase) :
 			self.app = service.Service([
 				"testfarmservice",
 				])
-			print "creating"
 			def application(environ, start_response) :
 				environ.update(TESTFARM_LOGPATH="fixture")
 				result = self.app(environ, start_response)
-				print "result", result
 				return result
 			return application
 
