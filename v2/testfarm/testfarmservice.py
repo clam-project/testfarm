@@ -12,9 +12,9 @@ def clientIdle(request, project, client, minutes) :
 	s = _server(request)
 	s.clientIdle(project, client, int(minutes))
 
-def executionStarts(request, project, client, execution) :
+def executionStarts(request, project, client, execution, **kwds) :
 	s = _server(request)
-	s.executionStarts(project, client, execution)
+	s.executionStarts(project, client, execution, **kwds)
 
 def taskStarts(request, project, client, execution, task, description) :
 	s = _server(request)
