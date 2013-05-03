@@ -213,10 +213,13 @@ class Service :
 	def __call__(self, request, target):
 		""" Handle request """
 		# TODO: Multiple valued
-		params = {
-			k: ast.literal_eval(request.params[k])
-			for k in request.params
-			}
+		params = {}
+		for k in request.params :
+			try :
+				params[k] = ast.literal_eval(request.params[k])
+			except ValueError:
+				raise BadRequest("Badly formated value for parameter '{}'"
+					.format(k))
 		requestVar = "request"
 		paramnames = target.func_code.co_varnames
 		hasRequest = requestVar in paramnames and paramnames.index(requestVar)==0

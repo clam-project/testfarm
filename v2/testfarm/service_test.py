@@ -214,6 +214,14 @@ class ServiceTest(unittest.TestCase) :
 			headers = self.headerPlainText(),
 			)
 
+	def testFunction1_withBadlyFormatedParamValue(self) :
+		self.assertError(
+			"TestingService/Function1?param1=lala",
+			400,
+			"BadRequest: Badly formated value for parameter 'param1'\n",
+			headers = self.headerPlainText(),
+			)
+
 	def testFunction1_usingGet(self) :
 		self.assertContent(
 			"TestingService/Function1?param1='value1'",
