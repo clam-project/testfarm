@@ -6,11 +6,17 @@ import HttpFormPost
 import sys
 import decorator
 from functools import wraps
+import inspect
 
 def remote(f) :
 	@wraps(f)
-	def wrapper(self, **kwds) :
-		f(self, **kwds)
+	def wrapper(self, *args, **kwds) :
+		f(self, *args, **kwds) # This just checks the signature
+		kwds.update({
+			name: arg
+			for arg, name
+			in zip(args, inspect.getargspec(f).args[1:])
+			})
 		return self.callRemotely(f.__name__, **kwds)
 	return wrapper
 	

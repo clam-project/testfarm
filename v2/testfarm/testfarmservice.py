@@ -12,19 +12,19 @@ def clientIdle(request, project, client, minutes) :
 	s = _server(request)
 	s.clientIdle(project, client, int(minutes))
 
-def executionStarts( project, client, execution) :
+def executionStarts(request, project, client, execution) :
 	s = _server(request)
-	s.executionStars(project, client, execution)
+	s.executionStarts(project, client, execution)
 
-def taskStarts( project, client, execution, task, description) :
+def taskStarts(request, project, client, execution, task, description) :
 	s = _server(request)
 	s.taskStarts(project, client, execution, task, description)
 
-def commandStarts( project, client, execution, task, command, commandline) :
+def commandStarts(request, project, client, execution, task, command, commandline) :
 	s = _server(request)
 	s.commandStarts( project, client, execution, task, command, commandline)
 
-def commandEnds(project, client, execution,
+def commandEnds(request, project, client, execution,
 		task, command, output, ok, info, stats
 		) :
 	s = _server(request)
@@ -32,11 +32,11 @@ def commandEnds(project, client, execution,
 		task, command, output, ok, info, stats
 		)
 
-def taskEnds( project, client, execution, task, ok) :
+def taskEnds(request, project, client, execution, task, ok) :
 	s = _server(request)
 	s.taskEnds( project, client, execution, task, ok)
 
-def executionEnds( project, client, execution, ok) :
+def executionEnds(request, project, client, execution, ok) :
 	s = _server(request)
 	s.executionEnds( project, client, execution, ok)
 

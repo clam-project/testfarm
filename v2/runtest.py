@@ -9,6 +9,8 @@ from testfarm.command_test import *
 from testfarm.reporter_test import *
 from testfarm.client_test import *
 from testfarm.config_test import *
+from testfarm.serviceproxy_test import *
+from testfarm.remotelogger_test import *
 
 
 if __name__ == '__main__' :
