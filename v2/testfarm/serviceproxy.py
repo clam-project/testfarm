@@ -5,7 +5,15 @@ import urlparse
 import HttpFormPost
 import sys
 import decorator
+from functools import wraps
 
+def remote(f) :
+	@wraps(f)
+	def wrapper(self, **kwds) :
+		f(self, **kwds)
+		return self.callRemotely(f.__name__, **kwds)
+	return wrapper
+	
 class ServiceProxy(object) :
 	def __init__(self, baseUrl) :
 		self.baseUrl = baseUrl

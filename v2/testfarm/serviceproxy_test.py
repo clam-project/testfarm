@@ -6,6 +6,7 @@ import urllib2
 import HttpFormPost
 import os
 from serviceproxy import ServiceProxy
+from serviceproxy import remote
 import webob
 
 class ServiceProxyTest(unittest.TestCase) :
@@ -80,6 +81,28 @@ class ServiceProxyTest(unittest.TestCase) :
 			self.assertEqual(e.read(), "Message")
 			self.assertEqual(e.getcode(), 500)
 
+	class MyModel(ServiceProxy) :
+		def __init__(self, url) :
+			super(ServiceProxyTest.MyModel,self).__init__(url)
+		@remote
+		def callme(self, a, b) : pass
+		
+	def test_remote(self) :
+		p = ServiceProxyTest.MyModel("http://myhost:80")
+
+		p.callme(a="boo", b="foo")
+
+		self.assertEqual(self.query.path,'/callme')
+		self.assertEqual(self.query.params,dict(a='boo', b='foo'))
+
+	def test_remote_wrongParams(self) :
+		p = ServiceProxyTest.MyModel("http://myhost:80")
+		try :
+			p.callme(a="boo", c="foo")
+			self.fail("exception expected")
+		except TypeError as e :
+			self.assertEqual(e.message,
+				"callme() got an unexpected keyword argument 'c'")
 
 
 if __name__=="__main__" :
