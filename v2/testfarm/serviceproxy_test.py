@@ -63,6 +63,13 @@ class ServiceProxyTest(unittest.TestCase) :
 		result = p.callRemotely("service")
 		self.assertEqual(result, "Hola")
 
+	def test_callRemotely_withIntArgs(self) :
+		p = ServiceProxy("http://myhost:80")
+		p.callRemotely("service", a=1)
+
+		self.assertEqual(self.query.path,'/service')
+		self.assertEqual(self.query.params,dict(a='1'))
+
 	def test_callRemotely_badHost(self) :
 		p = ServiceProxy("http://badhost:80")
 		try :

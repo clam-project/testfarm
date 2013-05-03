@@ -46,6 +46,7 @@ class ServiceProxy(object) :
 		"""
 
 	def callRemotely(self, serviceName, **fields) :
+		fields = {k:str(v) for k,v in fields.iteritems()}
 		content_type, body = HttpFormPost.encode_multipart_formdata_dictionary(fields)
 		headers = {
 			'Content-Type': content_type,
