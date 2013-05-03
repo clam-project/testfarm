@@ -121,7 +121,7 @@ class Server(object) :
 		filename = self._p(project, client, "stats")
 		f = open(filename, "a")
 		for key, value in sorted(stats.iteritems()) :
-			f.write(repr( (execution, key, value))+",")
+			f.write(repr( (execution, key, value))+",\n")
 		f.close()
 
 	def clientStats(self, project, client) :
