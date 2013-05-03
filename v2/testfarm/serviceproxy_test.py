@@ -6,8 +6,10 @@ import urllib2
 import HttpFormPost
 import os
 from serviceproxy import ServiceProxy
+from serviceproxy import RemoteError
 from serviceproxy import remote
 import webob
+import ast
 
 class ServiceProxyTest(unittest.TestCase) :
 	def setUp(self) :
@@ -15,9 +17,17 @@ class ServiceProxyTest(unittest.TestCase) :
 		def createApp() :
 			def appStub(request, start_response) :
 				self.query = webob.Request(request)
-				if "error" in self.query.params :
-					message = self.query.params['error']
+				self.params = {
+					k:ast.literal_eval(v)
+					for k,v in self.query.params.items()
+					}
+				if "error" in self.params :
+					message = self.params['error']
 					start_response("500 Internal Server Error", [])
+					return message
+				if "notfound" in self.params :
+					message = self.params['notfound']
+					start_response("404 Not found", [])
 					return message
 				return "Hola"
 			return appStub
@@ -49,14 +59,14 @@ class ServiceProxyTest(unittest.TestCase) :
 
 		self.assertEqual(self.query.path,'/service')
 		self.assertEqual(self.query.method,'POST')
-		self.assertEqual(self.query.params,dict(a='boo'))
+		self.assertEqual(self.params,dict(a='boo'))
 
 	def test_callRemotely_withArgs(self) :
 		p = ServiceProxy("http://myhost:80")
 		p.callRemotely("service", a="boo", b="foo")
 
 		self.assertEqual(self.query.path,'/service')
-		self.assertEqual(self.query.params,dict(a='boo', b='foo'))
+		self.assertEqual(self.params,dict(a='boo', b='foo'))
 
 	def test_callRemotely_returnsText(self) :
 		p = ServiceProxy("http://myhost:80")
@@ -68,7 +78,7 @@ class ServiceProxyTest(unittest.TestCase) :
 		p.callRemotely("service", a=1)
 
 		self.assertEqual(self.query.path,'/service')
-		self.assertEqual(self.query.params,dict(a='1'))
+		self.assertEqual(self.params,dict(a=1))
 
 	def test_callRemotely_badHost(self) :
 		p = ServiceProxy("http://badhost:80")
@@ -88,21 +98,41 @@ class ServiceProxyTest(unittest.TestCase) :
 			self.assertEqual(e.read(), "Message")
 			self.assertEqual(e.getcode(), 500)
 
+	def test_callRemotely_notFoundError(self) :
+		p = ServiceProxy("http://myhost")
+		try :
+			p.callRemotely("service", notfound="Message")
+			self.fail("Exception expected")
+		except urllib2.HTTPError as e :
+			self.assertEqual(e.reason, "Not found")
+			self.assertEqual(e.read(), "Message")
+			self.assertEqual(e.getcode(), 404)
+
+	def test_callRemotely_internalError(self) :
+		p = ServiceProxy("http://myhost:80")
+		try :
+			p.callRemotely("service", error="Message")
+			self.fail("Exception expected")
+		except RemoteError as e :
+			self.assertEqual(e.message, "Message")
+
+	# TODO Remote errors providing more information
+
 	class MyModel(ServiceProxy) :
 		def __init__(self, url) :
 			super(ServiceProxyTest.MyModel,self).__init__(url)
 		@remote
 		def callme(self, a, b) : pass
 		
-	def test_remote(self) :
+	def test_remoteDecorator(self) :
 		p = ServiceProxyTest.MyModel("http://myhost:80")
 
 		p.callme(a="boo", b="foo")
 
 		self.assertEqual(self.query.path,'/callme')
-		self.assertEqual(self.query.params,dict(a='boo', b='foo'))
+		self.assertEqual(self.params,dict(a='boo', b='foo'))
 
-	def test_remote_wrongParams(self) :
+	def test_remoteDecorator_wrongParams(self) :
 		p = ServiceProxyTest.MyModel("http://myhost:80")
 		try :
 			p.callme(a="boo", c="foo")

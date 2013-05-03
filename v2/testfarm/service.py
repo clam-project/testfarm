@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import webob
 import sys, os
 import decorator
+import ast
 
 class HttpError(Exception) :
 	def __init__(self, status, message) :
@@ -212,6 +213,10 @@ class Service :
 	def __call__(self, request, target):
 		""" Handle request """
 		# TODO: Multiple valued
+		params = {
+			k: ast.literal_eval(request.params[k])
+			for k in request.params
+			}
 		requestVar = "request"
 		paramnames = target.func_code.co_varnames
 		hasRequest = requestVar in paramnames and paramnames.index(requestVar)==0
@@ -222,25 +227,25 @@ class Service :
 		hasKeyword = target.func_code.co_flags & 0x08
 		missing = [
 			p for p in required
-			if p not in request.params
+			if p not in params
 			]
 		if missing :
 			raise BadRequest("Missing parameters: %s"%(
 				", ".join(missing)))
 		exceed = [
-			p for p in request.params
+			p for p in params
 			if p not in declared 
 			]
-		if hasRequest and requestVar in request.params :
+		if hasRequest and requestVar in params :
 			raise BadRequest("Unavailable parameter: %s"%requestVar)
 		if exceed and not hasKeyword:
 			raise BadRequest("Unavailable parameter: %s"%(
 				", ".join(exceed)))
 
 		if hasRequest :
-			result = target(request=request, **request.params)
+			result = target(request=request, **params)
 		else :
-			result = target(**request.params)
+			result = target(**params)
 
 		if result is None :
 			return webob.Response("Done",

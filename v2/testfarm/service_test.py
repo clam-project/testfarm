@@ -46,6 +46,9 @@ def FunctionReturningResponse(request) :
 def FunctionReturningNone() :
 	return None
 
+def FunctionWithServerError() :
+	nonexistingid
+
 def dummySigner(signature, id, **kwd) :
 	from testfarm import service
 	keys = dict(
@@ -72,6 +75,7 @@ import sys
 class ServiceTest(unittest.TestCase) :
 
 	def setUp(self) :
+		sys.path.insert(0,os.getcwd())
 		source = open("TestingService.py",'w')
 		source.write(_serviceCode)
 		source.close()
@@ -83,7 +87,6 @@ class ServiceTest(unittest.TestCase) :
 		def createApp() : return self.app
 		wsgi_intercept.urllib2_intercept.install_opener()
 		wsgi_intercept.add_wsgi_intercept('myhost', 80, createApp)
-		sys.path.append(os.getcwd())
 
 
 	def tearDown(self) :
@@ -213,14 +216,14 @@ class ServiceTest(unittest.TestCase) :
 
 	def testFunction1_usingGet(self) :
 		self.assertContent(
-			"TestingService/Function1?param1=value1",
+			"TestingService/Function1?param1='value1'",
 			body = 'param1 = value1',
 			headers = self.headerPlainText(),
 			)
 
 	def testFunction1_usingMultipleGet_lastWins(self) :
 		self.assertContent(
-			"TestingService/Function1?param1=value1&param1=value2",
+			"TestingService/Function1?param1='value1'&param1='value2'",
 			body = 'param1 = value2',
 			headers = self.headerPlainText(),
 			)
@@ -228,22 +231,22 @@ class ServiceTest(unittest.TestCase) :
 	def testFunction1_usingPost(self) :
 		self.assertContent(
 			"TestingService/Function1",
-			post = dict(param1='post value'),
+			post = dict(param1='"post value"'),
 			body = 'param1 = post value',
 			headers = self.headerPlainText(),
 			)
 
 	def testFunction1_usingPostAndUri_getWins(self) :
 		self.assertContent(
-			"TestingService/Function1?param1=get",
-			post = dict(param1='post'),
+			"TestingService/Function1?param1='get'",
+			post = dict(param1="'post'"),
 			body = 'param1 = get',
 			headers = self.headerPlainText(),
 			)
 
 	def testFunction0_withParams(self) :
 		self.assertError(
-			"TestingService/Function0?param=value",
+			"TestingService/Function0?param='value'",
 			400,
 			'BadRequest: Unavailable parameter: param\n',
 			headers = self.headerPlainText(),
@@ -265,15 +268,15 @@ class ServiceTest(unittest.TestCase) :
 
 	def testFunctionKeyword_withParams(self) :
 		self.assertContent(
-			"TestingService/FunctionKeyword?a=1&b=2",
-			body = "{u'a': u'1', u'b': u'2'}",
+			"TestingService/FunctionKeyword?a=1&b='2'",
+			body = "{u'a': 1, u'b': '2'}",
 			headers = self.headerPlainText(),
 			)
 
 	def testFunctionPositional(self) :
 		self.assertContent(
-			"TestingService/FunctionPositional?a=1",
-			body = "a = '1'\nargs = ()",
+			"TestingService/FunctionPositional?a='value'",
+			body = "a = 'value'\nargs = ()",
 			headers = self.headerPlainText(),
 			)
 
@@ -287,7 +290,7 @@ class ServiceTest(unittest.TestCase) :
 
 	def testFunctionPositional_withExtraParamNamedLikeThePositional(self) :
 		self.assertError(
-			"TestingService/FunctionPositional?a=1&b=2",
+			"TestingService/FunctionPositional?a='1'&b='2'",
 			code = 400,
 			body = "BadRequest: Unavailable parameter: b\n",
 			headers = self.headerPlainText(),
@@ -376,7 +379,7 @@ class ServiceTest(unittest.TestCase) :
 
 	def test_signedFunction0_withBadId(self) :
 		self.assertError(
-			"TestingService/signedFunction0?id=badId&signature=nevermind",
+			"TestingService/signedFunction0?id='badId'&signature='nevermind'",
 			403,
 			body = "Forbidden: Not such id\n",
 			headers = self.headerPlainText(),
@@ -384,9 +387,17 @@ class ServiceTest(unittest.TestCase) :
 
 	def test_signedFunction0_withBadSignature(self) :
 		self.assertError(
-			"TestingService/signedFunction0?id=alibaba&signature=sesame0",
+			"TestingService/signedFunction0?id='alibaba'&signature='sesame0'",
 			403,
 			body = "Forbidden: Bad signature\n",
+			headers = self.headerPlainText(),
+			)
+
+	def test_serverError(self) :
+		self.assertError(
+			"TestingService/FunctionWithServerError",
+			500,
+			body = "NameError: global name 'nonexistingid' is not defined\n",
 			headers = self.headerPlainText(),
 			)
 

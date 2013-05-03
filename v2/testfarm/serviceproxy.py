@@ -19,6 +19,9 @@ def remote(f) :
 			})
 		return self.callRemotely(f.__name__, **kwds)
 	return wrapper
+
+class RemoteError(Exception) :
+	pass
 	
 class ServiceProxy(object) :
 	def __init__(self, baseUrl) :
@@ -46,7 +49,7 @@ class ServiceProxy(object) :
 		"""
 
 	def callRemotely(self, serviceName, **fields) :
-		fields = {k:str(v) for k,v in fields.iteritems()}
+		fields = {k:repr(v) for k,v in fields.iteritems()}
 		content_type, body = HttpFormPost.encode_multipart_formdata_dictionary(fields)
 		headers = {
 			'Content-Type': content_type,
@@ -54,7 +57,16 @@ class ServiceProxy(object) :
 		}
 		req=urllib2.Request(
 			self.baseUrl+"/"+serviceName, body, headers)
-		return urllib2.urlopen(req).read()
+		try :
+			result = urllib2.urlopen(req).read()
+		except urllib2.HTTPError as e :
+			if e.getcode() == 500 :
+				message = e.read()
+				raise RemoteError(message)
+			raise
+		return result
+
+
 
 
 

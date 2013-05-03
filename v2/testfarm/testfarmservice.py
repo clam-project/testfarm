@@ -1,6 +1,5 @@
 from testfarm.server import Server as _Server
 import os as _os
-import ast as _ast
 def _server(request) :
 	_path = request.environ.get("TESTFARM_LOGPATH", "projects")
 	return _Server(_path)
@@ -13,7 +12,6 @@ def clientIdle(request, project, client, minutes) :
 
 def executionStarts(request, project, client, execution, **kwds) :
 	s = _server(request)
-	kwds = { k:_ast.literal_eval(v) for k,v in kwds }
 	s.executionStarts(project, client, execution, **kwds)
 
 def taskStarts(request, project, client, execution, task, description) :
@@ -28,7 +26,6 @@ def commandEnds(request, project, client, execution,
 		task, command, output, ok, info, stats
 		) :
 	s = _server(request)
-	stats = _ast.literal_eval(stats)
 	s.commandEnds(project, client, execution,
 		task, command, output, ok, info, stats
 		)
