@@ -14,12 +14,12 @@ Eventually, the server generates a set
 of web pages with the results of the clients
 grouped by projects.
 
-This command allows to setup the server file structure
+This command allows to setup the log file structure
 to define clients and projects, to manipulate
 related metadata and to simulate client executions.
 """
 
-from testfarm.server import Server, ArgPrepender
+from testfarm.logger import Logger, ArgPrepender
 from testfarm.webgenerator import WebGenerator
 import argparse
 import sys
@@ -27,36 +27,36 @@ import datetime
 
 def f_generate(args) :
 	print (
-		"Generating websites for server data '{serverpath}' into '{outputdir}'."
+		"Generating websites for logs at '{logpath}' into '{outputdir}'."
 		.format(**vars(args)))
-	s = Server(args.serverpath)
+	s = Logger(args.logpath)
 	w = WebGenerator(args.outputdir)
 	w.generate(s)
 	sys.exit(0)
 
-def f_createserver(args) :
-	s = Server(args.serverpath)
+def f_createlog(args) :
+	s = Logger(args.logpath)
 	s.createServer()
 	sys.exit(0)
 
 def f_addproject(args) :
 	print (
-		"Creating project '{project}' at server path '{serverpath}'."
+		"Creating project '{project}' at log path '{logpath}'."
 		.format(**vars(args)))
-	s = Server(args.serverpath)
+	s = Logger(args.logpath)
 	s.createProject(args.project)
 	sys.exit(0)
 
 def f_addclient(args) :
 	print (
-		"Creating client '{client}' within project '{project}' at server path '{serverpath}'."
+		"Creating client '{client}' within project '{project}' at log path '{logpath}'."
 		.format(**vars(args)))
-	s = Server(args.serverpath)
+	s = Logger(args.logpath)
 	s.createClient(args.project, args.client)
 	sys.exit(0)
 
 def f_meta(args) :
-	s = Server(args.serverpath)
+	s = Logger(args.logpath)
 	if args.client is None :
 		print "Setting metadata for project '{project}':".format(**vars(args))
 		s.setProjectMetadata(args.project, **dict(args.set))
@@ -87,7 +87,7 @@ def f_fakerun(args) :
 		" for client '{client}'"
 		" at project '{project}'"
 		.format(**vars(args)))
-	s = Server(args.serverpath)
+	s = Logger(args.logpath)
 	s = ArgPrepender(s, args.project, args.client, args.execution)
 
 	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
@@ -134,23 +134,23 @@ subparsers = parser.add_subparsers(
 	title='Subcommands',
 	description='For additional help type: %(prog)s SUBCOMMAND --help',
 	)
-serverpathhelp = "The root of the path where the server stores data"
+logpathhelp = "The root of the path where log data is stored"
 projecthelp = "A project holding client reports"
 clienthelp = "A client, a serie of execution reports from the same source and subject"
 
 
 sub = subparsers.add_parser(
 	'init',
-	help="Creates a testfarm server filesystem")
-sub.set_defaults(func = f_createserver)
-sub.add_argument('serverpath', help=serverpathhelp)
+	help="Creates a testfarm log filesystem")
+sub.set_defaults(func = f_createlog)
+sub.add_argument('logpath', help=logpathhelp)
 
 
 sub = subparsers.add_parser(
 	'addproject',
-	help="Adds a project to manage to the testfarm server")
+	help="Adds a project to manage to the testfarm log")
 sub.set_defaults(func = f_addproject)
-sub.add_argument('serverpath', help=serverpathhelp)
+sub.add_argument('logpath', help=logpathhelp)
 sub.add_argument('project', help=projecthelp)
 
 
@@ -158,16 +158,16 @@ sub = subparsers.add_parser(
 	'addclient',
 	help="Adds a client to a given project")
 sub.set_defaults(func = f_addclient)
-sub.add_argument('serverpath', help=serverpathhelp)
+sub.add_argument('logpath', help=logpathhelp)
 sub.add_argument('project', help=projecthelp)
 sub.add_argument('client', help=clienthelp)
 
 
 sub = subparsers.add_parser(
 	'generate',
-	help="Generates the website for a server")
+	help="Generates the website for a log")
 sub.set_defaults(func = f_generate)
-sub.add_argument('serverpath', help=serverpathhelp)
+sub.add_argument('logpath', help=logpathhelp)
 sub.add_argument('outputdir')
 
 
@@ -175,7 +175,7 @@ sub = subparsers.add_parser(
 	'meta',
 	help="Shows/sets metadata for project or client")
 sub.set_defaults(func = f_meta)
-sub.add_argument('serverpath', help=serverpathhelp)
+sub.add_argument('logpath', help=logpathhelp)
 sub.add_argument('project', help=projecthelp)
 sub.add_argument('client',
 	help = "If not specified, the command refers to project's metadata",
@@ -194,7 +194,7 @@ sub = subparsers.add_parser(
 	help="Emulates a fake client execution",
 	)
 sub.set_defaults(func = f_fakerun)
-sub.add_argument('serverpath', help=serverpathhelp)
+sub.add_argument('logpath', help=logpathhelp)
 sub.add_argument('project', help=projecthelp)
 sub.add_argument('client')
 sub.add_argument('execution', nargs='?')
