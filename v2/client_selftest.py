@@ -6,6 +6,7 @@
 
 import os, sys, time
 sys.path.append('%s/testfarm/src' % os.environ['HOME'])
+sys.path.append('%s/testfarm/v2' % os.environ['HOME'])
 from task import *
 from project import Project
 from client import Client
@@ -14,6 +15,7 @@ from utils import loadDictFile
 from mailreporter import MailReporter
 from ircreporter import IrcReporter
 from commands import getoutput
+from GitSandbox import GitSandbox
 
 startTime = -1
 def startTimer():
@@ -24,12 +26,10 @@ def ellapsedTime():
 	return time.time() - startTime
 def countLines( path ):
 	print 'loc for path:', path
-	lines =  getoutput("wc -l $("
-			"find {} -name '*.py' "
-			")"
-			.format(path)
+	lines =  getoutput("wc -l $(find {} -name '*.py')"
+			.format(path.strip())
 			).split('\n')[:-1]
-	return sum(line.strip[0] for line in lines)
+	return sum(int(line.strip()[0]) for line in lines)
 
 localDefinitions = dict(
 	description= 
@@ -81,9 +81,9 @@ clam.add_deployment( [
 ] )
 
 clam.add_subtask('Unit Tests', [
-	'cd %(sandbox)s/clam/CLAM/test'%localDefinitions,
+	'cd %(sandbox)s/testfarm/v2'%localDefinitions,
 	{INFO : lambda x:startTimer() },
-	'./runTests.py',
+	'./runtest.py',
 	{STATS : lambda x:{'exectime_unittests' : ellapsedTime()} },
 ] )
 
