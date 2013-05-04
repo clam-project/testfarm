@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from server import Server, ArgPrepender
+from logger import Logger, ArgPrepender
 from webgenerator import ExecutionDetails
 from webgenerator import JsonSummary
 from webgenerator import ProjectHistory
@@ -89,7 +89,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			stats = {}
 			) :
 		project, client, execution = "myproject", "myclient", "20130301-232425"
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project, client)
@@ -209,7 +209,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			stats = {}
 			) :
 		project, client, execution = "myproject", "myclient", "20130301-232425"
-		s = Server("fixture")
+		s = Logger("fixture")
 		e = ArgPrepender(s, project, client, execution)
 		e.executionStarts(
 			timestamp="2013-03-01 23:24:25",
@@ -256,7 +256,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 			)
 
 	def setUpEmptyClient(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 
 		s.createServer()
 		s.createProject("myproject")
@@ -291,7 +291,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 
 	def executionFixture(self, running = False) :
 		project, client, execution = "myproject", "myclient", "20130301-232425"
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project, client)
@@ -355,7 +355,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 
 	def emptyExecution(self) :
 		project, client, execution = "myproject", "myclient", "20130301-232425"
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project, client)
@@ -374,7 +374,7 @@ class ExecutionDetailsTest(unittest.TestCase) :
 		s = self.emptyExecution()
 
 		w = ExecutionDetails()
-		s = Server("fixture")
+		s = Logger("fixture")
 		content = w.generate(s,"myproject","myclient","20130301-232425")
 		self.assertMultiLineEqual( content,
 			"""\
@@ -421,7 +421,7 @@ class JsonSummaryTest(unittest.TestCase) :
 
 
 	def setUpEmptyClient(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 
 		s.createServer()
 		s.createProject("myproject")
@@ -454,8 +454,8 @@ class JsonSummaryTest(unittest.TestCase) :
 			'		},\n'
 			)
 
-	def setUpExecution(self, server, name, running=False, ok=True) :
-		e = ArgPrepender(server, "myproject", "myclient", name)
+	def setUpExecution(self, logger, name, running=False, ok=True) :
+		e = ArgPrepender(logger, "myproject", "myclient", name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 		e.executionStarts(
@@ -553,7 +553,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			)
 
 	def test_project_noClients(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.setProjectMetadata("myproject",
@@ -574,7 +574,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			)
 
 	def test_project_withClients(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject","myclient")
@@ -639,20 +639,20 @@ class ProjectHistoryTest(unittest.TestCase) :
 		os.system("rm -rf fixture")
 
 	def setUpProject(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		return s
 
 	def setUpClient(self, client) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createClient("myproject", client)
 		s.setClientMetadata("myproject", client, 
 			briefDescription = "brief description",
 			)
 
 	def setUpExecution(self, client, name, ok=True, running=False) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		e = ArgPrepender(s, "myproject", client, name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
@@ -992,7 +992,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 
 
 def setUpEmptyClient(project='myproject', client='myclient', **keyw) :
-	s = Server("fixture")
+	s = Logger("fixture")
 	s.createServer()
 	s.createProject(project)
 	s.createClient(project,client)
@@ -1003,7 +1003,7 @@ def setUpEmptyClient(project='myproject', client='myclient', **keyw) :
 
 def emulateExecution(name, tasks,
 		project='myproject', client='myclient') :
-	s = Server("fixture")
+	s = Logger("fixture")
 	s = ArgPrepender(s, project, client, name)
 	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 		datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))

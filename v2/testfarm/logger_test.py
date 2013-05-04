@@ -1,14 +1,14 @@
 #!/usr/bin/python
 
 import unittest
-from server import Server, ArgPrepender
-from server import ProjectNotFound, BadServerPath, ClientNotFound
+from logger import Logger, ArgPrepender
+from logger import ProjectNotFound, BadServerPath, ClientNotFound
 import os
 import datetime
 
 def emulateExecutionWithStats(self, name, tasks,
 		project='myproject', client='myclient') :
-	s = Server("fixture")
+	s = Logger("fixture")
 	s = ArgPrepender(s, project, client, name)
 	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 		datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
@@ -60,7 +60,7 @@ class ServerTest(unittest.TestCase) :
 				("aproject", "aclient", "anexecution","woo"))
 
 	def test_assertPathOk(self) :
-		s = Server("badpath")
+		s = Logger("badpath")
 		try :
 			s._assertPathOk()
 			self.fail("Exception expected")
@@ -68,7 +68,7 @@ class ServerTest(unittest.TestCase) :
 			self.assertEqual(e.message, "badpath")
 
 	def test_assertProjectOk(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		try :
 			s._assertProjectOk("badproject")
@@ -77,7 +77,7 @@ class ServerTest(unittest.TestCase) :
 			self.assertEqual(e.message, "Project not found 'badproject'")
 
 	def test_createProject(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s._assertProjectOk("myproject")
@@ -86,7 +86,7 @@ class ServerTest(unittest.TestCase) :
 			"{}")
 
 	def test_assertClientOk(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		try :
@@ -96,7 +96,7 @@ class ServerTest(unittest.TestCase) :
 			self.assertEqual(e.message, "Client not found 'badclient'")
 
 	def test_assertClientOk_whenAllOk(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -106,7 +106,7 @@ class ServerTest(unittest.TestCase) :
 			"{}")
 
 	def test_clientStatus_whenStarted(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -114,7 +114,7 @@ class ServerTest(unittest.TestCase) :
 			s.clientStatus("myproject","myclient"), "NotResponding")
 
 	def test_clientStatus_afterIdle(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -123,7 +123,7 @@ class ServerTest(unittest.TestCase) :
 			s.clientStatus("myproject","myclient"), "Idle")
 
 	def test_projectMetadata(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.setProjectMetadata("myproject", 
@@ -134,7 +134,7 @@ class ServerTest(unittest.TestCase) :
 			{'key1': 'value1', 'key2' : [4,3,2]})
 
 	def test_projectMetadata_updates(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.setProjectMetadata("myproject", 
@@ -149,7 +149,7 @@ class ServerTest(unittest.TestCase) :
 			{'key1': 'second', 'key2' : [4,3,2], 'key3' : [7,8,9]})
 
 	def test_clientMetadata(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject","myclient")
@@ -161,7 +161,7 @@ class ServerTest(unittest.TestCase) :
 			{'key1': 'value1', 'key2' : [4,3,2]})
 
 	def test_clientMetadata_updates(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject","myclient")
@@ -177,7 +177,7 @@ class ServerTest(unittest.TestCase) :
 			{'key1': 'second', 'key2' : [4,3,2], 'key3' : [7,8,9]})
 
 	def test_projects(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("project1")
 		s.createProject("project2")
@@ -187,7 +187,7 @@ class ServerTest(unittest.TestCase) :
 			])
 
 	def test_clients(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("project1")
 		s.createClient("project1","client1-1")
@@ -199,8 +199,8 @@ class ServerTest(unittest.TestCase) :
 			'client2-2',
 			])
 
-	def setUpExecution(self, server, project, client, execution) :
-		s = Server(server)
+	def setUpExecution(self, logpath, project, client, execution) :
+		s = Logger(logpath)
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project, client)
@@ -209,7 +209,7 @@ class ServerTest(unittest.TestCase) :
 		return e
 
 	def test_executionStarts_whenBadClient(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		e = ArgPrepender(s, "myproject","badclient","20130301-132313")
@@ -234,7 +234,7 @@ class ServerTest(unittest.TestCase) :
 			))
 
 	def test_executions(self) :
-		s = Server('fixture')
+		s = Logger('fixture')
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject","myclient")
@@ -279,7 +279,7 @@ class ServerTest(unittest.TestCase) :
 
 
 	def test_isRunning_withExecution(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -293,7 +293,7 @@ class ServerTest(unittest.TestCase) :
 			s.isRunning("myproject","myclient","20130301-132313"), True)
 
 	def test_isRunning_withEndedExecution(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -310,7 +310,7 @@ class ServerTest(unittest.TestCase) :
 			s.isRunning("myproject","myclient","20130301-132313"), False)
 
 	def test_isRunning_withClient_noExecutions(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -319,7 +319,7 @@ class ServerTest(unittest.TestCase) :
 			s.isRunning("myproject","myclient"), False)
 
 	def test_isRunning_client_whenExecutionRunning(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -333,7 +333,7 @@ class ServerTest(unittest.TestCase) :
 			s.isRunning("myproject","myclient"), True)
 
 	def test_isRunning_client_whenExecutionEnded(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -350,7 +350,7 @@ class ServerTest(unittest.TestCase) :
 			s.isRunning("myproject","myclient"), False)
 
 	def test_clientStatus_whenRunning(self) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject("myproject")
 		s.createClient("myproject", "myclient")
@@ -545,7 +545,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(command.stats, dict(stat1=3, stat2=19))
 
 	def setUpEmptyClient(self, project='myproject', client='myclient', **keyw) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s.createServer()
 		s.createProject(project)
 		s.createClient(project,client)
@@ -557,7 +557,7 @@ class ServerTest(unittest.TestCase) :
 	def emulateExecution(self, name,
 			ok = True, running = False,
 			project='myproject', client='myclient', **keyw) :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s = ArgPrepender(s, project, client, name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
@@ -688,7 +688,7 @@ class ServerTest(unittest.TestCase) :
 
 	def emulateExecutionWithStats(self, name, tasks,
 			project='myproject', client='myclient') :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s = ArgPrepender(s, project, client, name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))

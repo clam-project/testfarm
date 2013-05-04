@@ -1,6 +1,6 @@
 
-from server import Server
-from server import ArgPrepender
+from logger import Logger
+from logger import ArgPrepender
 import deansi
 import datetime
 import os
@@ -132,9 +132,9 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 				endblock = endblock,
 			)
 
-	def generate(self, server, project, client, execution) :
-		executionSummary = server.execution(project, client, execution)
-		executionInfo = server.executionInfo(project, client, execution)
+	def generate(self, logger, project, client, execution) :
+		executionSummary = logger.execution(project, client, execution)
+		executionInfo = logger.executionInfo(project, client, execution)
 		return self.template.format(
 			project = project,
 			client = client,
@@ -146,8 +146,8 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 
 class JsonSummary(object) :
 
-	def client(self, server, project, client) :
-		data = server.client(project, client)
+	def client(self, logger, project, client) :
+		data = logger.client(project, client)
 		failedTasksBlock = '' if not data.failedTasks else (
 			'			"failedTasks" : [\n' +
 			''.join((
@@ -186,10 +186,10 @@ class JsonSummary(object) :
 				currentTaskBlock = currentTaskBlock,
 			)
 
-	def project(self, server, project) :
+	def project(self, logger, project) :
 		clientsBlock = "".join((
-			self.client(server, project, client)
-			for client in server.clients(project)
+			self.client(logger, project, client)
+			for client in logger.clients(project)
 			))
 		return (
 			'{{'
@@ -200,7 +200,7 @@ class JsonSummary(object) :
 			'	]\n'
 			'}}'
 		).format(
-			now = server.now,
+			now = logger.now,
 			project = project,
 			clientsblock = clientsBlock,
 			)
@@ -235,12 +235,12 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 </body>
 </html>
 """
-	def execution(self, server, project, client, execution) :
-		data = server.execution(project, client, execution)
+	def execution(self, logger, project, client, execution) :
+		data = logger.execution(project, client, execution)
 
 		# TODO: briefDescription was named task_name in old testfarm
 		# TODO: check where to really get it
-		meta = server.clientMetadata(project, client)
+		meta = logger.clientMetadata(project, client)
 		try :
 			briefDescription = meta["briefDescription"]
 		except KeyError :
@@ -294,10 +294,10 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 		return [a for a in reversed(sorted(final.items()))]
 
 
-	def executionTable(self, server, project) :
+	def executionTable(self, logger, project) :
 		clientsExecutions = dict( [
-			( client, server.executions(project, client))
-			for client in server.clients(project) ])
+			( client, logger.executions(project, client))
+			for client in logger.clients(project) ])
 
 		executionsByDay = self.executionsByDay(clientsExecutions)
 		result = [
@@ -311,7 +311,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 			"".join([
 				'<td>\n' +
 				"".join([
-					self.execution(server, project, client, execution)
+					self.execution(logger, project, client, execution)
 					for execution in executions
 					]) + 
 				'</td>\n'
@@ -385,12 +385,12 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 
 
 	# TODO: Untested
-	def generate(self, server, project) :
+	def generate(self, logger, project) :
 		clients = [
-			server.client(project, client)
-			for client in sorted(server.clients(project))
+			logger.client(project, client)
+			for client in sorted(logger.clients(project))
 			]
-		meta = server.projectMetadata(project)
+		meta = logger.projectMetadata(project)
 		return self.template.format(
 			project = project,
 			description = meta.description if "description" in meta else "",
@@ -406,7 +406,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 				'<tr>\n'
 				+ ''.join([ self.clientStats(client) for client in clients ]) +
 				'</tr>'
-				+ self.executionTable(server, project) +
+				+ self.executionTable(logger, project) +
 				'</table>\n'
 				)
 		)
@@ -415,8 +415,8 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 class ClientStatsPlot(object) :
 
 	# TODO: no unit test for this
-	def generate(self, server, project, client) :
-		stats = server.clientStats(project, client)
+	def generate(self, logger, project, client) :
+		stats = logger.clientStats(project, client)
 		return self.tuplesToJson(stats)
 
 	def tuplesToJson(self, data) :
@@ -529,12 +529,12 @@ class WebGenerator(object) :
 		f.write(content)
 		f.close()
 
-	def generate(self, server) :
+	def generate(self, logger) :
 		self._mkdir(self._p())
-		for project in server.projects() :
-			self.generateProject(server, project)
+		for project in logger.projects() :
+			self.generateProject(logger, project)
 
-	def generateProject(self, server, project) :
+	def generateProject(self, logger, project) :
 		full = False
 		self._mkdir(self._p(project))
 		self.copyToProject(project, "style.css")
@@ -543,33 +543,33 @@ class WebGenerator(object) :
 		self.copyToProject(project, "jquery.js")
 		self.copyToProject(project, "summary.html")
 		writer = ExecutionDetails()
-		for client in server.clients(project) :
-			for execution in server.executions(project, client) :
-				self.write(writer.generate(server,project,client,execution),
+		for client in logger.clients(project) :
+			for execution in logger.executions(project, client) :
+				self.write(writer.generate(logger,project,client,execution),
 					project, "details-"+client+"-"+execution+".html")
 
-			self.write(ClientStatsPlot().generate(server,project, client),
+			self.write(ClientStatsPlot().generate(logger,project, client),
 				project, client+"-stats.json")
 			self.write(statsPage.format(client=client),
 				project, client+"-stats.html")
 
 		writer = ProjectHistory()
-		self.write(writer.generate(server, project),
+		self.write(writer.generate(logger, project),
 			project, "history.html")
-		json = JsonSummary().project(server, project)
+		json = JsonSummary().project(logger, project)
 		self.write(json,
 			project,'testfarm-data.js')
 		self.write("callme({})".format(json),
 			project, 'testfarm-data.jsond')
 
-		self.write(writer.generate(server, project),
+		self.write(writer.generate(logger, project),
 			project, "history.html")
 
 if __name__ == "__main__" :
 
 	import sys
 	if len(sys.argv) == 3 :
-		s = Server(sys.argv[1])
+		s = Logger(sys.argv[1])
 		w = WebGenerator(sys.argv[2])
 		w.generate(s)
 		sys.exit(0)
@@ -577,7 +577,7 @@ if __name__ == "__main__" :
 
 	def emulateExecution(client, name, tasks,
 			project='myproject') :
-		s = Server("fixture")
+		s = Logger("fixture")
 		s = ArgPrepender(s, project, client, name)
 		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
@@ -599,7 +599,7 @@ if __name__ == "__main__" :
 		s.executionEnds(ok)
 
 	print "Simulating client calls"
-	s = Server("fixture")
+	s = Logger("fixture")
 	os.system("rm -rf fixture")
 	os.system("rm -rf www")
 	s.createServer()

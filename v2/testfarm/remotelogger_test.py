@@ -7,7 +7,7 @@ import HttpFormPost
 import os
 import sys
 from remotelogger import RemoteLogger
-from server import Server
+from logger import Logger
 
 class RemoteLoggerTest(unittest.TestCase) :
 
@@ -32,7 +32,7 @@ class RemoteLoggerTest(unittest.TestCase) :
 		except Exception, e: 
 			print e
 
-		self.remote = Server("fixture")
+		self.remote = Logger("fixture")
 		self.remote.createServer()
 		self.remote.createProject("myproject")
 		self.remote.createClient("myproject","myclient")

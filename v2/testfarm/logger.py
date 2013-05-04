@@ -51,8 +51,8 @@ class AttributeMap() :
 
 
 
-class Server(object) :
-	"""A server handles information from executions comming
+class Logger(object) :
+	"""A logger handles information from executions comming
 	from several clients for several projects"""
 	fileAccessTrace = []
 
