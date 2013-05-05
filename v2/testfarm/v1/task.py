@@ -76,12 +76,10 @@ class SubTask:
 		"Returns if the subtask is mandatory or not"
 		return self.mandatory
 
-	def do_subtask(self, listener, server_to_push = None, verbose=False): #TODO : Refactor
+	def do_subtask(self, listener, verbose=False): #TODO : Refactor
 		"Executes the subtask and all its commands"
 
 		listener.listen_begin_subtask( self.name )
-		if server_to_push:
-			server_to_push.update_static_html_files()
 		initial_working_dir = os.path.abspath(os.curdir)
 		temp_file = tempfile.NamedTemporaryFile()
 		temp_file_name = temp_file.name
@@ -95,8 +93,6 @@ class SubTask:
 			cmd_with_pwd = cmd + " && %s > '%s'" %(pwd_cmd, temp_file_name)
 			# 2 : Begin command run
 			listener.listen_begin_command( cmd )
-			if server_to_push: #TODO
-				server_to_push.update_static_html_files()
 			output, command_ok = run_command(cmd_with_pwd, verbose=verbose)
 
 			status_ok = status_ok_parser( output ) if status_ok_parser else command_ok
@@ -117,8 +113,6 @@ class SubTask:
 			# 3: End command run
 			os.chdir ( initial_working_dir )
 			listener.listen_end_command( cmd, status_ok, output, info, stats )
-			if server_to_push: #TODO
-				server_to_push.update_static_html_files()
 			if current_dir:
 				os.chdir( current_dir )
 		os.chdir ( initial_working_dir )
@@ -208,7 +202,7 @@ class Task :
 		listener.listen_found_new_commits( True, self.seconds_idle )
 		return True
 
-	def do_subtasks( self, listeners = [ NullResultListener() ], server_to_push = None, verbose=False):
+	def do_subtasks( self, listeners = [ NullResultListener() ], verbose=False):
 		"Executes all subtasks and sends results"
 		listener = MultiListener(listeners)
 		all_ok = True
@@ -237,26 +231,20 @@ class Task :
 			listener.listen_end_subtask(sub_task_name)
 
 		for subtask in self.subtasks :
-			subtask_ok = subtask.do_subtask(listener, server_to_push, verbose=verbose)
+			subtask_ok = subtask.do_subtask(listener, verbose=verbose)
 			all_ok = all_ok and subtask_ok
 			if not subtask_ok and subtask.is_mandatory() : # if it is a failing mandatory task, force the end of repository
 				break
 			if not subtask_ok :
 				failed_subtasks.append(subtask.name) # TODO
-			if server_to_push :
-				server_to_push.update_static_html_files()
 		listener.listen_end_task( self.name, all_ok )
-		if server_to_push :
-			server_to_push.update_static_html_files()
 
 		return all_ok
 
-	def stop_execution_gently(self, listeners = [], server_to_push = None): # TODO : Refactor, only for ServerListener
+	def stop_execution_gently(self, listeners = []): # TODO : Refactor, only for ServerListener
 		"Asks listeners to stop the task execution gently if the execution was aborted by user"
 		listener = MultiListener(listeners)
 		listener.listen_end_task_gently(self.name)
-		if server_to_push :
-			server_to_push.update_static_html_files()
 
 CMD = 1
 INFO = 2

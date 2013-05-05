@@ -20,8 +20,6 @@
 
 
 from task import *
-from serverlistener import ServerListener
-from serverlistenerproxy import ServerListenerProxy
 
 class Runner :
 	"The interface to another modules. It runs a defined script and sends information to listeners."
@@ -41,6 +39,7 @@ class Runner :
 		serverlistener = None # for keyboard interrupt purpose
 
 		if remote_server_url:
+			from serverlistenerproxy import ServerListenerProxy
 			listenerproxy = ServerListenerProxy(
 				client=task.client,
 				service_url=remote_server_url,
@@ -48,14 +47,13 @@ class Runner :
 			)
 			self.listeners.append( listenerproxy )
 		if local_base_dir :
+			from serverlistener import ServerListener
 			serverlistener = ServerListener(
 				client=task.client,
 				logs_base_dir=local_base_dir + "/logs",
 				project=task.project
 			)
 			self.listeners.append( serverlistener )
-
-		server_to_push = None
 
 		if testinglisteners:
 			self.listeners = testinglisteners
@@ -68,17 +66,15 @@ class Runner :
 			print "first_run_always ",first_run_always
 			print "new commits_found ", new_commits_found
 			if first_run_always or new_commits_found :
-				task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+				task.do_subtasks( self.listeners, verbose=verbose )
 
 			while continuous :
 				new_commits_found = task.do_checking_for_new_commits( self.listeners, verbose=verbose )
 				if new_commits_found:
 					time.sleep(2) #avoid having executions with the same time
-					task.do_subtasks( self.listeners, server_to_push = server_to_push, verbose=verbose )
+					task.do_subtasks( self.listeners, verbose=verbose )
 				else:
-					if server_to_push: #update idle time display
-						server_to_push.update_static_html_files()
 					time.sleep( task.seconds_idle )
 		except KeyboardInterrupt :
-			task.stop_execution_gently(self.listeners, server_to_push = server_to_push)
+			task.stop_execution_gently(self.listeners)
 
