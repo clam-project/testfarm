@@ -102,6 +102,6 @@ Runner( clam,
 	first_run_always = forceRun,
 	remote_server_url = 'http://localhost/testfarm/server/testfarmservice',
 #	local_base_dir='~/logs',
-	config,
+	config = config,
 )
 
