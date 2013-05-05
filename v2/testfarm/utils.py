@@ -10,7 +10,7 @@ def loadDictFile(dictfile) :
 	def unclass(aclass) :
 		return {
 			(k, unclass(v) if inspect.isclass(v) else v)
-			for k,v in aclass.__dict__
+			for k,v in aclass.__dict__.iteritems()
 			if not k.startswith("_")
 			}
 	class temp : exec(open(dictfile))
