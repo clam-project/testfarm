@@ -44,6 +44,7 @@ config = dict(
 		'<img src="http://clam-project.org/images/linux_icon.png"/>\n'
 		'<img src="http://clam-project.org/images/ubuntu_icon.png"/>\n',
 	sandbox= os.path.expanduser('~/'),
+	testfarm_page="http://clam-project.org/testfarm.html",
 )
 try :
 	config.update(loadDictFile(os.path.expanduser('~/.config/testfarm/testfarm')))
@@ -98,25 +99,11 @@ clam.add_subtask('Unit Tests', [
 forceRun = len(sys.argv)>1
 print "force Run: ", forceRun
 
-extra_listeners = []
-
-if 'mail_report' in config :
-	extra_listeners.append(
-		MailReporter(
-			testfarm_page="http://clam-project.org/testfarm.html",
-			**config['mail_report']))
-
-if 'irc_report' in config :
-	extra_listeners.append(
-		IrcReporter(
-			testfarm_page="http://clam-project.org/testfarm.html",
-			**config['irc_report']))
-
 Runner( clam, 
 	continuous = False,
 	first_run_always = forceRun,
 	remote_server_url = 'http://localhost/testfarm/server/testfarmservice',
 #	local_base_dir='~/logs',
-	extra_listeners = extra_listeners,
+	config,
 )
 

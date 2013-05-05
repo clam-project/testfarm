@@ -35,6 +35,7 @@ class Runner :
 		verbose = False,
 		testinglisteners = [],
 		extra_listeners = [],
+		config={},
 	) :
 		"Runs a task defined in user's script"
 		self.listeners = [ ConsoleResultListener() ]
@@ -55,6 +56,18 @@ class Runner :
 					task.client.name,
 				)
 			)
+
+		if 'mail_report' in config :
+			self.listeners.append(
+				MailReporter(
+					testfarm_page=config['testfarm_page'],
+					**config['mail_report']))
+
+		if 'irc_report' in config :
+			self.listeners.append(
+				IrcReporter(
+					testfarm_page=config['testfarm_page'],
+					**config['irc_report']))
 
 		if testinglisteners:
 			self.listeners = testinglisteners
