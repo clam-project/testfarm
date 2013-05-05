@@ -52,7 +52,7 @@ class Runner :
 				LoggerV2Reporter(
 					Logger(os.path.expanduser(local_base_dir)),
 					task.project,
-					localDefinitions['name'],
+					task.client,
 				)
 			)
 
