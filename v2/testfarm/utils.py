@@ -3,14 +3,18 @@
 import subprocess
 import sys
 import os
+import inspect
 
 def loadDictFile(dictfile) :
 	""" Returns a dict with the variables defined in a file """
+	def unclass(aclass) :
+		return {
+			(k, unclass(v) if inspect.isclass(v) else v)
+			for k,v in aclass.__dict__
+			if not k.startswith("_")
+			}
 	class temp : exec(open(dictfile))
-	loaded = dict(temp.__dict__)
-	del loaded['__doc__']
-	del loaded['__module__']
-	return loaded
+	return unclass(temp)
 
 def die(message, exitCode=-1) :
 	""" Exits the program by prompting a message using the do-this-or-die idiom. """

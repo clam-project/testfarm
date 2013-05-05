@@ -50,7 +50,7 @@ try :
 	localDefinitions['name'] # ensure that name is defined
 	localDefinitions['description']
 except :
-	print >> sys.stderr, "ERROR: You should create ~/.config/testfarmrc with at least the name and description attributes of your client"
+	print >> sys.stderr, "ERROR: You should create ~/.config/testfarm/testfarm with at least the name and description attributes of your client"
 	raise
 
 localDefinitions['installPath'] = os.path.join(localDefinitions['sandbox'],"local")
@@ -101,22 +101,16 @@ print "force Run: ", forceRun
 extra_listeners = []
 
 if 'mail_report' in localDefinitions :
-	mail_report_args = localDefinitions['mail_report'].__dict__
-	del mail_report_args["__module__"]
-	del mail_report_args["__doc__"]
 	extra_listeners.append(
 		MailReporter(
 			testfarm_page="http://clam-project.org/testfarm.html",
-			**mail_report_args))
+			**localDefinitions['mail_report']))
 
 if 'irc_report' in localDefinitions :
-	irc_report_args = localDefinitions['irc_report'].__dict__
-	del irc_report_args["__module__"]
-	del irc_report_args["__doc__"]
 	extra_listeners.append(
 		IrcReporter(
 			testfarm_page="http://clam-project.org/testfarm.html",
-			**irc_report_args))
+			**localDefinitions['irc_report']))
 
 Runner( clam, 
 	continuous = False,
