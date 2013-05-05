@@ -393,8 +393,8 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 		meta = logger.projectMetadata(project)
 		return self.template.format(
 			project = project,
-			description = meta.description if "description" in meta else "",
-			briefDescription = meta.briefDescription if 'briefDescription' in meta else "",
+			description = meta.get('description',''),
+			briefDescription = meta.get('briefDescription',''),
 			content = (
 				'<table class="execution_history">\n'
 				'<tr>\n'
