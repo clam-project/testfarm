@@ -1,12 +1,14 @@
 #! /usr/bin/python
 
+# this is a testfarm client for testing testfarm itself
+
 # to install as a cron script, use this line in crontab
 # 0,5,10,15,20,25,30,35,40,45,50,55 * * * *    (cd /home/testfarm/testfarm/v2/ && git pull && ./runOnce.py lock ./clam_testfarm_client.py) 2>&1 | cat > /tmp/err_testfarm_clam
 
 
 import os, sys, time
-sys.path.append('%s/testfarm/src' % os.environ['HOME'])
 sys.path.append('%s/testfarm/v2' % os.environ['HOME'])
+sys.path.append('%s/testfarm/src' % os.environ['HOME'])
 from task import *
 from project import Project
 from client import Client
@@ -16,6 +18,7 @@ from mailreporter import MailReporter
 from ircreporter import IrcReporter
 from commands import getoutput
 from GitSandbox import GitSandbox
+import re
 
 startTime = -1
 def startTimer():
@@ -30,6 +33,10 @@ def countLines( path ):
 			.format(path.strip())
 			).split('\n')[:-1]
 	return sum(int(line.strip()[0]) for line in lines)
+def pyunitTestCount(output) :
+	m = re.match(r"Ran (?P<unittests>[0-9]+) in [0-9.]+)s", output)
+	return dict(unittests=m.group("unittests"))
+
 
 localDefinitions = dict(
 	description= 
@@ -60,7 +67,7 @@ client.brief_description = localDefinitions['description']
 clam = Task(
 	project = Project('CLAM','<a href="http://clam-project.org">clam web</a>' ),
 	client = client,
-	task_name='Full Tests' if '--slow-tests' in sys.argv else 'Quick Tests',
+	task_name='Testfarm',
 	)
 
 clam.add_sandbox(GitSandbox(os.path.join(localDefinitions['sandbox'], 'testfarm')))
@@ -83,7 +90,7 @@ clam.add_deployment( [
 clam.add_subtask('Unit Tests', [
 	'cd %(sandbox)s/testfarm/v2'%localDefinitions,
 	{INFO : lambda x:startTimer() },
-	'./runtest.py',
+	{CMD : './runtest.py', STATS : pyunitTestCount, },
 	{STATS : lambda x:{'exectime_unittests' : ellapsedTime()} },
 ] )
 
