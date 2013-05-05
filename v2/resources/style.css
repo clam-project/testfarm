@@ -16,6 +16,10 @@ a:visited {
 	font-weight: bold;
 }
 
+table.execution_history
+{
+	margin: auto;
+}
 table.execution_history td
 {
 	text-align: center;
