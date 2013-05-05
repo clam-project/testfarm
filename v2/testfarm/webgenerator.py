@@ -44,7 +44,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 				content = deansi.deansi(content),
 				expander = "" if content.count("\n") <= 10 else
 					"<script type='text/javascript'>"
-						"togglesize('{}');</script>\n".format(id),
+						"togglesize('{0}');</script>\n".format(id),
 				)
 			)
 	def command(self, command) :
@@ -55,7 +55,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 			"running" if command.running else
 			"ok" if command.ok else "failure")
 
-		id  = "{}_{}".format(command.task, command.id)
+		id  = "{0}_{1}".format(command.task, command.id)
 		# TODO: Compute it!!!!
 
 		return (
@@ -79,7 +79,7 @@ Learn <a href="http://testfarm.sf.net/">about TestFarm</a>.</p>
 					'	<div class="stats">\n'
 					'		<div class="stats_header">Statistics:</div>\n'+
 					"".join([
-						"		<b>{}:</b> {}<br />\n".format(param, value)
+						"		<b>{0}:</b> {1}<br />\n".format(param, value)
 						for param, value in sorted(command.stats.iteritems()) ]) +
 					'	</div>\n'
 					),
@@ -151,13 +151,13 @@ class JsonSummary(object) :
 		failedTasksBlock = '' if not data.failedTasks else (
 			'			"failedTasks" : [\n' +
 			''.join((
-				'				"{}",\n'.format(failedTask[1])
+				'				"{0}",\n'.format(failedTask[1])
 				for failedTask in data.failedTasks
 			)) +
 			'			],\n'
 			)
 		currentTaskBlock = '' if not data.currentTask else (
-			'			"currentTask": "{}",\n'.format(data.currentTask[1])
+			'			"currentTask": "{0}",\n'.format(data.currentTask[1])
 			)
 
 		return (
@@ -429,7 +429,7 @@ class ClientStatsPlot(object) :
 		executions = self.executions(data)
 		def formatedValueOrNul(execution, key) :
 			try:
-				return ', {}'.format(table[execution,key])
+				return ', {0}'.format(table[execution,key])
 			except KeyError:
 				return ', null'
 
@@ -561,7 +561,7 @@ class WebGenerator(object) :
 		json = JsonSummary().project(logger, project)
 		self.write(json,
 			project,'testfarm-data.js')
-		self.write("callme({})".format(json),
+		self.write("callme({0})".format(json),
 			project, 'testfarm-data.jsond')
 
 		self.write(writer.generate(logger, project),
