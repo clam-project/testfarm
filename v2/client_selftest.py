@@ -3,7 +3,7 @@
 # this is a testfarm client for testing testfarm itself
 
 # to install as a cron script, use this line in crontab
-# 0,5,10,15,20,25,30,35,40,45,50,55 * * * *    (cd /home/testfarm/testfarm/v2/ && git pull && ./runOnce.py lock ./clam_testfarm_client.py) 2>&1 | cat > /tmp/err_testfarm_clam
+# 0,5,10,15,20,25,30,35,40,45,50,55 * * * *    (cd /home/testfarm/testfarm/v2/ && git pull && ./runOnce.py lock ./client_selftest.py) 2>&1 | cat > /tmp/err_testfarm_testfarm
 
 
 import os, sys, time
