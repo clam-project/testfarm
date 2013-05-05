@@ -3,11 +3,7 @@ Options +FollowSymLinks +ExecCGI
 
 RewriteEngine On
 
-# change this path to whatever it suits you
-RewriteBase /~vokimon/testfarm/server2/
+RewriteBase /testfarmserver/
 RewriteRule ^dispatch\.fcgi/ - [L]
-RewriteRule ^(.*)$ dispatch.fcgi/$1 [L]
+RewriteRule ^(.*)$ dispatch.fcgi/testfarmservice/$1 [L]
 
-RewriteBase /testfarm/
-RewriteRule ^dispatch\.fcgi/ - [L]
-RewriteRule ^(.*)$ dispatch.fcgi/$1 [L]
