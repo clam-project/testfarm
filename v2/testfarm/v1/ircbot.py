@@ -24,7 +24,7 @@ import socket, SocketServer
 import threading, time
 import Queue
 
-class config
+class config :
 	host="irc.freenode.net"
 	port=6667
 	nick="testfarmbot"
