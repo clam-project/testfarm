@@ -2,14 +2,18 @@
 
 import sys, os
 
-DEBUG   = False
+DEBUG   = True
 ROOT    = os.path.dirname(os.path.abspath(__file__))
-#INTERP  = '/home/dgarcia/env/bin/python'
-INTERP  = '/usr/bin/python'
+ROOT    = '/home/dgarcia/testfarm/v2'
+INTERP  = '/home/dgarcia/testfarmenv/bin/python'
 
-sys.path.insert(1,ROOT)
+# Ensure the interpret we are using is the one we want
 if sys.executable != INTERP:
 	os.execl(INTERP, INTERP, *sys.argv)
+
+# testfarm in the module search path
+sys.path.insert(1,ROOT+'/testfarm')
+sys.path.insert(1,ROOT)
 
 def application(environ, start_response):
 	start_response('200 OK', [('Content-type', 'text/plain')])

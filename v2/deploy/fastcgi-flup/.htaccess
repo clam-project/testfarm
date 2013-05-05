@@ -1,5 +1,4 @@
-AddHandler fastcgi-script .fcgi
-Options +FollowSymLinks +ExecCGI
+Options +ExecCGI
 
 RewriteEngine On
 
