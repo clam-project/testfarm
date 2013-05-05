@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import utils
+import testfarm.utils as utils
 import os.path
 
 def debug(arg) :

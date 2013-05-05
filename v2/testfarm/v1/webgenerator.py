@@ -35,7 +35,7 @@ TODO
 import datetime, os, glob, sys
 import subprocess
 from dirhelpers import *
-import deansi
+import testfarm.deansi
 
 
 header_index = """\

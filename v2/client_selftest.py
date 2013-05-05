@@ -12,7 +12,7 @@ from testfarm.v1.task import Task, CMD, INFO, STATS, CD, STATUS_OK
 from testfarm.v1.project import Project
 from testfarm.v1.client import Client
 from testfarm.v1.runner import Runner
-from testfarm.v1.utils import loadDictFile
+from testfarm.utils import loadDictFile
 from testfarm.v1.mailreporter import MailReporter
 from testfarm.v1.ircreporter import IrcReporter
 from commands import getoutput

@@ -20,8 +20,6 @@
 
 
 from task import *
-from webgenerator import WebGenerator
-from listeners import ConsoleResultListener, MultiListener
 from serverlistener import ServerListener
 from serverlistenerproxy import ServerListenerProxy
 
@@ -56,13 +54,8 @@ class Runner :
 				project=task.project
 			)
 			self.listeners.append( serverlistener )
-			server_to_push = WebGenerator(
-				logs_base_dir=local_base_dir + "/logs",
-				html_base_dir=local_base_dir + "/html",
-				project_name=task.project.name)
 
-		else:
-			server_to_push = None
+		server_to_push = None
 
 		if testinglisteners:
 			self.listeners = testinglisteners

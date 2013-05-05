@@ -20,7 +20,7 @@
 
 import os, time, sys, subprocess, tempfile
 from listeners import NullResultListener, MultiListener, ConsoleResultListener
-import utils
+import testfarm.utils as utils
 
 def is_string( data ):
 	try: # TODO : find another clean way to tho this check
