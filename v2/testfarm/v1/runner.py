@@ -43,16 +43,16 @@ class Runner :
 			self.listeners.append(
 				LoggerV2Reporter(
 					RemoteLogger(remote_server_url),
-					task.project,
-					task.client,
+					task.project.name,
+					task.client.name,
 				)
 			)
 		if local_base_dir :
 			self.listeners.append(
 				LoggerV2Reporter(
 					Logger(os.path.expanduser(local_base_dir)),
-					task.project,
-					task.client,
+					task.project.name,
+					task.client.name,
 				)
 			)
 
