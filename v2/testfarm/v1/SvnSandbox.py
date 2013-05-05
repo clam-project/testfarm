@@ -2,7 +2,7 @@
 
 import xml.etree.cElementTree as ET
 #import xml.etree.ElementTree as ET # Python 2.5
-import utils
+import testfarm.utils as utils
 
 
 class SvnSandbox(object) :

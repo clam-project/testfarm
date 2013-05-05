@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from SvnSandbox import SvnSandbox
-import utils
+import testfarm.utils as utils
 import os
 import unittest
 

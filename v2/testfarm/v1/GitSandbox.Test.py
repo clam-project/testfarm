@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 from GitSandbox import GitSandbox
-import utils
+import testfarm.utils as utils
 import os
 import unittest
 
