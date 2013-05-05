@@ -20,6 +20,9 @@
 
 
 from task import *
+from loggerv2reporter import LoggerV2Reporter
+from testfarm.logger import Logger
+from testfarm.remotelogger import RemoteLogger
 
 class Runner :
 	"The interface to another modules. It runs a defined script and sends information to listeners."
@@ -36,24 +39,22 @@ class Runner :
 		"Runs a task defined in user's script"
 		self.listeners = [ ConsoleResultListener() ]
 
-		serverlistener = None # for keyboard interrupt purpose
-
 		if remote_server_url:
-			from serverlistenerproxy import ServerListenerProxy
-			listenerproxy = ServerListenerProxy(
-				client=task.client,
-				service_url=remote_server_url,
-				project=task.project
+			self.listeners.append(
+				LoggerV2Reporter(
+					RemoteLogger(remote_server_url),
+					task.project,
+					task.client,
+				)
 			)
-			self.listeners.append( listenerproxy )
 		if local_base_dir :
-			from serverlistener import ServerListener
-			serverlistener = ServerListener(
-				client=task.client,
-				logs_base_dir=local_base_dir + "/logs",
-				project=task.project
+			self.listeners.append(
+				LoggerV2Reporter(
+					Logger(os.path.expanduser(local_base_dir)),
+					task.project,
+					localDefinitions['name'],
+				)
 			)
-			self.listeners.append( serverlistener )
 
 		if testinglisteners:
 			self.listeners = testinglisteners
