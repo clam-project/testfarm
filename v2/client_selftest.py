@@ -29,13 +29,15 @@ def ellapsedTime():
 	return time.time() - startTime
 def countLines( path ):
 	print 'loc for path:', path
-	lines =  getoutput("wc -l $(find {} -name '*.py')"
+	# /dev/null is to be safe when no files match
+	output = getoutput("cat /dev/null $(find {} -name '*.py') | wc -l"
 			.format(path.strip())
-			).split('\n')[:-1]
-	return sum(int(line.strip()[0]) for line in lines)
+			)
+	return int(output)
 def pyunitTestCount(output) :
-	m = re.match(r"Ran (?P<unittests>[0-9]+) in [0-9.]+s", output)
-	return dict(unittests=m.group("unittests"))
+	m = re.search(r"Ran (?P<unittests>[0-9]+) tests", output)
+	if m is None : return {}
+	return dict(unittests=int(m.group("unittests")))
 
 
 localDefinitions = dict(
