@@ -221,10 +221,9 @@ class ProjectHistory(object) :
 <script language="javascript" type="text/javascript" src="plot.js"></script>
 </head>
 
-<body>
+<body class='history_page'>
 <div id="theLayer" class="layer"></div>
-<h1>testfarm for project <a>{project}
-<span class='tooltip'>{description}</span></a>
+<h1>TestFarm: Client history for project <a>{project}<span class='tooltip'>{description}</span></a>
 <span class='description'>{briefDescription}</span>
 </h1>
 {content}
