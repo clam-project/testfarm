@@ -34,7 +34,7 @@ def countLines( path ):
 			).split('\n')[:-1]
 	return sum(int(line.strip()[0]) for line in lines)
 def pyunitTestCount(output) :
-	m = re.match(r"Ran (?P<unittests>[0-9]+) in [0-9.]+)s", output)
+	m = re.match(r"Ran (?P<unittests>[0-9]+) in [0-9.]+s", output)
 	return dict(unittests=m.group("unittests"))
 
 
