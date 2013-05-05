@@ -213,7 +213,7 @@ class ProjectHistory(object) :
 <head>
 <meta charset="utf-8">
 <meta http-equiv="refresh" content="120">
-<title>Testfarm History for project {project} </title>
+<title>Testfarm: History for project {project} </title>
 <link href="style.css" rel="stylesheet" type="text/css">
 <script language="javascript" type="text/javascript" src="testfarm.js"></script>
 <script language="javascript" type="text/javascript" src="jquery.js"></script>
@@ -223,8 +223,11 @@ class ProjectHistory(object) :
 
 <body class='history_page'>
 <div id="theLayer" class="layer"></div>
-<h1>TestFarm: Client history for project <a>{project}<span class='tooltip'>{description}</span></a>
+<h1>
+<a>TestFarm: History for project {project}
+<span class='tooltip'>{description}</span>
 <span class='description'>{briefDescription}</span>
+</a>
 </h1>
 {content}
 <div class="about">
