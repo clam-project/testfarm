@@ -1,7 +1,7 @@
 from testfarm.logger import Logger as _Logger
 import os as _os
 def _logger(request) :
-	_path = request.environ.get("TESTFARM_LOGPATH", "projects")
+	_path = request.environ.get("TESTFARM_LOGPATH", "testfarmlog")
 	return _Logger(_path)
 
 api = "2.0"
