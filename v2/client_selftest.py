@@ -9,7 +9,7 @@
 import os, sys, time
 sys.path.append('%s/testfarm/v2' % os.environ['HOME'])
 sys.path.append('%s/testfarm/src' % os.environ['HOME'])
-from task import *
+from task import Task
 from project import Project
 from client import Client
 from runner import Runner

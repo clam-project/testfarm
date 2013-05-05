@@ -20,7 +20,6 @@
 
 import os, time, sys, subprocess, tempfile
 from listeners import NullResultListener, MultiListener, ConsoleResultListener
-from SvnSandbox import SvnSandbox
 import utils
 
 def is_string( data ):
@@ -149,6 +148,7 @@ class Task :
 	# Deprecated: use add_sandbox with an XSandbox object
 	def set_repositories_to_keep_state_of(self, sandboxes):
 		#TODO supposes that sandboxes are in ~!!!
+		from SvnSandbox import SvnSandbox
 		for repo in sandboxes :
 			self.sandboxes.append(SvnSandbox("~/%s"%repo))
 
