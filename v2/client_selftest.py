@@ -8,16 +8,15 @@
 
 import os, sys, time
 sys.path.append('%s/testfarm/v2' % os.environ['HOME'])
-sys.path.append('%s/testfarm/src' % os.environ['HOME'])
-from task import Task, CMD, INFO, STATS, CD, STATUS_OK
-from project import Project
-from client import Client
-from runner import Runner
-from utils import loadDictFile
-from mailreporter import MailReporter
-from ircreporter import IrcReporter
+from testfarm.v1.task import Task, CMD, INFO, STATS, CD, STATUS_OK
+from testfarm.v1.project import Project
+from testfarm.v1.client import Client
+from testfarm.v1.runner import Runner
+from testfarm.v1.utils import loadDictFile
+from testfarm.v1.mailreporter import MailReporter
+from testfarm.v1.ircreporter import IrcReporter
 from commands import getoutput
-from GitSandbox import GitSandbox
+from testfarm.v1.GitSandbox import GitSandbox
 import re
 
 startTime = -1
@@ -120,7 +119,7 @@ if 'irc_report' in localDefinitions :
 			**irc_report_args))
 
 try:
-	from loggerv2reporter import LoggerV2Reporter
+	from testfarm.v1.loggerv2reporter import LoggerV2Reporter
 	from testfarm.logger import Logger
 	from testfarm.remotelogger import RemoteLogger
 	extra_listeners.append(
