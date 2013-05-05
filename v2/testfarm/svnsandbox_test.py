@@ -1,13 +1,24 @@
 #!/usr/bin/python
 
-from SvnSandbox import SvnSandbox
+from svnsandbox import SvnSandbox
 import testfarm.utils as utils
 import os
 import unittest
 
+_quiet = True
+
 class SvnSandboxTest(unittest.TestCase) :
+	def o(self, command) :
+		return utils.output(
+			command%self.defs,
+			message="" if _quiet else None,
+			)
 	def x(self, command) :
-		return utils.run(command%self.defs)
+		return utils.run(
+			command%self.defs,
+			message="" if _quiet else None,
+			log = utils.null(),
+			)
 	def inSandbox(self, file) :
 		return os.path.join(self.defs['sandbox'],file)
 	def addFile(self, file, commit=True) :
@@ -26,7 +37,7 @@ class SvnSandboxTest(unittest.TestCase) :
 				self.commitFile(file, "change %i of %s"%(i,file))
 	def pushRevision(self) :
 		self.revisions.append(str(len(self.revisions)))
-		print "REVISIONS", self.revisions
+#		print "REVISIONS", self.revisions
 	def commitFile(self, file, message) :
 		self.x('svn commit %%(sandbox)s/%s -m"%s"'%(file,message))
 		self.x('svn up %(sandbox)s')
@@ -39,8 +50,8 @@ class SvnSandboxTest(unittest.TestCase) :
 		target = int(self.current())-revisions
 		self.x('svn up -r%s %%(sandbox)s'%(target))
 	def current(self) :
-		output = utils.output('svn info -r BASE %(sandbox)s | grep ^Revision: '%self.defs)
-		print "CURRENT",output.split()
+		output = self.o('svn info -r BASE %(sandbox)s | grep ^Revision: ')
+#		print "CURRENT",output.split()
 		return output.split()[-1]
 
 	def setUp(self) :

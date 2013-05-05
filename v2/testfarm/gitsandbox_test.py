@@ -1,15 +1,21 @@
 #!/usr/bin/python
 
-from GitSandbox import GitSandbox
-import testfarm.utils as utils
+from gitsandbox import GitSandbox
+import utils as utils
 import os
 import unittest
+
+_quiet = True
 
 class GitSandboxTest(unittest.TestCase) :
 	def s(self, command) :
 		return self.x("cd %(sandbox)s && " + command)
 	def x(self, command) :
-		return utils.run(command%self.defs)
+		return utils.run(
+			command%self.defs,
+			message="" if _quiet else None,
+			log = utils.null(),
+			)
 	def inSandbox(self, file) :
 		return os.path.join(self.defs['sandbox'],file)
 	def addFile(self, file, commit=True) :

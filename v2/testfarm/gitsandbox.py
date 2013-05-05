@@ -1,41 +1,55 @@
 #!/usr/bin/python
 
-import testfarm.utils as utils
+import utils
 import os.path
 
 def debug(arg) :
 	print "\033[33m",arg,"\033[0m"
 
 class GitSandbox(object) :
-	def __init__(self, sandbox ) :
+	def __init__(self, sandbox, verbose=False ) :
 		self.sandbox = sandbox
+		self._verbose = verbose
+
+	def _run(self, command) :
+		utils.run(
+			command%self.__dict__,
+			message = None if self._verbose else "",
+			log = utils.null(),
+			)
+
+	def _output(self, command) :
+		return utils.output(
+			command%self.__dict__,
+			message = None if self._verbose else "",
+			)
 
 	# TODO: Not unit tested
 	def location(self) :
 		return self.sandbox
 
 	def state(self) :
-		return utils.output("cd %(sandbox)s && git  log --pretty=format:'%%H' -n 1 HEAD"%self.__dict__)
+		return self._output("cd %(sandbox)s && git  log --pretty=format:'%%H' -n 1 HEAD")
 
 	def remoteState(self) :
-		utils.run('cd %(sandbox)s && git fetch'%self.__dict__)
-		return utils.output("cd %(sandbox)s && git  log --pretty=format:'%%H' -n 1 FETCH_HEAD"%self.__dict__)
+		self._run('cd %(sandbox)s && git fetch')
+		return self._output("cd %(sandbox)s && git  log --pretty=format:'%%H' -n 1 FETCH_HEAD")
 
 	def update(self) :
-		utils.run('cd %(sandbox)s && git stash'%self.__dict__)
-		utils.run('cd %(sandbox)s && git pull'%self.__dict__)
-		utils.run('cd %(sandbox)s && git stash pop || true'%self.__dict__)
+		self._run('cd %(sandbox)s && git stash')
+		self._run('cd %(sandbox)s && git pull')
+		self._run('cd %(sandbox)s && git stash pop || true')
 
 	def pendingUpdates(self) :
-		utils.run('cd %(sandbox)s && git fetch'%self.__dict__)
-		output = utils.output('cd %(sandbox)s && git log --pretty=oneline HEAD..FETCH_HEAD'%self.__dict__)
+		self._run('cd %(sandbox)s && git fetch')
+		output = self._output('cd %(sandbox)s && git log --pretty=oneline HEAD..FETCH_HEAD')
 		return [line.split()[0] for line in reversed(output.split('\n')) if line]
 
 	def guilty(self) :
-		utils.run('cd %(sandbox)s && git fetch'%self.__dict__)
-		revisions = utils.output(
-			('cd %(sandbox)s && '%self.__dict__)+
-			'git log --pretty="format:%H\t%an <%ae>\t%s" HEAD...FETCH_HEAD'
+		self._run('cd %(sandbox)s && git fetch')
+		revisions = self._output(
+			'cd %(sandbox)s && '
+			'git log --pretty="format:%%H\t%%an <%%ae>\t%%s" HEAD...FETCH_HEAD'
 			)
 		return [
 			tuple(revision.split('\t',2))
@@ -44,13 +58,13 @@ class GitSandbox(object) :
 			]
 
 	def _pendingChanges(self) :
-		utils.run('cd %(sandbox)s && git fetch'%self.__dict__)
+		self._run('cd %(sandbox)s && git fetch')
 		def listChanges(revisions) :
 			return [
 				line.split('\t')[::-1]
-				for line in utils.output(
-					('cd %(sandbox)s && '%self.__dict__)+
-					'git diff --name-status %s'%revisions
+				for line in self._output(
+					'cd %(sandbox)s && '
+					'git diff --name-status ' + revisions
 					).splitlines()
 				]
 		originChanges = dict(listChanges("HEAD..FETCH_HEAD"))

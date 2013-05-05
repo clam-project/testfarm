@@ -14,7 +14,7 @@ from testfarm.v1.client import Client
 from testfarm.v1.runner import Runner
 from testfarm.utils import loadDictFile
 from commands import getoutput
-from testfarm.v1.GitSandbox import GitSandbox
+from testfarm.gitsandbox import GitSandbox
 import re
 
 startTime = -1

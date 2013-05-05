@@ -41,6 +41,13 @@ class tee :
 		self.f1.write(content)
 		self.f2.write(content)
 
+class null :
+	""" Output file decorator that voids any output. """
+	def flush(self):
+		pass
+	def write(self, content) :
+		pass
+
 class buffer :
 	""" Output file decorator that memorizes the output so you can retrieve it later. """
 	def __init__(self) :
@@ -108,7 +115,9 @@ def run(command, message=None, log=sys.stdout, err=None, fatal=True, cwd=None) :
 	return process.returncode == 0
 
 def output(command, message=None, fatal=True) :
-	print "\033[32m== Output of: %s\033[0m"%(message or command)
+	if message is None : message = "Output of: " + command
+	if message :
+		print "\033[32m== %s\033[0m"%(message)
 	proc = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 	output = proc.communicate()[0]
 	if fatal and proc.returncode : die("Failed, exit code %i"%proc.returncode, proc.returncode)

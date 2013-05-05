@@ -11,6 +11,8 @@ from testfarm.client_test import *
 from testfarm.config_test import *
 from testfarm.serviceproxy_test import *
 from testfarm.remotelogger_test import *
+from testfarm.svnsandbox_test import *
+from testfarm.gitsandbox_test import *
 
 
 if __name__ == '__main__' :

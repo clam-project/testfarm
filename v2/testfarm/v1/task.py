@@ -142,7 +142,7 @@ class Task :
 	# Deprecated: use add_sandbox with an XSandbox object
 	def set_repositories_to_keep_state_of(self, sandboxes):
 		#TODO supposes that sandboxes are in ~!!!
-		from SvnSandbox import SvnSandbox
+		from testfarm.svnsandbox import SvnSandbox
 		for repo in sandboxes :
 			self.sandboxes.append(SvnSandbox("~/%s"%repo))
 
