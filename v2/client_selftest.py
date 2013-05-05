@@ -39,31 +39,31 @@ def pyunitTestCount(output) :
 	return dict(unittests=int(m.group("unittests")))
 
 
-localDefinitions = dict(
+config = dict(
 	description= 
 		'<img src="http://clam-project.org/images/linux_icon.png"/>\n'
 		'<img src="http://clam-project.org/images/ubuntu_icon.png"/>\n',
 	sandbox= os.path.expanduser('~/'),
 )
 try :
-	localDefinitions.update(loadDictFile(os.path.expanduser('~/.config/testfarm/testfarm')))
-	localDefinitions['name'] # ensure that name is defined
-	localDefinitions['description']
+	config.update(loadDictFile(os.path.expanduser('~/.config/testfarm/testfarm')))
+	config['name'] # ensure that name is defined
+	config['description']
 except :
 	print >> sys.stderr, "ERROR: You should create ~/.config/testfarm/testfarm with at least the name and description attributes of your client"
 	raise
 
-localDefinitions['installPath'] = os.path.join(localDefinitions['sandbox'],"local")
-#os.environ['LD_LIBRARY_PATH']='%(installPath)s/lib:/usr/local/lib' %localDefinitions
+config['installPath'] = os.path.join(config['sandbox'],"local")
+#os.environ['LD_LIBRARY_PATH']='%(installPath)s/lib:/usr/local/lib' %config
 #os.environ['PATH']=':'.join([
-#	'%(installPath)s/bin'% localDefinitions,
+#	'%(installPath)s/bin'% config,
 #	os.path.expanduser('~/bin'), # for soxsucks
 #	os.environ['PATH'],
 #	])
-os.environ['PYTHONPATH']='%(installPath)s/lib/python' % localDefinitions
+os.environ['PYTHONPATH']='%(installPath)s/lib/python' % config
 
-client = Client(localDefinitions['name'])
-client.brief_description = localDefinitions['description']
+client = Client(config['name'])
+client.brief_description = config['description']
 
 clam = Task(
 	project = Project('CLAM','<a href="http://clam-project.org">clam web</a>' ),
@@ -71,25 +71,25 @@ clam = Task(
 	task_name='Testfarm',
 	)
 
-clam.add_sandbox(GitSandbox(os.path.join(localDefinitions['sandbox'], 'testfarm')))
+clam.add_sandbox(GitSandbox(os.path.join(config['sandbox'], 'testfarm')))
 
 clam.set_check_for_new_commits(
-	checking_cmd = 'false'%localDefinitions,
+	checking_cmd = 'false'%config,
 	minutes_idle = 15,
 )
 
 clam.add_subtask('count lines of code', [
-	{CMD:'echo %(sandbox)s/testfarm/src'%localDefinitions, STATS: lambda x: {'testfarm_v1_loc': countLines(x) } },
-	{CMD:'echo %(sandbox)s/testfarm/v2'%localDefinitions, STATS: lambda x: {'testfarm_v2_loc': countLines(x) } },
+	{CMD:'echo %(sandbox)s/testfarm/src'%config, STATS: lambda x: {'testfarm_v1_loc': countLines(x) } },
+	{CMD:'echo %(sandbox)s/testfarm/v2'%config, STATS: lambda x: {'testfarm_v2_loc': countLines(x) } },
 ] )
 
 clam.add_deployment( [
-	'cd %(sandbox)s/testfarm/v2'%localDefinitions,
+	'cd %(sandbox)s/testfarm/v2'%config,
 	'rm $(find -name \'*.pyc\')',
 ] )
 
 clam.add_subtask('Unit Tests', [
-	'cd %(sandbox)s/testfarm/v2'%localDefinitions,
+	'cd %(sandbox)s/testfarm/v2'%config,
 	{INFO : lambda x:startTimer() },
 	{CMD : './runtest.py', STATS : pyunitTestCount, },
 	{STATS : lambda x:{'exectime_unittests' : ellapsedTime()} },
@@ -100,17 +100,17 @@ print "force Run: ", forceRun
 
 extra_listeners = []
 
-if 'mail_report' in localDefinitions :
+if 'mail_report' in config :
 	extra_listeners.append(
 		MailReporter(
 			testfarm_page="http://clam-project.org/testfarm.html",
-			**localDefinitions['mail_report']))
+			**config['mail_report']))
 
-if 'irc_report' in localDefinitions :
+if 'irc_report' in config :
 	extra_listeners.append(
 		IrcReporter(
 			testfarm_page="http://clam-project.org/testfarm.html",
-			**localDefinitions['irc_report']))
+			**config['irc_report']))
 
 Runner( clam, 
 	continuous = False,
