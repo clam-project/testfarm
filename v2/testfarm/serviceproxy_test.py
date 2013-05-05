@@ -17,10 +17,10 @@ class ServiceProxyTest(unittest.TestCase) :
 		def createApp() :
 			def appStub(request, start_response) :
 				self.query = webob.Request(request)
-				self.params = {
-					k:ast.literal_eval(v)
+				self.params = dict((
+					(k,ast.literal_eval(v))
 					for k,v in self.query.params.items()
-					}
+					))
 				if "error" in self.params :
 					message = self.params['error']
 					start_response("500 Internal Server Error", [])

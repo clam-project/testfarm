@@ -23,10 +23,10 @@ class Command(object) :
 		output = log.output()
 		if self.ok is not None : ok = self.ok(output, ok)
 		info = None if self.info is None else self.info(output)
-		stats = {
-			stat : retriever(output) if callable(retriever) else retriever
+		stats = dict([
+			(stat, retriever(output) if callable(retriever) else retriever )
 			for stat, retriever in self.stats.iteritems()
-			}
+			])
 
 		return output, ok, info, stats
 

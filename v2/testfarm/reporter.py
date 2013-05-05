@@ -70,16 +70,16 @@ class LogWrapper(object) :
 				"for keyword argument '{repeatedKeys[0]}'"
 				.format(**vars()))
 
-		kwds.update({
-			key : value
+		kwds.update(dict((
+			(key, value)
 			for key, value
 			in zip(fargs, args)
-			}) 
-		params = {
-			key : value
+			))) 
+		params = dict((
+			(key, value)
 			for key, value
 			in zip(fargs[-len(fdef.defaults):], fdef.defaults)
-			} if fdef.defaults else {}
+			)) if fdef.defaults else {}
 		params.update(**kwds)
 		self._calls.append( (
 			f.__name__, params))

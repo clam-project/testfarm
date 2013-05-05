@@ -8,11 +8,11 @@ import inspect
 def loadDictFile(dictfile) :
 	""" Returns a dict with the variables defined in a file """
 	def unclass(aclass) :
-		return {
+		return dict((
 			(k, unclass(v) if inspect.isclass(v) else v)
 			for k,v in aclass.__dict__.iteritems()
 			if not k.startswith("_")
-			}
+			))
 	class temp : exec(open(dictfile))
 	return unclass(temp)
 
