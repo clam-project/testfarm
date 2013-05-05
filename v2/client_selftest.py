@@ -9,7 +9,7 @@
 import os, sys, time
 sys.path.append('%s/testfarm/v2' % os.environ['HOME'])
 sys.path.append('%s/testfarm/src' % os.environ['HOME'])
-from task import Task
+from task import Task, CMD, INFO, STATS, CD, STATUS_OK
 from project import Project
 from client import Client
 from runner import Runner
@@ -119,7 +119,6 @@ if 'irc_report' in localDefinitions :
 			testfarm_page="http://clam-project.org/testfarm.html",
 			**irc_report_args))
 
-print sys.path
 try:
 	from loggerv2reporter import LoggerV2Reporter
 	from testfarm.logger import Logger
