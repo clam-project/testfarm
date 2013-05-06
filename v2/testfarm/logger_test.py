@@ -10,7 +10,7 @@ def emulateExecutionWithStats(self, name, tasks,
 		project='myproject', client='myclient') :
 	s = Logger("fixture")
 	s = ArgPrepender(s, project, client, name)
-	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+	timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 		datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 	s.executionStarts(
 		timestamp=timestamp,
@@ -559,7 +559,7 @@ class ServerTest(unittest.TestCase) :
 			project='myproject', client='myclient', **keyw) :
 		s = Logger("fixture")
 		s = ArgPrepender(s, project, client, name)
-		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 		s.executionStarts(
 			timestamp=timestamp,
@@ -690,7 +690,7 @@ class ServerTest(unittest.TestCase) :
 			project='myproject', client='myclient') :
 		s = Logger("fixture")
 		s = ArgPrepender(s, project, client, name)
-		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 		s.executionStarts(
 			timestamp=timestamp,

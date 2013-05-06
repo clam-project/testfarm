@@ -456,7 +456,7 @@ class JsonSummaryTest(unittest.TestCase) :
 
 	def setUpExecution(self, logger, name, running=False, ok=True) :
 		e = ArgPrepender(logger, "myproject", "myclient", name)
-		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 		e.executionStarts(
 			timestamp= timestamp,
@@ -654,7 +654,7 @@ class ProjectHistoryTest(unittest.TestCase) :
 	def setUpExecution(self, client, name, ok=True, running=False) :
 		s = Logger("fixture")
 		e = ArgPrepender(s, "myproject", client, name)
-		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 		e.executionStarts(
 			timestamp= timestamp,
@@ -1005,7 +1005,7 @@ def emulateExecution(name, tasks,
 		project='myproject', client='myclient') :
 	s = Logger("fixture")
 	s = ArgPrepender(s, project, client, name)
-	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+	timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 		datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 	s.executionStarts(
 		timestamp=timestamp,

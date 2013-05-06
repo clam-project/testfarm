@@ -581,7 +581,7 @@ if __name__ == "__main__" :
 			project='myproject') :
 		s = Logger("fixture")
 		s = ArgPrepender(s, project, client, name)
-		timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+		timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 			datetime.datetime.strptime(name, "%Y%m%d-%H%M%S"))
 		s.executionStarts(
 			timestamp=timestamp,

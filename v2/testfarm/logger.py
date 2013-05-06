@@ -236,7 +236,7 @@ class Logger(object) :
 		self._assertClientOk(project,client)
 		self._log(
 			project, client, execution,
-			"endExecution", ok, "{:%Y%m%d-%H%M%S}".format(self.now))
+			"endExecution", ok, "{0:%Y%m%d-%H%M%S}".format(self.now))
 
 	def isRunning(self,
 			project, client, execution=None) :
