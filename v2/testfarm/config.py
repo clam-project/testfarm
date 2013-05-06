@@ -25,7 +25,7 @@ class Config(object) :
 		try :
 			return self._vars[key]
 		except KeyError as e:
-			raise AttributeError("'Config' object has no attribute '{}'"
+			raise AttributeError("'Config' object has no attribute '{0}'"
 				.format(key))
 
 	def subst(self, string) :
@@ -38,16 +38,16 @@ class Config(object) :
 	def dumps(self, classStyle=False) :
 		def dumpSubConfigClassStyle(key, value, prefix) :
 			subprefix = prefix + "\t"
-			subline = "{}class {} :\n".format(prefix, key)
+			subline = "{0}class {1} :\n".format(prefix, key)
 			return subline + "".join(dumpdict(value, subprefix))
 		def dumpSubConfig(key, value, prefix) :
-			subprefix = "{}{}.".format(prefix,key)
-			subline = "{}{} = Config()\n".format(prefix, key)
+			subprefix = "{0}{1}.".format(prefix,key)
+			subline = "{0}{1} = Config()\n".format(prefix, key)
 			return subline + "".join(dumpdict(value, subprefix))
 		if classStyle : dumpSubConfig = dumpSubConfigClassStyle
 		def dumpdict(values, prefix='') :
 			return [
-				"{}{} = {!r}\n".format(prefix, key, value)
+				"{0}{1} = {2!r}\n".format(prefix, key, value)
 				if not isinstance(value, dict) else
 				dumpSubConfig(key, value, prefix)
 				for key, value in sorted(values.iteritems()) ]

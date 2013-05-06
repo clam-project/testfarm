@@ -39,7 +39,7 @@ def expandfunction(expander) :
 			if var not in foptional]
 			)
 		allCallArgs = keywordArgs(set(gargs+fargs)) + [
-			"**{}".format(keywords) ]
+			"**{0}".format(keywords) ]
 		gcall = allCallArgs if gkeywords else keywordArgs(gargs)
 		fcall = allCallArgs if fkeywords else keywordArgs(fargs)
 		wrapperSource = """\

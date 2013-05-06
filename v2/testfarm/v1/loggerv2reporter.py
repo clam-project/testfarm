@@ -24,7 +24,7 @@ class LoggerV2Reporter(object) :
 
 	def listen_begin_task(self, taskname, snapshot=""):
 		# TODO: what to do with taskname?
-		taskname = "{:%Y%m%d-%H%M%S}".format(
+		taskname = "{0:%Y%m%d-%H%M%S}".format(
 			datetime.datetime.now())
 		self.tasks.append(taskname)
 		self.logger.executionStarts(

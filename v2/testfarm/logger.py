@@ -25,12 +25,12 @@ class BadServerPath(Exception) : pass
 class ProjectNotFound (Exception) :
 	def __init__(self, name) :
 		super(ProjectNotFound, self).__init__(name)
-		self.message = "Project not found '{}'".format(name)
+		self.message = "Project not found '{0}'".format(name)
 
 class ClientNotFound (Exception) :
 	def __init__(self, name) :
 		super(ClientNotFound, self).__init__(name)
-		self.message = "Client not found '{}'".format(name)
+		self.message = "Client not found '{0}'".format(name)
 
 class ArgPrepender(object) :
 	"""Wraps an object so that any method call to the wrapper,

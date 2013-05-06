@@ -27,7 +27,7 @@ def ellapsedTime():
 def countLines( path ):
 	print 'loc for path:', path
 	# /dev/null is to be safe when no files match
-	output = getoutput("cat /dev/null $(find {} -name '*.py') | wc -l"
+	output = getoutput("cat /dev/null $(find {0} -name '*.py') | wc -l"
 			.format(path.strip())
 			)
 	return int(output)
