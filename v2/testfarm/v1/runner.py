@@ -62,6 +62,8 @@ class Runner :
 		if 'mail_report' in config :
 			self.listeners.append(
 				MailReporter(
+					task.project.name,
+					task.client.name,
 					testfarm_page=config['testfarm_page'],
 					**config['mail_report']))
 

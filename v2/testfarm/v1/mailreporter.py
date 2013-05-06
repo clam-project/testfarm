@@ -10,6 +10,32 @@ from email.MIMEText import MIMEText
 from email.Encoders import encode_base64
 from listeners import NullResultListener
 
+"""
+Runner will activate this reporter if you define in
+the configuration something like:
+
+class mail_report :
+	from = 'testfarmaddress@gmail.com'
+	recipients = [
+		'developer1@developland.net',
+		'developer2@developland.net',
+		]
+	server = 'smtp.gmail.com'
+	port = 587
+	user = 'testfarmaddress@gmail.com'
+	password = 'lalala'
+
+If you machine has a sendmail with relay you can simplify it with:
+
+class mail_report :
+	from = 'nobody@yourdomain.com'
+	recipients = [
+		'developer1@developland.net',
+		'developer2@developland.net',
+		]
+
+"""
+
 
 
 # returns true if state changed
@@ -46,17 +72,20 @@ def check_state_changed(color, repositories):
 
 class MailReporter(NullResultListener) :
 	def __init__(self,
+		project,
+		client,
 		recipients,
-		server,
-		username,
-		password,
+		server = 'localhost',
+		username = None,
+		password = None,
 		testfarm_page=None,
-		port=587,
+		port=25,#587,
 		from_email = 'noreply@nodomain.com',
 		from_name = 'Testfarm Report',
 		subject = 'Testfarm is %s',
 		**kwd
 		) :
+		print locals()
 		self.repositories = []
 
 		self.server = server
@@ -99,23 +128,29 @@ class MailReporter(NullResultListener) :
 
 		server = smtplib.SMTP(self.server, self.port)
 		server.set_debuglevel(debug)
+		print locals()
 
 		try:
-			server.ehlo()
-			# If we can encrypt this session, do it
-			if server.has_extn('STARTTLS'):
-				server.starttls()
-				server.ehlo() # re-identify ourselves over TLS connection
-			server.login(self.username, self.password)
+			# if we provided a username, identify
+			if self.username :
+				# If we can encrypt this session, do it
+				server.ehlo()
+				if server.has_extn('STARTTLS'):
+					server.starttls()
+					server.ehlo() # re-identify ourselves over TLS connection
+				server.login(self.username, self.password)
 			recipient_list = [r.strip() for r in self.recipients.split(",") ]
-			smtpresult = server.sendmail(self.from_email, recipient_list, msg.as_string())
-			if not smtpresult : return # ok!
-			for recipient, error in smtpresult.iteritems():
+			smtperrors = server.sendmail(self.from_email, recipient_list, msg.as_string())
+			if not smtperrors : return # ok!
+			for recipient, error in smtperrors.iteritems():
 				print  """Could not delivery mail to: %s, server said: %s %s"""  \
-					% (recip, smtpresult[recip][0], smtpresult[recip][1])
+					% (recip, smtperrors[recip][0], smtperrors[recip][1])
+		except e :
+			print >> sys.stderr, "Error sending mail:", e.message
 
 		finally:
 			server.quit()
+
 
 
 if __name__ == "__main__":

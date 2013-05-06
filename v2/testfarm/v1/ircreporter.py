@@ -4,7 +4,13 @@ from listeners import NullResultListener
 
 class IrcReporter(NullResultListener) :
 	"""This listener sends reports to an ircbot which is listening
-	at the provided address and port."""
+	at the provided address and port.
+	An example of configuration:
+
+	class irc_report :
+		channel = '#mycoolproject'
+		address = 'chat.freenode.net'
+	"""
 
 	def __init__(self,
 			project,
