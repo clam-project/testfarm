@@ -168,17 +168,17 @@ table.tfclients th
 	</td>
 	<td class='tf{{:status}}'>{{statusString status /}}
 		
-		<div class='tfdetails'>{{if failedTasks }}Failed tasks: {{/if}}
-			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
+		<div class='tfdetails'>{{if failedTasks }}Failed tasks:<br />{{/if}}
+			{{each_in failedTasks}}- {{:#data}}<br/>{{/each_in}}
 			<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Details</a>
 		</div>
 	</td>
-	<td>{{formatDate lastupdate /}}</td>
 	<td class='tf{{:doing}}'>{{doingString doing /}}
 		{{if currentTask }}
 		<div class='tfdetails'>Current tasks: {{:currentTask}}</div>
 		{{/if}}
 	</td>
+	<td class='tf{{:doing}}'>{{formatDate lastupdate /}}</td>
 	<td>
 		<a href="{{testfarmUrl /}}history.html" title="Full history">History</a>
 	</td>
