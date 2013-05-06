@@ -437,11 +437,11 @@ class ClientStatsPlot(object) :
 			'[\n'
 			"[ 'Execution'"
 			+ ''.join((
-				', {!r}'.format(key)
+				', {0!r}'.format(key)
 				for key in self.keys(data))) +
 			' ],\n' +
 			''.join((
-				'[ {!r}'.format(execution)
+				'[ {0!r}'.format(execution)
 				+ ''.join((
 					formatedValueOrNul(execution,key)
 					for key in self.keys(data))) + ' ],\n'
