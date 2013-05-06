@@ -64,7 +64,7 @@ def f_meta(args) :
 		print "Setting metadata for client '{client}' at project '{project}':".format(**vars(args))
 		s.setClientMetadata(args.project, args.client, **dict(args.set))
 	for key, value in args.set :
-		print "\t{}: {}".format(key,value)
+		print "\t{0}: {1}".format(key,value)
 	if args.set : sys.exit(0)
 	# get
 	if args.client is None : 
@@ -74,7 +74,7 @@ def f_meta(args) :
 		print "Metadata for client '{client}' at project '{project}':".format(**vars(args))
 		d = s.clientMetadata(args.project, args.client)
 	for key, value in d.iteritems() :
-		print "\t{}: {}".format(key,value)
+		print "\t{0}: {1}".format(key,value)
 	if not d :
 		print "\tNo values stored"
 	sys.exit(0)
