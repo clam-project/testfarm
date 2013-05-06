@@ -100,7 +100,7 @@ print "force Run: ", forceRun
 Runner( clam, 
 	continuous = False,
 	first_run_always = forceRun,
-	remote_server_url = 'http://localhost/testfarm/server/testfarmservice',
+	remote_server_url = 'http://clam-project.org/testfarmserver/',
 #	local_base_dir='~/logs',
 	config = config,
 )
