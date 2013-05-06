@@ -31,7 +31,7 @@ Install TestFarm within the virtualenv
 
 	cd $src
 	git clone git://github.com/clam-project/testfarm.git
-	cd $src/testfarm/v2
+	cd $src/testfarm
 	python setup.py install
 
 Install additional dependencies for flup mode
@@ -92,7 +92,7 @@ Installing server files
 5. Create a link to the fastcgi-flup path:
 
 	cd $webroot
-	ln -sf $src/testfarm/v2/deploy/fastcgi-flup/ testfarmserver
+	ln -sf $src/testfarm/deploy/fastcgi-flup/ testfarmserver
 
 6. Create a link to the generated web:
 

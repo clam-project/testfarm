@@ -3,7 +3,7 @@
 import sys, os
 
 DEBUG   = True
-SERVICEPATH = '/home/clamadm/testfarm/v2/testfarm'
+SERVICEPATH = '/home/clamadm/testfarm/testfarm'
 INTERP  = '/home/clamadm/testfarmenv/bin/python'
 LOGPATH = '/home/clamadm/testfarmlogs/'
 

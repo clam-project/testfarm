@@ -8,8 +8,8 @@ def addIfNotInPath(path) :
 script_dir = os.path.abspath(os.path.dirname(os.path.abspath(__file__))+"/../")
 path, package = os.path.split(script_dir)
 addIfNotInPath(path)
-addIfNotInPath('/home/vokimon/CajitasDeArena/testfarm/v2/')
-addIfNotInPath('/home/vokimon/CajitasDeArena/testfarm/v2/testfarm')
+addIfNotInPath('/home/vokimon/CajitasDeArena/testfarm/')
+addIfNotInPath('/home/vokimon/CajitasDeArena/testfarm/testfarm')
 
 print os.environ
 

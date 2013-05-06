@@ -3,11 +3,11 @@
 # this is a testfarm client for testing testfarm itself
 
 # to install as a cron script, use this line in crontab
-# 0,5,10,15,20,25,30,35,40,45,50,55 * * * *    (cd /home/testfarm/testfarm/v2/ && git pull && ./runonce lock ./client_selftest.py) 2>&1 | cat > /tmp/err_testfarm_testfarm
+# 0,5,10,15,20,25,30,35,40,45,50,55 * * * *    (cd /home/testfarm/testfarm/ && git pull && ./runonce lock ./client_selftest.py) 2>&1 | cat > /tmp/err_testfarm_testfarm
 
 
 import os, sys, time
-sys.path.append('%s/testfarm/v2' % os.environ['HOME'])
+sys.path.append('%s/testfarm/' % os.environ['HOME'])
 from testfarm.v1.task import Task, CMD, INFO, STATS, CD, STATUS_OK
 from testfarm.v1.project import Project
 from testfarm.v1.client import Client
@@ -78,17 +78,17 @@ clam.set_check_for_new_commits(
 )
 
 clam.add_subtask('count lines of code', [
-	{CMD:'echo %(sandbox)s/testfarm/src'%config, STATS: lambda x: {'testfarm_v1_loc': countLines(x) } },
-	{CMD:'echo %(sandbox)s/testfarm/v2'%config, STATS: lambda x: {'testfarm_v2_loc': countLines(x) } },
+	{CMD:'echo %(sandbox)s/testfarm/v1/src'%config, STATS: lambda x: {'testfarm_v1_loc': countLines(x) } },
+	{CMD:'echo %(sandbox)s/testfarm/testfarm'%config, STATS: lambda x: {'testfarm_v2_loc': countLines(x) } },
 ] )
 
 clam.add_deployment( [
-	'cd %(sandbox)s/testfarm/v2'%config,
+	'cd %(sandbox)s/testfarm/'%config,
 	'rm $(find -name \'*.pyc\')',
 ] )
 
 clam.add_subtask('Unit Tests', [
-	'cd %(sandbox)s/testfarm/v2'%config,
+	'cd %(sandbox)s/testfarm/'%config,
 	{INFO : lambda x:startTimer() },
 	{CMD : './runtest.py', STATS : pyunitTestCount, },
 	{STATS : lambda x:{'exectime_unittests' : ellapsedTime()} },
