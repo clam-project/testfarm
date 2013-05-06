@@ -7,6 +7,57 @@ Legend
 TODO's
 ------
 
+- Smart web generation
+	- Not regenerating up-to-date pages
+		- A logger for written files
+		- Testing conditons
+	- Caching
+- Make wsgi install work (again)
+- Bugs
+	- Aborted executions are still 'in progress' in history page
+	- No execution for a client:
+		- Summary generates a Details link
+		- Add a fourth client state?
+
+- Missing things
+	- SECURITY: Limit logger names used as file names (project, client, execution)
+	- SECURITY: Signed client messages
+	- Details page
+		- execution stoptime or lastupdate in Details
+		- Summary at the top
+	- Status aborted from client
+	- Force abort on old running executions
+- Reporters
+	- Working mail reporter
+	- Update interface
+- Clients lock files
+	- Write the pid on the lock file
+	- Ignore the lock if the pid is not running
+	- Windows solution
+- Command class
+	- Working with strings
+	- Substitutions
+	- Info
+	- Ok
+	- Stats
+- Stats module
+	- PyUnit test counter
+	- MiniCppUnit test counter
+	- CppUnit test counter
+	- General regexp picker
+	- Lines of code
+		- Filters
+- Config class
+	- Works as dictionary
+	- Accessible as attributes
+	- Inner configs
+	- Recursive updating keeping values of inner configs
+- Reorganize where to expect configuration files
+
+
+Old Done Tasks for the Record
+-----------------------------
+
 + Server logger
 + Web Generator
 	+ Execution details
@@ -21,29 +72,16 @@ TODO's
 		+ Project
 	+ Project history
 	+ Stats plots
-- Smart web generation
-	- Not regenerating up-to-date pages
-		- A logger for written files
-		- Testing conditons
-	- Caching
 
++ Server v2 wrapper for v1
++ Rename Server -> Logger
++ RemoteLogger
+	+ testfarmservice
+	+ Unify Logger and RemoteLogger API edges
++ Make flup install work
++ Execution end time in history page is always 2013-04-50 06:07:08
++ Summary: Details link for currently executing
 
-- Server logger proxy
-- Server logger frontend
-- Server logger reporter
-
-- Bugs
-	+ Execution end time in history page is always 2013-04-50 06:07:08
-	- Aborted executions are still 'in progress' in history page
-
-- Missing things
-	- SECURITY: Limit at server names used as file names (project, client, execution)
-	- SECURITY: Signed client messages
-	- Details page
-		- execution stoptime or lastupdate in Details
-		- Summary at the top
-	- Status aborted from client
-	- Force abort on old running executions
 
 
 
