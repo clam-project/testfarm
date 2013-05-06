@@ -81,7 +81,7 @@ def f_meta(args) :
 
 def f_fakerun(args) :
 	if args.execution is None :
-		args.execution = "{:%Y%m%d-%H%M%S}".format(datetime.datetime.now())
+		args.execution = "{0:%Y%m%d-%H%M%S}".format(datetime.datetime.now())
 	print(
 		"Generating task '{execution}'"
 		" for client '{client}'"
@@ -90,7 +90,7 @@ def f_fakerun(args) :
 	s = Logger(args.logpath)
 	s = ArgPrepender(s, args.project, args.client, args.execution)
 
-	timestamp = "{:%Y-%m-%d %H:%M:%S}".format(
+	timestamp = "{0:%Y-%m-%d %H:%M:%S}".format(
 		datetime.datetime.strptime(args.execution, "%Y%m%d-%H%M%S"))
 	s.executionStarts(
 		timestamp=timestamp,
