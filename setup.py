@@ -2,31 +2,42 @@
 
 import os.path
 from glob import glob
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-datafiles=[
-	'testfarm.js',
-	'testfarm.cron',
-	'mod_python_testfarm.conf',
-	'style.css',
-	'summary.html',
-]
 datapath='share/testfarm'
+datafiles=[
+#	'testfarm.cron',
+#	'mod_python_testfarm.conf',
+]
 
 setup(
 	name='testfarm',
-	version='1.0',
+	version='2.0-dev',
 	description = 'Testfarm, a continuous integration tool',
-#	home_page = 'http://sourceforge.net/projects/testfarm/',
+	url = 'http://github.com/clam-project/testfarm/',
 	author = 'CLAM Project',
 	author_email='info@clam-project.org',
-	license = 'GPL v2 or later',
-	packages = ['testfarm', 'testfarm_indicator'],
+	license = 'GPL v3 or later',
+	install_requires = [
+		'decorator',
+		'webob',
+		'argparse',
+		'wsgi_intercept',
+		'wsgiref',
+		],
+	packages = find_packages(),
 	package_dir = {
-		'testfarm': 'src',
-		'testfarm_indicator': 'indicator',
+		'testfarm': 'testfarm',
+#		'testfarm_indicator': 'indicator',
 		},
-	data_files=[ ( datapath, datafiles ), ],
+	data_files=[
+		('resources', glob('resources/*' )),
+		],
+	test_suite = "runtest",
+	scripts = [
+		"testfarmserver",
+		"runonce",
+		],
 	)
 
 

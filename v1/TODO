@@ -1,0 +1,131 @@
+
+
+Version 0.6
+------------------
+
+Done 	- summary text format based on: key, [ok|no] so that the server can easily parse it
+Done 	- efficiency, etc. statistics. based on TAG, number also in the summary? statistics section
+Done 	- client writes colorized output in console and sends step-by-step progress to server
+Done	- Idle State
+Done	- Propagate "idle" checking to HTML (logs)
+Done	- xml/easier text format YAML --> Plain Python Code!!
+Done	- essentia in linux
+Done	- Remove "log" sufix in idle methods
+Done	- Examples use appropiate logs dir
+Done!!	- Adapt to Windows => Bram rules!
+Done	- Adapt to MacOS X
+Done	- essentia in windows
+Done	- BUG : Fix idle messages in console - MS
+Done 	- BUG TestFarmClient without name - MS  => But Find Another Clean Way!
+Done	- communication via http post 
+Done	- Mileston 2: remote server
+Done	- Multiple repositories 
+Done	- Expandible info (and stats) with javascript - MS
+Done	- Integrate Bram's nice javascript
+Done	- Multiple clients in a single script (usage_example.py) REJECTED: script==one build
+Done	- Think: first iteration new_commits should return always true
+Done	- All CLAM tests working in linux - PA
+Done	- windows new commits check (INFO:func) => NOT WITH INFO, but a native grep-like command
+Done	- mac osx new commits check. why it fails? => it was a run_command bug
+Done	- refactoring: remove listener at client constructor
+
+Done	- verbose client argument: adds info : pass_text to every command => in a different way. it write text to a log file. Moreover it does it continuously (without having to wait to the command finalization)
+
+Version 0.7
+------------
+
+Done	- stats diagrams in a rough way
+Done	- publish (ought to be public) htmls, via scp. add hook to user script? - PA
+	 => solution should be more generalizable
+
+Version 0.8
+------------
+
+Done	- IMPORTANT refactoring: define new user script. This will have important impact on design.	
+Done	  -> find a name for Task concept.
+Done	  -> Task name in the html 
+Done	  -> rename repository->project
+___________________
+
+MODEL BIG FACTORING
+___________________
+Done	- collapse 2 base dir attr in one -> local_base_dir
+Done	- rename Repository -> Task
+Done	- rename Task(Repository) methods
+Done	- rename Client -> Runner
+Done	- move repository_name -> project_name
+Done	- add task_name (imply changing server)
+Done	- move client_name to task
+
+Low Priority
+----------------
+	- define cvs repository and branch (and backend cvs, svn) so the server can hunt guilty commits.
+	  -> write a html column for commits and synchronize commits with boxes.
+	- client info to the server. not only the name
+	- separate config script and command line tool with options: verbose, disable repository, server url
+	  ala scons and SConstruct.  testfarm --verbose --force
+	- send mail option?? mmmm... it is up to the StabilityLevelChecker which should be in the server.
+	  -> alarms instead of stability level
+	- Idle with threading repositories (very low priority)
+	  -> or just now allow multiple repositories
+	- Now executing con AJAX 
+	- html details of current task should be done with AJAX
+	- Nice diagrams: gnuplot, rrdtools, ploticus(*) -> patch ploticus to solve anti-aliasing 
+	- Nice html, ala tinderbox
+
+Medium Priority
+----------------
+Done	- statistics with holes
+Done	- different statistics plots for each commands or task
+Done	- robust statistics: allow adding new stats, renaming it. 
+Done	- how to name different plots? taskname? taskname+#cmd
+
+	- set up a "universal" server for any project (be aware of security issues, spam...)
+	  -> Done but inside MTG
+Done	- Stop client "gently"
+Done	  -> Propagate "user aborted" to HTML 
+		--> BUG : some times, the index.html is not loaded properly
+Done	- Mandatory / Breaking tasks
+	- Think: Tasks in HTML with proportional size
+Done	- Rotate logs => Purge logs
+Done	- remove info and output from logs, once html file is writen.
+Done	- an alternative to rotate: extract info and outputs to external files
+Done	- Send begin command --MS
+Done	- brake index.html columns by days
+	- ardour2 in linux
+	- ardour2 in osx
+	- eye candy: project logo and client logos/photos
+	- project setup step when creating a new project
+	- clone tasks, i.e, a task can copy a list of subtasks from another task
+	- rename src files
+	- IMPORTANT: support for "constant release"
+	 -> server service that returns "currenty stable"
+	 -> decide: always upload? or ask to the server?
+	- Timeout when server doesn't respond
+
+High Priority
+----------------
+	- Manage string variables with blanks not supported by ploticus
+	- Manage client_name string variables with blanks not supported by ploticus
+	- Statistics from efficiency task in CLAM
+Done	- Stats refactoring: internal data format for collected stats:
+Done	 -> [(time, {key:val, key2:val2})...]
+Done	 -> global tree structure: client->diagram->data
+
+	- API: Checking <-> Check. Ask Bram
+	  -> assert that name is a string
+Done	- BUG : temp files should be unique
+Done	- BUG after command completion should update html - MS
+Current	- CLAM in mac osx
+Current	- CLAM in windows
+	- refactoring: remote communication code and (.py) file names
+	- refactoring: init project phase
+	- refactoring: init client phase
+	  -> copy (or link) css and js files
+Done	- organize src directories
+Done	- API change: add_checking... -> set_check... (only one check is allowed)
+Done	- fix: idle message should appear only at current day, not all days
+Done	- fix: INFO now can receive any python structure. str() conversion is
+          done, avoiding process to crash at purgue method
+Done	- fix all plots goes to the same client bug. Not all pngs where uploaded to the web server
+Don	- clients shoulnd not push the server. EFFICIENCY PROBLEM. timely updates instead
