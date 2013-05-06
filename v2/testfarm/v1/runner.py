@@ -23,6 +23,8 @@ from task import *
 from loggerv2reporter import LoggerV2Reporter
 from testfarm.logger import Logger
 from testfarm.remotelogger import RemoteLogger
+from ircreporter import IrcReporter
+from mailreporter import MailReporter
 
 class Runner :
 	"The interface to another modules. It runs a defined script and sends information to listeners."
@@ -66,6 +68,8 @@ class Runner :
 		if 'irc_report' in config :
 			self.listeners.append(
 				IrcReporter(
+					task.project.name,
+					task.client.name,
 					testfarm_page=config['testfarm_page'],
 					**config['irc_report']))
 
