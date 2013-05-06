@@ -154,9 +154,9 @@ table.tfclients th
 <table class='tfclients'>
 <tr>
 	<th>Client</th>
-	<th>Updated</th>
-	<th>Currently</th>
 	<th>Last build</th>
+	<th>Currently</th>
+	<th>Since</th>
 	<th></th>
 </tr>
 <script id="testfarmrowTempl" type="text/x-jsrender">
@@ -166,21 +166,20 @@ table.tfclients th
 		<div class='tfdetails'>{{:name_details}}</div>
 	{{/if}}
 	</td>
+	<td class='tf{{:status}}'>{{statusString status /}}
+		
+		<div class='tfdetails'>{{if failedTasks }}Failed tasks: {{/if}}
+			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
+			<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Details</a>
+		</div>
+	</td>
 	<td>{{formatDate lastupdate /}}</td>
 	<td class='tf{{:doing}}'>{{doingString doing /}}
 		{{if currentTask }}
 		<div class='tfdetails'>Current tasks: {{:currentTask}}</div>
 		{{/if}}
 	</td>
-	<td class='tf{{:status}}'>{{statusString status /}}
-		{{if failedTasks }}
-		<div class='tfdetails'>Failed tasks:
-			{{each_in failedTasks}}<br/>- {{:#data}}{{/each_in}}<br/>
-		</div>
-		{{/if}}
-	</td>
 	<td>
-		<a href="{{testfarmUrl /}}details-{{:name}}-{{:lastExecution}}.html" title="Execution details">Details</a>
 		<a href="{{testfarmUrl /}}history.html" title="Full history">History</a>
 	</td>
 </tr>
