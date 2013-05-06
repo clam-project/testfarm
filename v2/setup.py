@@ -36,6 +36,7 @@ setup(
 	test_suite = "runtest",
 	scripts = [
 		"testfarmserver",
+		"runonce",
 		],
 	)
 
