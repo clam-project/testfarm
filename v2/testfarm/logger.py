@@ -374,7 +374,8 @@ class Logger(object) :
 			doing = doing,
 			lastExecution = datetime.datetime(1900,1,1,0,0,0),
 			currentTask = None,
-			failedTasks = []
+			failedTasks = [],
+			currentExecution = None,
 			)
 		# TODO: If two running, the newer one remains
 		for execution in  reversed(executions) :

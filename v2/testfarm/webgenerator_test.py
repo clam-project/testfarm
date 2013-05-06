@@ -526,6 +526,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			"lastupdate": "2013/04/05 06:07:08",\n'
 			'			"lastExecution": "20130405-060708",\n'
 			'			"currentTask": "First task",\n'
+			'			"currentExecution": "20130506-070809",\n'
 			'		},\n'
 			)
 
@@ -549,6 +550,7 @@ class JsonSummaryTest(unittest.TestCase) :
 			'			],\n'
 			'			"lastExecution": "20130405-060708",\n'
 			'			"currentTask": "First task",\n'
+			'			"currentExecution": "20130506-070809",\n'
 			'		},\n'
 			)
 

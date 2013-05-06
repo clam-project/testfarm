@@ -597,6 +597,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertFalse("ok" in client)
 		self.assertEqual(client.failedTasks, [])
 		self.assertEqual(client.currentTask, None)
+		self.assertEqual(client.currentExecution, None)
 
 	def test_clientSummary_green(self) :
 		s = self.setUpEmptyClient()
@@ -611,6 +612,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.ok, True)
 		self.assertEqual(client.failedTasks, [])
 		self.assertEqual(client.currentTask, None)
+		self.assertEqual(client.currentExecution, None)
 
 	def test_clientSummary_red(self) :
 		s = self.setUpEmptyClient()
@@ -625,6 +627,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.failedTasks, [(1,"First task")])
 		self.assertEqual(client.ok, False)
 		self.assertEqual(client.currentTask, None)
+		self.assertEqual(client.currentExecution, None)
 
 	def test_clientSummary_running(self) :
 		s = self.setUpEmptyClient()
@@ -639,6 +642,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertFalse("ok" in client)
 		self.assertEqual(client.doing, "run")
 		self.assertEqual(client.currentTask, (1,"First task"))
+		self.assertEqual(client.currentExecution, "20130301-040506")
 
 	def test_clientSummary_lastFinishedCounts(self) :
 		s = self.setUpEmptyClient()
@@ -654,6 +658,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.failedTasks, [(1,"First task")])
 		self.assertEqual(client.ok, False)
 		self.assertEqual(client.currentTask, None)
+		self.assertEqual(client.currentExecution, None)
 
 
 	def test_clientSummary_runningAfterGreen(self) :
@@ -670,6 +675,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.ok, True)
 		self.assertEqual(client.doing, "run")
 		self.assertEqual(client.currentTask, (1,"First task"))
+		self.assertEqual(client.currentExecution, "20130302-040506")
 
 	def test_clientSummary_runningAfterRed(self) :
 		s = self.setUpEmptyClient()
@@ -685,6 +691,7 @@ class ServerTest(unittest.TestCase) :
 		self.assertEqual(client.ok, False)
 		self.assertEqual(client.doing, "run")
 		self.assertEqual(client.currentTask, (1,"First task"))
+		self.assertEqual(client.currentExecution, "20130302-040506")
 
 	def emulateExecutionWithStats(self, name, tasks,
 			project='myproject', client='myclient') :
