@@ -157,7 +157,8 @@ class JsonSummary(object) :
 			'			],\n'
 			)
 		currentTaskBlock = '' if not data.currentTask else (
-			'			"currentTask": "{0}",\n'.format(data.currentTask[1])
+			'			"currentTask": "{0}",\n'.format(data.currentTask[1])+
+			'			"currentExecution": "{0}",\n'.format(data.currentExecution)
 			)
 
 		return (

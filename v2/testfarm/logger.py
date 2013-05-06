@@ -381,9 +381,10 @@ class Logger(object) :
 			executionData = self.execution(project, client, execution)
 			executionTime = datetime.datetime.strptime(execution,"%Y%m%d-%H%M%S")
 			if executionData.running :
-				data.currentTask = executionData.currentTask
 				data.doing = 'run'
 				data.runningSince = executionTime
+				data.currentExecution = execution
+				data.currentTask = executionData.currentTask
 				continue
 			data.lastExecution = executionTime
 			data.failedTasks = executionData.failedTasks

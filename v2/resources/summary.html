@@ -175,7 +175,9 @@ table.tfclients th
 	</td>
 	<td class='tf{{:doing}}'>{{doingString doing /}}
 		{{if currentTask }}
-		<div class='tfdetails'>Current tasks: {{:currentTask}}</div>
+		<div class='tfdetails'>Current tasks: {{:currentTask}}
+			<a href="{{testfarmUrl /}}details-{{:name}}-{{:currentExecution}}.html" title="Execution details">Details</a>
+		</div>
 		{{/if}}
 	</td>
 	<td class='tf{{:doing}}'>{{formatDate lastupdate /}}</td>
