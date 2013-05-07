@@ -7,18 +7,18 @@ Legend
 TODO's
 ------
 
+- PyPI install for TestFarm Indicator
 - Smart web generation
 	- Not regenerating up-to-date pages
 		- A logger for written files
 		- Testing conditons
 	- Caching
-- Make wsgi install work (again)
+- Make wsgi deployment work (again)
 - Bugs
 	- Aborted executions are still 'in progress' in history page
 	- No execution for a client:
 		- Summary generates a Details link
 		- Add a fourth client state?
-
 - Missing things
 	- SECURITY: Limit logger names used as file names (project, client, execution)
 	- SECURITY: Signed client messages
