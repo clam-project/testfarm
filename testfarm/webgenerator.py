@@ -545,6 +545,7 @@ class WebGenerator(object) :
 		self.copyToProject(project, "plot.js")
 		self.copyToProject(project, "jquery.js")
 		self.copyToProject(project, "summary.html")
+		self.copyToProject(project, "summary.html", "index.html")
 		writer = ExecutionDetails()
 		for client in logger.clients(project) :
 			for execution in logger.executions(project, client) :
