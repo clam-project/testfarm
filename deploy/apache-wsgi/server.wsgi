@@ -6,12 +6,7 @@ def addIfNotInPath(path) :
 		sys.path.insert(0, path)
 
 script_dir = os.path.abspath(os.path.dirname(os.path.abspath(__file__))+"/../")
-path, package = os.path.split(script_dir)
-addIfNotInPath(path)
-addIfNotInPath('/home/vokimon/CajitasDeArena/testfarm/')
-addIfNotInPath('/home/vokimon/CajitasDeArena/testfarm/testfarm')
-
-print os.environ
+addIfNotInPath(scriptdir)
 
 def application(environ, start_response):
 	start_response('200 OK', [('Content-type', 'text/plain')])

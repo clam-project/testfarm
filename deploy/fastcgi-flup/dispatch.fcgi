@@ -7,6 +7,10 @@ SERVICEPATH = '/home/clamadm/testfarm/testfarm'
 INTERP  = '/home/clamadm/testfarmenv/bin/python'
 LOGPATH = '/home/clamadm/testfarmlogs/'
 
+def addIfNotInPath(path) :
+	if path in sys.path: return
+	sys.path.insert(0, path)
+
 # Ensure the interpret we are using is the one we want
 if sys.executable != INTERP:
 	os.execl(INTERP, INTERP, *sys.argv)
@@ -17,7 +21,7 @@ def application(environ, start_response):
 	return ["Hello, world!\n"]+[repr(environ)]
 
 # testfarm service in the module search path
-sys.path.insert(1,SERVICEPATH)
+addIfNotInPath(SERVICEPATH)
 
 def createapp() :
        import testfarm.service as service

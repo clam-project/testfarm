@@ -27,6 +27,8 @@ TODO's
 		- Summary at the top
 	- Status aborted from client
 	- Force abort on old running executions
+- Bring order to project and client metadata (description, brief_description...)
+- Should clients set their own metadata?
 - Reporters
 	- Working mail reporter
 	- Update interface
@@ -53,7 +55,6 @@ TODO's
 	- Inner configs
 	- Recursive updating keeping values of inner configs
 - Reorganize where to expect configuration files
-
 
 Old Done Tasks for the Record
 -----------------------------

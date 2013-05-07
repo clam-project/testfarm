@@ -1,7 +1,13 @@
 Installing the library
 ======================
 
-Use the provided setup.py script.
+From the source path, use the provided setup.py script.
+
+	python setup.py install
+
+Or using the pip system:
+
+	pip install testfarm
 
 
 Installing the server
@@ -9,7 +15,7 @@ Installing the server
 
 If you want to deploy a server receiving client reports,
 documentation and configuration files for different
-deploymend methods are available at the 'deploy' directory.
+deployment methods are available at the 'deploy' directory.
 The recommended setup is using mod_wsgi on Apache.
 
 
