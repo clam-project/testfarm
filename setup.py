@@ -12,7 +12,7 @@ datafiles=[
 
 setup(
 	name='testfarm',
-	version='2.0-dev',
+	version='2.0',
 	description = 'Testfarm, a continuous integration tool',
 	url = 'http://github.com/clam-project/testfarm/',
 	author = 'CLAM Project',
