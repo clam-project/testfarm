@@ -512,7 +512,7 @@ class WebGenerator(object) :
 			if not os.access(dir, os.F_OK) :
 				raise # not in there
 
-	def copyToProject(self, project, file) :
+	def copyToProject(self, project, file, asfile=None) :
 		try :
 			basepath = pkg_resources.Requirement.parse('testfarm')
 			content = pkg_resources.resource_string(
@@ -522,7 +522,7 @@ class WebGenerator(object) :
 			basepath = os.path.join(
 				os.path.dirname(__file__),"..","resources",file)
 			content = open(basepath).read()
-		self.write(content, project, file)
+		self.write(content, project, asfile or file)
 
 	def write(self, content, *args) :
 		filename = self._p(*args)
