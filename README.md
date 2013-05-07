@@ -20,24 +20,32 @@ The typical workflow is:
 Features
 --------
 
-**TestFarm is suited for projects of volunteer developers
-so that they can use their own computers as clients.**
-	* Clients do not need to have an fixed IP to be reached, or be connected 24/7.
-	* Clients can control the pace of VCS checks,
-	  disable executions at will or
-	  explicitly start an execution even with no pending updates.
-
+* **TestFarm is suited for projects of volunteer developers
+  so that they can use their own computers as clients.**
+	* Clients do not need to have an fixed IP to be reached.
+	* Clients do not need to be connected 24/7.
+	* Clients can control the pace of VCS checks.
+	* Clients can disable executions at will.
+	* Clients can explicitly start an execution even with no pending updates.
+	* Clients can report to a local logger when internet goes down.
 * **Client executions are defined in Python.**
-	* Python is a very flexible and easy language
-	* It provides ways of extending the basic features
-
-* **Supported version control systems:** Git and SVN. Extendible via plug-ins.
-
-* The generated website is pure HTML + CSS + JavaScript pages.
-  No server side PHP or Python is needed to visualize it.
-  Server side Python is used to collect and update the website.
-* Collects stats such as SLOC, number of tests... and
-  present them in a time graph.
+	* Tasks are sequences of shell commands wrapped in Python code.
+	* Python provides syntactic sugar and expressiveness to the client definition.
+	* Python provides ways of extending the off-the-shelf TestFarm features.
+* **Version Control Systems.**
+	* A client can monitor several repositories at once
+	* Supported: Subversion, Git
+	* Extendible to other VCS's via plug-ins
+* **Minimum requirements.**
+	* The generated public website is pure HTML + CSS + JavaScript pages.
+	  No server side PHP or Python is needed to visualize it.
+	* Server side Python (wsgi or fastcgi) is used to collect and update the website.
+	* No database is required, it uses file based logs
+* **Collecting time evolving numerical data.**
+	* Numerical data can be collected from the executed commands
+	* Presented at the web site as time plots.
+	* Some provided: SLOC, number of tests...
+	* You can define your custom ones.
 
 Status
 ------
