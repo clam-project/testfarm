@@ -5,11 +5,18 @@ What is it?
 -----------
 
 TestFarm is a continuous integration platform.
-Several distributed TestFarm clients periodically monitor
-the version control system (VCS) for updates.
-Whenever an update is detected, the client starts an execution
-and its results are reported to the centralized server.
-Then, the server collects such reports to rebuild the web site information.
+The typical workflow is:
+* Several clients monitor periodially for updates
+  at the project version control system (VCS).
+* When a client detects any update,
+  it starts an execution and
+  reports the results to the TestFarm server.
+* The server collects this data to build a public web,
+* Developers can see whether 
+  their changes had unexpected impacts over other platforms or configuration.
+
+![TestFarm Summary](http://canvoki.net/coder/media/images/testfarmserver2-summarypage.png)
+
 
 Features
 --------
